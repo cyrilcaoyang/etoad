@@ -4,6 +4,8 @@ This module provides helper functions to the ctypes module,
 and can be imported as a whole when low level C interfacing is required.
 """
 
+# TODO: Refactor and Pythonize this document
+
 import binascii
 
 from ctypes import (
