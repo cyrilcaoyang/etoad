@@ -13,6 +13,7 @@ class EChemMethod(metaclass=ABCMeta):
     """
     Abstract base class for electrochemical methods to be run on the Bio-Logic Instrument using the Python Interface.
     """
+    # TODO: implement parameter parsing and take that away from the API
 
     def __init__(self, path_to_binaries: Path):
         self.method = path_to_binaries / self.method_file_name
@@ -20,12 +21,9 @@ class EChemMethod(metaclass=ABCMeta):
     def method_file(self) -> str:
         return str(self.method)
 
-    # TODO: implement parameter parsing and take that away from the API
-
-    @classmethod
-    def decode_data(cls, data: tuple, numeric_to_single: Optional[Callable]) -> Tuple[np.ndarray, dict]:
+    def decode_data(self, data: tuple, numeric_to_single: Optional[Callable]) -> Tuple[np.ndarray, dict]:
         """
-        Abstract method to decode the experimentally recorded data into a numpy ndarray.
+        Public method to decode the experimentally recorded data into a numpy ndarray.
 
         Args:
             data: Tuple of data recorded from the API  # TODO: figure out and type-hint properly
@@ -36,14 +34,14 @@ class EChemMethod(metaclass=ABCMeta):
             metadata: Dictionary of experiment metadata.
         """
         current_values, data_info, data_record = data
-        metadata = cls._unpack_metadata(current_values, data_info)
+        metadata = self._unpack_metadata(current_values, data_info)
         extracted_data: np.ndarray = np.array([])
 
         start_index = 0
         for _ in range(data_info.NbRows):
             row: tuple = data_record[start_index: start_index + data_info.NbCols]
-            extracted_row: np.array = cls._decode_row(row, metadata["timebase"], numeric_to_single)
-            extracted_data = cls.merge_data(extracted_data, extracted_row)
+            extracted_row: np.array = self._decode_row(row, metadata["timebase"], numeric_to_single)
+            extracted_data = self._merge_data(extracted_data, extracted_row)
             start_index = start_index + data_info.NbCols
 
         return extracted_data, metadata
@@ -87,11 +85,10 @@ class EChemMethod(metaclass=ABCMeta):
             numeric_to_single: Function that can convert a numeric value to a 32-bit value (from the API).
         """
         # TODO: figure out if it is possible to write a general decoder based on class properties only
-        # TODO: might need to be converted to classmethod then
-        pass
+        raise NotImplementedError
 
     @staticmethod
-    def merge_data(original_data: np.ndarray, new_data: np.array) -> np.ndarray:
+    def _merge_data(original_data: np.ndarray, new_data: np.array) -> np.ndarray:
         """
         Merges a new 1D numpy array (new_data) into a 2D array (original_data) by appending it along axis 0.
         If the original_data array is empty, a new 2D array of correct dimensionality is generated from new_data.
