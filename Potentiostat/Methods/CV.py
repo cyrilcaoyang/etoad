@@ -20,8 +20,6 @@ class CV(EChemMethod):
             timebase: Current time base step, as extracted from the metadata.
             numeric_to_single: Function to convert C++ signature numericals to singles.
         """
-        assert len(row) == 5, "The row does not have the appropriate length."
-
         time_high, time_low, current, voltage, cycle = row
 
         time = timebase * ((time_high << 32) + time_low)

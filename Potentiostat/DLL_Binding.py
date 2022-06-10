@@ -7,7 +7,7 @@ from typing import Any
 
 from .Utils import get_bit_mode
 from .DataStructures import *
-import Drivers.BioLogic as KBIO
+import Potentiostat.BioLogic as KBIO
 
 
 class EClibDLLInterface(object):

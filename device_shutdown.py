@@ -1,4 +1,4 @@
-from Drivers import EChemController
+from Potentiostat import EChemController
 
 controller = EChemController(
     server="USB0",

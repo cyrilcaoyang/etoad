@@ -7,7 +7,7 @@ from typing import Union, List
 import numpy as np
 
 from .Binaries import BINARY_PATH
-import Drivers.BioLogic as KBIO  # TODO: Refactor and re-name to not import as global constant
+import Potentiostat.BioLogic as KBIO  # TODO: Refactor and re-name to not import as global constant
 from .DataStructures import *
 from .Methods import *
 from .DLL_Binding import EClibDLLInterface

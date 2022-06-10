@@ -1,5 +1,6 @@
-from Drivers import EChemController
-from Drivers.Utils import scatter_plot
+import numpy as np
+from Potentiostat import EChemController
+from Potentiostat.Utils import scatter_plot
 
 from ExampleSettings.CV_Parameters import CV_PARAMETERS
 from ExampleSettings.SWV_Parameters import SWV_PARAMETERS
@@ -15,6 +16,8 @@ controller.load_technique(
     parameters=SWV_PARAMETERS
 )
 
-results = controller.do_measurement()
+results: np.ndarray = controller.do_measurement()
+
+
 scatter_plot(results[:, 1], results[:, 2])
 

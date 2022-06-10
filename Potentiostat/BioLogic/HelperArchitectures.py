@@ -1,5 +1,5 @@
-import Drivers.BioLogic as KBIO
-from Drivers.Utils import pp_plural
+import Potentiostat.BioLogic as KBIO
+from Potentiostat.Utils import pp_plural
 
 # TODO: Refactor and properly implement
 
