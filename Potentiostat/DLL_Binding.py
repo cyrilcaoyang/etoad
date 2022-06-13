@@ -5,7 +5,7 @@ import ctypes
 from pathlib import Path
 from typing import Any
 
-from .Utils import get_bit_mode
+from ..Utils import get_bit_mode
 from .DataStructures import *
 import Potentiostat.BioLogic as KBIO
 

@@ -3,11 +3,11 @@ import numpy as np
 from .EChemMethod import EChemMethod
 
 
-class SWV(EChemMethod):
+class DPV(EChemMethod):
     """
     Implementation of the Square Wave Voltammetry Method.
     """
-    method_file_name: str = "swv4.ecc"
+    method_file_name: str = "dpv4.ecc"
     data_structure: tuple = ("Time", "Voltage", "Current")
 
     @staticmethod
@@ -37,7 +37,7 @@ class SWV(EChemMethod):
 
         # TODO: Write this loop in a more numpy fashion, just a quick & dirty implementation now
         for i in range(0, len(extracted_data), 2):
-            differential_current: float = extracted_data[i, 2] - extracted_data[i+1, 2]
+            differential_current: float = extracted_data[i+1, 2] - extracted_data[i, 2]
             processed_data = self._merge_data(processed_data, np.asarray([extracted_data[i, 0], extracted_data[i, 1], differential_current]))
 
         return processed_data

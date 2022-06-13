@@ -1,0 +1,10 @@
+{
+  "visa_address": "ASRL4::INSTR",
+  "device_address": 0,
+  "pump_volume": 2.5,
+  "initial_valve": 12,
+  "default_velocity": 400,
+  "cell_port": 10,
+  "wash_port": 11,
+  "waste_port": 12
+}

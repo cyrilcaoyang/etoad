@@ -1,10 +1,10 @@
 import numpy as np
 from Potentiostat import EChemController
-from Potentiostat.Utils import scatter_plot
+from Utils.PreliminaryDataHandling import scatter_plot, save_data
 
 from ExampleSettings.CV_Parameters import CV_PARAMETERS
 from ExampleSettings.SWV_Parameters import SWV_PARAMETERS
-
+from ExampleSettings.DPV_Parameters import DPV_PARAMETERS
 
 controller = EChemController(
     server="USB0",
@@ -12,12 +12,10 @@ controller = EChemController(
 )
 
 controller.load_technique(
-    technique="SWV",
-    parameters=SWV_PARAMETERS
+    technique="DPV",
+    parameters=DPV_PARAMETERS
 )
 
 results: np.ndarray = controller.do_measurement()
 
-
 scatter_plot(results[:, 1], results[:, 2])
-

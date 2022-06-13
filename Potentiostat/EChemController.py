@@ -213,7 +213,7 @@ class EChemController(object):
             else:
                 results = np.append(results, data_decoded, axis=0)
 
-        return results
+        return self.technique.process_data(results)  # TODO: Does data processing need to go external from here?
 
     def _get_data(
             self

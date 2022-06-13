@@ -22,6 +22,9 @@ class EChemMethod(metaclass=ABCMeta):
         return str(self.method)
 
     def decode_data(self, data: tuple, numeric_to_single: Optional[Callable]) -> Tuple[np.ndarray, dict]:
+        # TODO: rename to extract_data
+        # TODO: implement internal data processing for differential techniques
+        # TODO: requires changing the architecture of all children classes
         """
         Public method to decode the experimentally recorded data into a numpy ndarray.
 
@@ -86,6 +89,13 @@ class EChemMethod(metaclass=ABCMeta):
         """
         # TODO: figure out if it is possible to write a general decoder based on class properties only
         raise NotImplementedError
+
+    def process_data(self, extracted_data: np.ndarray) -> np.ndarray:
+        """
+        Specific processing method for each type of data that we get
+        TODO: document properly
+        """
+        return extracted_data
 
     @staticmethod
     def _merge_data(original_data: np.ndarray, new_data: np.array) -> np.ndarray:
