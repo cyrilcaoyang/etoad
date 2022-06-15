@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 __author__ = 'Felix Strieth-Kalthoff'
 
-import copy
 import ctypes
 from pathlib import Path
 from typing import Any, Union, Callable
@@ -12,13 +11,21 @@ import Potentiostat.BioLogic as KBIO
 
 
 class EClibDLLInterface(object):
+    """
+    Interface for addressing the EClib.dll / EClib64.dll for controlling the Bio-Logic potentiostats.
+    Binds the DLL functions and can be called for executing the respective function by function name.
 
-    dll_files: dict = {
+    Public Methods:
+        __call__(function_name: str, *args): Execute the function $function_name$ with $*args$
+        define_parameter(label: str, parameter_type: type, value, index: Optional[int]): Wrapper for param specification
+    """
+
+    _dll_files: dict = {
         32: "EClib.dll",
         64: "EClib64.dll"
     }
 
-    eclib_functions: dict = {
+    _eclib_functions: dict = {
         "BL_GetLibVersion": ([c_char_p, c_uint32_p], None),
         "BL_Connect": ([c_char_p, c_uint8, c_int32_p, KBIO.DEVICE_INFO], None),
         "BL_GetUSBdeviceinfos": ([c_uint32, c_char_p, c_uint32_p, c_char_p, c_uint32_p, c_char_p, c_uint32_p], c_bool),
@@ -49,12 +56,19 @@ class EClibDLLInterface(object):
         "BL_ConvertNumericIntoSingle": ([c_uint32, c_float_p], None)
     }
 
-    def __init__(self, binary_path: Path):
-
+    def __init__(
+            self,
+            binary_path:
+            Path
+    ):
         dll_path: Path = self._get_dll_file(binary_path)
-        self.callable_functions: dict = self._bind_dll_functions(dll_path)
+        self._callable_functions: dict = self._bind_dll_functions(dll_path)
 
-    def __call__(self, function_name: str, *args) -> Any:
+    def __call__(
+            self,
+            function_name: str,
+            *args
+    ) -> Any:
         """
         External call of a DLL function by its function name (via the self.callable_functions dictionary).
         Returns the return value of the DLL function.
@@ -69,14 +83,17 @@ class EClibDLLInterface(object):
         Raises:
             ConnectionError (if return value is not 0)
         """
-        check_value: int = self.callable_functions[function_name](*args)
+        check_value: int = self._callable_functions[function_name](*args)
 
         if not check_value == 0:
             raise ConnectionError(f"Error upon execution of method {function_name}")
 
         return check_value
 
-    def _get_dll_file(self, binary_path: Path) -> Path:
+    def _get_dll_file(
+            self,
+            binary_path: Path
+    ) -> Path:
         """
         Method to get the correct EClib dll file, depending on the bit mode of the system.
 
@@ -87,9 +104,12 @@ class EClibDLLInterface(object):
             Path to the correct EClib dll file.
         """
         bit_mode: int = get_bit_mode()
-        return binary_path / self.dll_files[bit_mode]
+        return binary_path / self._dll_files[bit_mode]
 
-    def _bind_dll_functions(self, dll_file: Path) -> dict:
+    def _bind_dll_functions(
+            self,
+            dll_file: Path
+    ) -> dict:
         """
         Binds all DLL functions from class variable into a dictionary with function names as keys.
 
@@ -102,15 +122,20 @@ class EClibDLLInterface(object):
         callable_functions: dict = {}
         dll: ctypes.WinDLL = WinDLL(str(dll_file))
 
-        for func_name, parameters in zip(self.eclib_functions, self.eclib_functions.values()):
+        for func_name, parameters in zip(self._eclib_functions, self._eclib_functions.values()):
             function: Callable = dll[func_name]
             function.argtypes = parameters[0]
-
             callable_functions[func_name] = function
 
         return callable_functions
 
-    def define_parameter(self, label: str, parameter_type: type, value: Union[int, float, bool], index: int = 0) -> KBIO.EccParam:
+    def define_parameter(
+            self,
+            label: str,
+            parameter_type: type,
+            value: Union[int, float, bool],
+            index: int = 0
+    ) -> KBIO.EccParam:
         """
         Defines a parameter object depending on its parameter type (Python type – bool, int, float).
         Calls the corresponding DLL function and returns the ECCParam object.
@@ -133,6 +158,6 @@ class EClibDLLInterface(object):
         parameter = KBIO.EccParam()
 
         function_name = type_definitions[parameter_type]
-        self.callable_functions[function_name](label.encode(), value, index, parameter)
+        self.__call__(function_name, label.encode(), value, index, parameter)
 
         return parameter

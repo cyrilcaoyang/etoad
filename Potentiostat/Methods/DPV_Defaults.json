@@ -1,62 +1,74 @@
 {
   "Initial Voltage": {
     "name": "Ei",
-    "type": "float",
-    "value": -0.5
+    "variable_type": "float",
+    "value": -0.5,
+    "constraints": "-1.3 <= x <= 0.8"
   },
   "Initial Voltage vs OCV": {
     "name": "OCi",
-    "type": "bool",
-    "value": false
+    "variable_type": "bool",
+    "value": false,
+    "constraints": null
   },
   "Rest Time": {
     "name": "Rest_time_Ti",
-    "type": "float",
-    "value": 10
+    "variable_type": "float",
+    "value": 10,
+    "constraints": "0 < x <= 120"
   },
   "Final Voltage": {
     "name": "Ef",
-    "type": "float",
-    "value": 0.5
+    "variable_type": "float",
+    "value": 0.5,
+    "constraints": "-1.3 <= x <= 0.8"
   },
   "Final Voltage vs OCV": {
     "name": "OCf",
-    "type": "bool",
-    "value": false
+    "variable_type": "bool",
+    "value": false,
+    "constraints": null
   },
   "Pulse Height": {
     "name": "PH",
-    "type": "float",
-    "value": 0.010
+    "variable_type": "float",
+    "value": 0.010,
+    "constraints": "0 < x <= 0.5"
   },
   "Pulse Width": {
     "name": "PW",
-    "type": "float",
-    "value": 0.100
+    "variable_type": "float",
+    "value": 0.100,
+    "constraints": "0 < x < 5"
   },
   "Step Height": {
     "name": "SH",
-    "type": "float",
-    "value": 0.005
+    "variable_type": "float",
+    "value": 0.005,
+    "constraints": "0 < x <= 0.5"
   },
   "Step Width": {
     "name": "ST",
-    "type": "float",
-    "value": 0.500
+    "variable_type": "float",
+    "value": 0.500,
+    "constraints": "0 < x < 5"
   },
   "Start Averaging Interval": {
     "name": "Begin_measuring_I",
-    "type": "float",
-    "value": 0.80
+    "variable_type": "float",
+    "value": 0.80,
+    "constraints": "0 <= x <= 1"
   },
   "End Averaging Interval": {
     "name": "End_measuring_I",
-    "type": "float",
-    "value": 1.0
+    "variable_type": "float",
+    "value": 1.0,
+    "constraints": "0 <= x <= 1"
   },
   "Current Range": {
     "name": "I_Range",
-    "type": "int",
-    "value": 8
+    "variable_type": "int",
+    "value": 8,
+    "constraints": "x in range(-1, 13)"
   }
 }

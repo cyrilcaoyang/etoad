@@ -1,10 +1,8 @@
 from pathlib import Path
 from SamplingSystem import SamplingSystem
 
-SAMPLER_SETTINGS = Path(__file__).parent / "sampler_settings.json"
+SAMPLER_SETTINGS = Path(__file__).parent / "Settings" / "sampler_settings.json"
 
-sampler = SamplingSystem(SAMPLER_SETTINGS)
+sampler = SamplingSystem(SAMPLER_SETTINGS, initial_wash=0)
 
-sampler.transfer_to_cell(6, 2.0)
-
-sampler.wash_cell(1.0)
+sampler.dilute_cell(volume=0.2)

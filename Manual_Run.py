@@ -3,7 +3,7 @@ import numpy as np
 
 # Import the Controller for the Potentiostat and some Helper Functions
 from Potentiostat import EChemController
-from Utils import get_logger
+from Utils import get_logger, timestamp_datetime
 from Utils.PreliminaryDataHandling import scatter_plot, save_data
 
 # Definition of Global Variables (PRELIMINARY!)
@@ -13,7 +13,8 @@ DATA_PATH = Path(r"C:\Users\Potentiostat_SP-300\Desktop\AutoEChem_Data")
 
 sample_name: str = "Test"
 technique: str = "SWV"
-parameters: dict = {}
+parameters: dict = {
+}
 
 # Instantiation of the Logger and Controller Objects.
 logger = get_logger(
@@ -27,6 +28,8 @@ controller = EChemController(
 )
 
 # Performance of all Measurements (Load Technique, Measure, Plot Results, Save Results)
+
+experiment_name = f"{sample_name}_{technique}_{timestamp_datetime()}"
 
 logger.info(f"Starting Experiment for Compound {sample_name}")
 
@@ -42,12 +45,12 @@ scatter_plot(
     results[:, 2],
     show=False,
     save=True,
-    file_name=DATA_PATH / f"{sample_name}_{technique}.png"
+    file_name=DATA_PATH / f"{experiment_name}.png"
 )
 
 save_data(
     results,
-    file_name=DATA_PATH / f"{sample_name}_{technique}.pkl"
+    file_name=DATA_PATH / f"{experiment_name}.pkl"
 )
 
-logger.debug(f"Data for Compound {sample_name} saved to {sample_name}_{technique}.pkl")
+logger.debug(f"Data for Compound {sample_name} saved to {experiment_name}.pkl")

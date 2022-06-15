@@ -1,47 +1,56 @@
 {
   "Voltage Profile": {
     "name": "Voltage_step",
-    "type": "float",
-    "value": [0.5, 0.5, -0.5, 0.5, 0.5]
+    "variable_type": "float",
+    "value": [0.5, 0.5, -0.5, 0.5, 0.5],
+    "constraints": "-1.3 <= x <= 0.8"
   },
   "Voltage vs OCV": {
     "name": "vs_initial",
-    "type": "bool",
-    "value": [false, false, false, false, false]
+    "variable_type": "bool",
+    "value": [false, false, false, false, false],
+    "constraints": null
   },
   "Scan Rate": {
     "name": "Scan_Rate",
-    "type": "float",
-    "value": [0.05, 0.05, 0.05, 0.05, 0.05]
+    "variable_type": "float",
+    "value": [0.05, 0.05, 0.05, 0.05, 0.05],
+    "constraints": "0 < x < 0.5"
   },
   "Scan Number": {
     "name": "Scan_number",
-    "type": "int",
-    "value": 2
+    "variable_type": "int",
+    "value": 2,
+    "constraints": "x in range(1, 10)"
   },
   "Voltage Interval Size": {
     "name": "Record_every_dE",
-    "type": "float",
-    "value": 0.01
+    "variable_type": "float",
+    "value": 0.01,
+    "constraints": "0 < x < 1"
   },
   "Average over Interval": {
     "name": "Average_over_dE",
-    "type": "bool",
-    "value": true
+    "variable_type": "bool",
+    "value": true,
+    "constraints": null
   },
   "Number of Cycles": {
     "name": "N_Cycles",
-    "type": "int",
-    "value": 5
+    "variable_type": "int",
+    "value": 5,
+    "constraints": "x in range(1, 100)"
   },
   "Start Averaging Interval": {
     "name": "Begin_measuring_I",
-    "type": "float",
-    "value": 0
+    "variable_type": "float",
+    "value": 0,
+    "constraints": "0 <= x <= 1"
   },
   "End Averaging Interval": {
     "name": "End_measuring_I",
-    "type": "float",
-    "value": 1.0
+    "variable_type": "float",
+    "value": 1.0,
+    "constraints": "0 <= x <= 1"
   }
 }

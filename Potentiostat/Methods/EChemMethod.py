@@ -1,13 +1,12 @@
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Optional, Callable, Tuple
+from typing import Optional, Callable, Tuple, Union
 import numpy as np
-from ..BioLogic import TECH_ID, PROG_STATE
+from ..BioLogic import TECH_ID, PROG_STATE, CurrentValues, DataInfo, DataBuffer
 from Utils import ConfigLoader
 
 
 class EChemMethod(metaclass=ABCMeta):
-
     """
     Abstract base class for electrochemical methods to be run on the Bio-Logic Instrument using the Python Interface.
 
@@ -27,22 +26,41 @@ class EChemMethod(metaclass=ABCMeta):
     Abstract methods (need to be defined in "child" classes):
         _decode_row(row: tuple, timebase: float, numeric_to_single: Callable) -> np.array: Decoder for raw data points.
         [OPTIONAL] process_data(extracted_data: np.ndarray) -> np.ndarray: Processes the full measurement dataset
+
+    Each child class requires an additional config file containing the default settings for the respective method
+    located in the same folder: $method_name_short$_Defaults.json
     """
     method_name: str = ""
     method_name_short: str = ""
     method_file_name: str = ""
     data_structure: tuple = ()
 
-    def __init__(self, path_to_binaries: Path):
+    def __init__(
+            self,
+            path_to_binaries: Path
+    ):
         self.method = path_to_binaries / self.method_file_name
 
-    def __str__(self):
+    def __str__(
+            self
+    ) -> str:
         return f"{self.method_name} ({self.method_name_short})"
 
-    def method_file(self) -> str:
+    def method_file(
+            self
+    ) -> str:
+        """
+        Returns the absolute path to the method file as a string.
+
+        Returns:
+            String of the absolute path to the method file
+        """
         return str(self.method)
 
-    def load_parameters(self, set_parameters: dict) -> list:
+    def load_parameters(
+            self,
+            set_parameters: dict
+    ) -> list:
         """
         Takes a dictionary of set parameters (key-value pairs, where the keys can either be the variable description
         or the parameter name, as required for the DLL function) and generates the list of arguments for the DLL
@@ -59,8 +77,10 @@ class EChemMethod(metaclass=ABCMeta):
 
         return parameters_list
 
-    @staticmethod
-    def _parse_parameters(config: dict) -> list:
+    def _parse_parameters(
+            self,
+            config: dict
+    ) -> list:
         """
         Parses the parameters (as given in the dictionary / json file) as a list of tuples (as required as args
         for the DLL functions).
@@ -76,24 +96,68 @@ class EChemMethod(metaclass=ABCMeta):
         for parameter_details in config.values():
             if type(parameter_details["value"]) is list:
                 for i, value in enumerate(parameter_details["value"]):
-                    args: tuple = (
-                        parameter_details["name"],
-                        eval(parameter_details["type"]),
-                        value,
-                        i
+                    args: tuple = self._validate_parameter(
+                        name=parameter_details["name"],
+                        variable_type=parameter_details["variable_type"],
+                        value=value,
+                        constraints=parameter_details["constraints"],
+                        index=i
                     )
                     parameters_list.append(args)
             else:
-                args: tuple = (
-                    parameter_details["name"],
-                    eval(parameter_details["type"]),
-                    parameter_details["value"]
-                )
+                args: tuple = self._validate_parameter(**parameter_details)
                 parameters_list.append(args)
 
         return parameters_list
 
-    def _get_config(self, set_parameters: dict) -> dict:
+    @staticmethod
+    def _validate_parameter(
+            name: str,
+            variable_type: str,
+            value: Union[int, float, bool],
+            constraints: Union[None, str],
+            index: Optional[Union[int, None]] = None
+    ) -> tuple:
+        """
+        Parses the parameters, as given in the settings dictionary, into an args tuple (required by the DLL Function).
+        (name[str], type[type], value[int, float, bool], index[Optional: int])
+        Validates the passed data types and checks for constraint violation.
+
+        Args:
+            name: Name of the parameter, as required by the DLL function.
+            variable_type: Python type of the parameter, given as a string (as read from the settings json file).
+            value: Value of the parameter
+            constraints: Constraint on the parameter values, given as a string (as read from the settings json file)
+            index: Optional, integer index if a variable is to be declared multiple times.
+
+        Returns:
+            Tuple of the parameter settings, as required by the DLL function
+
+        Raises:
+            TypeError (if parameter is not of the specified type)
+            ValueError (if parameter value violates the constraints)
+        """
+        parameter_type: type = eval(variable_type)
+
+        if not type(value) is parameter_type:
+            if type(value) in (int, float) and parameter_type in (int, float):
+                value = parameter_type(value)
+            else:
+                raise TypeError("The passed value does not match the parameter type signature.")
+
+        if constraints:
+            if not eval(constraints, {"range": range}, {"x": value}):
+                raise ValueError(f"The value {value} violates the constraint {constraints} for the parameter {name}.")
+
+        if not index:
+            return name, parameter_type, value
+        else:
+            return name, parameter_type, value, index
+
+    def _get_config(
+            self,
+            set_parameters: dict
+    ) -> dict:
         """
         Updates the default configuration dictionary by the key-value pairs passed as parameters.
         Keys can be either the variable description or the variable name as required by the DLL function.
@@ -125,7 +189,9 @@ class EChemMethod(metaclass=ABCMeta):
 
         return parameters
 
-    def _load_default_config(self) -> dict:
+    def _load_default_config(
+            self
+    ) -> dict:
         """
         Loads the default parameters from the $METHOD_Defaults.json located in the same folder
         and returns the dictionary:
@@ -136,12 +202,16 @@ class EChemMethod(metaclass=ABCMeta):
         default_file: Path = Path(__file__).parent / f"{self.method_name_short}_Defaults.json"
         return ConfigLoader.load_config(default_file)
 
-    def extract_data(self, data: tuple, numeric_to_single: Optional[Callable]) -> Tuple[np.ndarray, dict]:
+    def extract_data(
+            self,
+            data: Tuple[CurrentValues, DataInfo, DataBuffer],
+            numeric_to_single: Optional[Callable]
+    ) -> Tuple[np.ndarray, dict]:
         """
         Public method to decode the experimentally recorded data into a numpy ndarray.
 
         Args:
-            data: Tuple of data recorded from the API  # TODO: figure out and type-hint properly
+            data: Tuple of data recorded from the API (ata architectures to receive the DLL method returns).
             numeric_to_single: Function that can convert a numeric value to a 32-bit value (from the API).
 
         Returns:
@@ -149,7 +219,7 @@ class EChemMethod(metaclass=ABCMeta):
             metadata: Dictionary of experiment metadata.
         """
         current_values, data_info, data_record = data
-        metadata = self._unpack_metadata(current_values, data_info)
+        metadata: dict = self._unpack_metadata(current_values, data_info)
         extracted_data: np.ndarray = np.array([])
 
         start_index = 0
@@ -162,13 +232,16 @@ class EChemMethod(metaclass=ABCMeta):
         return extracted_data, metadata
 
     @staticmethod
-    def _unpack_metadata(current_values, data_info) -> dict:
+    def _unpack_metadata(
+            current_values: CurrentValues,
+            data_info: DataInfo
+    ) -> dict:
         """
         Extracts the metadata from the experimentally recorded data.
 
         Args:
-            current_values:
-            data_info:  # TODO: figure out and type-hint properly
+            current_values: CurrentValues object, as required by the DLL function
+            data_info: DataInfo object, as required by the DLL function
 
         Returns:
             metadata: Dictionary of measurement metadata
@@ -190,7 +263,11 @@ class EChemMethod(metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def _decode_row(row: tuple, timebase: float, numeric_to_single: Optional[Callable]) -> np.array:
+    def _decode_row(
+            row: tuple,
+            timebase: float,
+            numeric_to_single: Optional[Callable]
+    ) -> np.array:
         """
         Method to decode a single row of experimental data recorded experimentally.
 
@@ -199,10 +276,12 @@ class EChemMethod(metaclass=ABCMeta):
             timebase: Current time base step, as extracted from the metadata
             numeric_to_single: Function that can convert a numeric value to a 32-bit value (from the API).
         """
-        # TODO: figure out if it is possible to write a general decoder based on class properties only
         raise NotImplementedError
 
-    def process_data(self, extracted_data: np.ndarray) -> np.ndarray:
+    def process_data(
+            self,
+            extracted_data: np.ndarray
+    ) -> np.ndarray:
         """
         Specific processing method for the data returned from a specific measurement technique
         (e.g. calculation of differential spectra for pulsed techniques).
@@ -212,7 +291,10 @@ class EChemMethod(metaclass=ABCMeta):
         return extracted_data
 
     @staticmethod
-    def _merge_data(original_data: np.ndarray, new_data: np.array) -> np.ndarray:
+    def _merge_data(
+            original_data: np.ndarray,
+            new_data: np.array
+    ) -> np.ndarray:
         """
         Merges a new 1D numpy array (new_data) into a 2D array (original_data) by appending it along axis 0.
         If the original_data array is empty, a new 2D array of correct dimensionality is generated from new_data.

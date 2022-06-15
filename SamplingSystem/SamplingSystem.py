@@ -15,8 +15,12 @@ class SamplingSystem:
         transfer_to_cell(source_port: int, volume: float) -> None
         dilute_cell(volume: float = 0, factor: float = 1) -> None
         wash_cell(volume: float, cycles: int = 3) -> None
-
     """
+
+    # TODO [at some point...]: Dead volume handling in the valve / syringe
+    # For now, dead volume upon transferring small sample quantities can be dealt with by doing the sample transfer
+    # first, and the dilution step later, so that all dead volume of sample is subsequently passed to the same
+    # vessel as the sample. But that's not a generalizable solution...
 
     required_settings: set = {
         "visa_address",
@@ -35,7 +39,7 @@ class SamplingSystem:
         "waste_port"
     }
 
-    def __init__(self, config_file: Path):
+    def __init__(self, config_file: Path, initial_wash: int = 3):
         """
         Creates an instance of the SamplingSystem class.
 
@@ -52,9 +56,9 @@ class SamplingSystem:
         self.waste_port: Union[int, None] = None
 
         self._set_ports()
-        self._initialize_pump()
+        self._initialize_pump(initial_wash)
 
-    def _initialize_pump(self) -> None:
+    def _initialize_pump(self, initial_wash: int = 3) -> None:
         """
         Creates an instance of the XCPump, sets the velocity and primes the pump.
         """
@@ -67,7 +71,7 @@ class SamplingSystem:
 
         self._pump.set_velocity(self._config["default_velocity"])
 
-        self._wash_pump()
+        self._wash_pump(initial_wash)
 
     def _set_ports(self) -> None:
         """
@@ -84,7 +88,6 @@ class SamplingSystem:
             source_port: Port from which the liquid should be moved to the cell.
             volume: Volume to be dispensed
         """
-        # TODO: Dead volume handling
         self._pump.draw_and_dispense(source_port, self.cell_port, volume, wait=1)
         self._update_cell_volume(volume)
 

@@ -19,6 +19,9 @@ from .DLL_Binding import EClibDLLInterface
 class EChemController(object):
     """
     Minimalistic API-type Interface to the Bio-Logic Potentiostats.
+
+    Public Methods:
+        load_technique(technique: str, set_parameters: dict)
     """
 
     required_settings: set = {
@@ -197,6 +200,7 @@ class EChemController(object):
                         break
                     continue
 
+                # Breaks the while loop upon keyboard interrupt - closes channel connection via context manager
                 except KeyboardInterrupt:
                     self.logger.error("Measurement was interrupted through keyboard interrupt.")
                     break
