@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 __author__ = 'Felix Strieth-Kalthoff'
 
+import copy
 import ctypes
 from pathlib import Path
-from typing import Any
+from typing import Any, Union, Callable
 
-from ..Utils import get_bit_mode
+from Utils import get_bit_mode
 from .DataStructures import *
 import Potentiostat.BioLogic as KBIO
 
@@ -64,8 +65,16 @@ class EClibDLLInterface(object):
 
         Returns:
             Return value of the function.
+
+        Raises:
+            ConnectionError (if return value is not 0)
         """
-        return self.callable_functions[function_name](*args)
+        check_value: int = self.callable_functions[function_name](*args)
+
+        if not check_value == 0:
+            raise ConnectionError(f"Error upon execution of method {function_name}")
+
+        return check_value
 
     def _get_dll_file(self, binary_path: Path) -> Path:
         """
@@ -94,10 +103,36 @@ class EClibDLLInterface(object):
         dll: ctypes.WinDLL = WinDLL(str(dll_file))
 
         for func_name, parameters in zip(self.eclib_functions, self.eclib_functions.values()):
-            function = dll[func_name]
+            function: Callable = dll[func_name]
             function.argtypes = parameters[0]
+
             callable_functions[func_name] = function
 
-        # TODO: Include function sanity checks (i.e. if result code is 0) and implement appropriate error handling.
-
         return callable_functions
+
+    def define_parameter(self, label: str, parameter_type: type, value: Union[int, float, bool], index: int = 0) -> KBIO.EccParam:
+        """
+        Defines a parameter object depending on its parameter type (Python type – bool, int, float).
+        Calls the corresponding DLL function and returns the ECCParam object.
+
+        Args:
+            label: String of the variable name, as given in the DLL documentation.
+            parameter_type: Python type of the variable (bool, int, float)
+            value: Value of the variable
+            index: Index of the variable (in case this variable is set multiple times, 0 otherwise).
+
+        Returns:
+            None
+        """
+        type_definitions: dict = {
+            int: "BL_DefineIntParameter",
+            float: "BL_DefineSglParameter",
+            bool: "BL_DefineBoolParameter"
+        }
+
+        parameter = KBIO.EccParam()
+
+        function_name = type_definitions[parameter_type]
+        self.callable_functions[function_name](label.encode(), value, index, parameter)
+
+        return parameter

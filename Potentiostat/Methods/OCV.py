@@ -7,6 +7,8 @@ class OCV(EChemMethod):
     """
     Implementation of the Open Circuit Voltammetry.
     """
+    method_name: str = "Open Circuit Voltammetry"
+    method_name_short: str = "OCV"
     method_file_name: str = "ocv4.ecc"
     data_structure: tuple = ("Time", "Voltage")
 

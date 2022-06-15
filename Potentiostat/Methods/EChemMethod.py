@@ -3,28 +3,140 @@ from pathlib import Path
 from typing import Optional, Callable, Tuple
 import numpy as np
 from ..BioLogic import TECH_ID, PROG_STATE
+from Utils import ConfigLoader
 
 
 class EChemMethod(metaclass=ABCMeta):
 
-    method_file_name: str = ""
-    data_structure: tuple = ()
-
     """
     Abstract base class for electrochemical methods to be run on the Bio-Logic Instrument using the Python Interface.
+
+    Public methods:
+        __str__()
+        method_file() -> str: Returns the path to the ecc file for the specific method.
+        load_parameters(set_parameters: dict) -> list: Merges user-defined parameters into default configuration
+        extract_data(data: tuple, numeric_to_single: Callable) -> tuple: Extracts results from the raw loaded data.
+        process_data(extracted_data: np.ndarray) -> np.ndarray: Processes the full measurement dataset.
+
+    Abstract attributes (need to be defined in "child" classes):
+        method_name (str): Name of the experimental method
+        method_name_short (str): Short form of the method name
+        method_file_name (str): Name of the ecc file.
+        data_structure (tuple): Tuple of column headers of the final data structure.
+
+    Abstract methods (need to be defined in "child" classes):
+        _decode_row(row: tuple, timebase: float, numeric_to_single: Callable) -> np.array: Decoder for raw data points.
+        [OPTIONAL] process_data(extracted_data: np.ndarray) -> np.ndarray: Processes the full measurement dataset
     """
-    # TODO: implement parameter parsing and take that away from the API
+    method_name: str = ""
+    method_name_short: str = ""
+    method_file_name: str = ""
+    data_structure: tuple = ()
 
     def __init__(self, path_to_binaries: Path):
         self.method = path_to_binaries / self.method_file_name
 
+    def __str__(self):
+        return f"{self.method_name} ({self.method_name_short})"
+
     def method_file(self) -> str:
         return str(self.method)
 
-    def decode_data(self, data: tuple, numeric_to_single: Optional[Callable]) -> Tuple[np.ndarray, dict]:
-        # TODO: rename to extract_data
-        # TODO: implement internal data processing for differential techniques
-        # TODO: requires changing the architecture of all children classes
+    def load_parameters(self, set_parameters: dict) -> list:
+        """
+        Takes a dictionary of set parameters (key-value pairs, where the keys can either be the variable description
+        or the parameter name, as required for the DLL function) and generates the list of arguments for the DLL
+        function to define the parameter objects.
+
+        Args:
+            set_parameters: Dictionary of parameters set by the user.
+
+        Returns:
+            parameters_list: List of parameters as arguments for the DLL function for setting parameter objects
+        """
+        config: dict = self._get_config(set_parameters)
+        parameters_list: list = self._parse_parameters(config)
+
+        return parameters_list
+
+    @staticmethod
+    def _parse_parameters(config: dict) -> list:
+        """
+        Parses the parameters (as given in the dictionary / json file) as a list of tuples (as required as args
+        for the DLL functions).
+
+        Args:
+            config: Dictionary of parameter names and specifications (as given in the json file).
+
+        Returns:
+            parameters_list: List of tuples of arguments for the DLL function.
+        """
+        parameters_list: list = []
+
+        for parameter_details in config.values():
+            if type(parameter_details["value"]) is list:
+                for i, value in enumerate(parameter_details["value"]):
+                    args: tuple = (
+                        parameter_details["name"],
+                        eval(parameter_details["type"]),
+                        value,
+                        i
+                    )
+                    parameters_list.append(args)
+            else:
+                args: tuple = (
+                    parameter_details["name"],
+                    eval(parameter_details["type"]),
+                    parameter_details["value"]
+                )
+                parameters_list.append(args)
+
+        return parameters_list
+
+    def _get_config(self, set_parameters: dict) -> dict:
+        """
+        Updates the default configuration dictionary by the key-value pairs passed as parameters.
+        Keys can be either the variable description or the variable name as required by the DLL function.
+
+        Args:
+            set_parameters: Dictionary of parameters to override the default settings
+
+        Returns:
+            parameters_updated: Updated parameter dictionary.
+
+        Raises:
+            KeyError (if the key in parameters_set is not found in the default config).
+        """
+        parameters: dict = self._load_default_config()
+
+        for key in set_parameters:
+            key_found: bool = False
+            if key in parameters:
+                parameters[key]["value"] = set_parameters[key]
+                key_found = True
+            else:
+                for param in parameters:
+                    if key == parameters[param]["name"]:
+                        parameters[param]["value"] = set_parameters[key]
+                        key_found = True
+
+            if not key_found:
+                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}.")
+
+        return parameters
+
+    def _load_default_config(self) -> dict:
+        """
+        Loads the default parameters from the $METHOD_Defaults.json located in the same folder
+        and returns the dictionary:
+
+        Returns:
+            Dictionary of default settings.
+        """
+        default_file: Path = Path(__file__).parent / f"{self.method_name_short}_Defaults.json"
+        return ConfigLoader.load_config(default_file)
+
+    def extract_data(self, data: tuple, numeric_to_single: Optional[Callable]) -> Tuple[np.ndarray, dict]:
         """
         Public method to decode the experimentally recorded data into a numpy ndarray.
 
@@ -59,7 +171,7 @@ class EChemMethod(metaclass=ABCMeta):
             data_info:  # TODO: figure out and type-hint properly
 
         Returns:
-            # TODO: type-hint and document properly by debugging data that is returned from the experiment
+            metadata: Dictionary of measurement metadata
         """
         status = PROG_STATE(current_values.State).name
         technique_name = TECH_ID(data_info.TechniqueID).name
@@ -92,8 +204,10 @@ class EChemMethod(metaclass=ABCMeta):
 
     def process_data(self, extracted_data: np.ndarray) -> np.ndarray:
         """
-        Specific processing method for each type of data that we get
-        TODO: document properly
+        Specific processing method for the data returned from a specific measurement technique
+        (e.g. calculation of differential spectra for pulsed techniques).
+
+        Returns the unprocessed data, if not declared for a specific child class.
         """
         return extracted_data
 

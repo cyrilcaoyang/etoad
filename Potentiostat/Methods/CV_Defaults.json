@@ -1,0 +1,47 @@
+{
+  "Voltage Profile": {
+    "name": "Voltage_step",
+    "type": "float",
+    "value": [0.5, 0.5, -0.5, 0.5, 0.5]
+  },
+  "Voltage vs OCV": {
+    "name": "vs_initial",
+    "type": "bool",
+    "value": [false, false, false, false, false]
+  },
+  "Scan Rate": {
+    "name": "Scan_Rate",
+    "type": "float",
+    "value": [0.05, 0.05, 0.05, 0.05, 0.05]
+  },
+  "Scan Number": {
+    "name": "Scan_number",
+    "type": "int",
+    "value": 2
+  },
+  "Voltage Interval Size": {
+    "name": "Record_every_dE",
+    "type": "float",
+    "value": 0.01
+  },
+  "Average over Interval": {
+    "name": "Average_over_dE",
+    "type": "bool",
+    "value": true
+  },
+  "Number of Cycles": {
+    "name": "N_Cycles",
+    "type": "int",
+    "value": 5
+  },
+  "Start Averaging Interval": {
+    "name": "Begin_measuring_I",
+    "type": "float",
+    "value": 0
+  },
+  "End Averaging Interval": {
+    "name": "End_measuring_I",
+    "type": "float",
+    "value": 1.0
+  }
+}

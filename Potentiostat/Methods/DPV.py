@@ -5,8 +5,10 @@ from .EChemMethod import EChemMethod
 
 class DPV(EChemMethod):
     """
-    Implementation of the Square Wave Voltammetry Method.
+    Implementation of the Differential Pulse Voltammetry Method.
     """
+    method_name: str = "Differential Pulse Voltammetry"
+    method_name_short: str = "DPV"
     method_file_name: str = "dpv4.ecc"
     data_structure: tuple = ("Time", "Voltage", "Current")
 
@@ -30,14 +32,23 @@ class DPV(EChemMethod):
 
     def process_data(self, extracted_data: np.ndarray) -> np.ndarray:
         """
-        TODO: Document properly
-        Generates the differential CV spectrum from the pulsed technique
+        Processes the full extracted dataset by generating the differential voltammogram.
+        Generates the current difference from the two data points of a pulse (posterior - prior).
+
+        Args:
+            extracted_data: 2D Numpy array of all measured data points.
+
+        Returns:
+            processed_data: 2D Numpy array of all pulse data points.
+
         """
-        processed_data: np.ndarray = np.array([])
+        differential_current: np.array = extracted_data[:, 2][1::2] - extracted_data[:, 2][0::2]
+        processed_data: np.ndarray = np.vstack(
+            (
+                extracted_data[:, 0][0::2],  # Time from Column 0
+                extracted_data[:, 1][0::2],  # Voltage from Column 1
+                differential_current         # Differential Current from Column 2
+            )
+        )
 
-        # TODO: Write this loop in a more numpy fashion, just a quick & dirty implementation now
-        for i in range(0, len(extracted_data), 2):
-            differential_current: float = extracted_data[i+1, 2] - extracted_data[i, 2]
-            processed_data = self._merge_data(processed_data, np.asarray([extracted_data[i, 0], extracted_data[i, 1], differential_current]))
-
-        return processed_data
+        return processed_data.transpose()

@@ -2,7 +2,6 @@ import Potentiostat.BioLogic as KBIO
 
 # TODO: Refactor and properly implement
 
-
 def pp_plural(nb, label, num=True, nothing=''):
     """Return a user friendly version of an ordinal and a label.
 
@@ -136,7 +135,7 @@ class ChannelInfo(KBIO.ChannelInfo):
                 f"FPGA ({self.XilinxVersion:04X})"
             )
 
-        en_clair = '\n'.join(fragments)
+        en_clair = ', '.join(fragments)
         return en_clair
 
 

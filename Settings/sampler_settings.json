@@ -3,8 +3,8 @@
   "device_address": 0,
   "pump_volume": 2.5,
   "initial_valve": 12,
-  "default_velocity": 400,
+  "default_velocity": 500,
   "cell_port": 10,
-  "wash_port": 11,
-  "waste_port": 12
+  "wash_port": 12,
+  "waste_port": 11
 }

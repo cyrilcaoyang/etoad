@@ -1,0 +1,17 @@
+{
+  "Rest Time": {
+    "name": "Rest_time_T",
+    "type": "float",
+    "value": 10
+  },
+  "Voltage Interval Size": {
+    "name": "Record_every_dE",
+    "type": "float",
+    "value": 0.01
+  },
+  "Time Interval Size": {
+    "name": "Record_every_dT",
+    "type": "float",
+    "value": 0.01
+  }
+}

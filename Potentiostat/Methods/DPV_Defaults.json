@@ -1,0 +1,62 @@
+{
+  "Initial Voltage": {
+    "name": "Ei",
+    "type": "float",
+    "value": -0.5
+  },
+  "Initial Voltage vs OCV": {
+    "name": "OCi",
+    "type": "bool",
+    "value": false
+  },
+  "Rest Time": {
+    "name": "Rest_time_Ti",
+    "type": "float",
+    "value": 10
+  },
+  "Final Voltage": {
+    "name": "Ef",
+    "type": "float",
+    "value": 0.5
+  },
+  "Final Voltage vs OCV": {
+    "name": "OCf",
+    "type": "bool",
+    "value": false
+  },
+  "Pulse Height": {
+    "name": "PH",
+    "type": "float",
+    "value": 0.010
+  },
+  "Pulse Width": {
+    "name": "PW",
+    "type": "float",
+    "value": 0.100
+  },
+  "Step Height": {
+    "name": "SH",
+    "type": "float",
+    "value": 0.005
+  },
+  "Step Width": {
+    "name": "ST",
+    "type": "float",
+    "value": 0.500
+  },
+  "Start Averaging Interval": {
+    "name": "Begin_measuring_I",
+    "type": "float",
+    "value": 0.80
+  },
+  "End Averaging Interval": {
+    "name": "End_measuring_I",
+    "type": "float",
+    "value": 1.0
+  },
+  "Current Range": {
+    "name": "I_Range",
+    "type": "int",
+    "value": 8
+  }
+}

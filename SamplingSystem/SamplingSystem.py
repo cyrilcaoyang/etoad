@@ -46,10 +46,10 @@ class SamplingSystem:
         self._config: dict = ConfigLoader.load_config(config_file, self.required_settings)
 
         self._pump: Union[XCPump, None] = None
-        self._cell_port: Union[int, None] = None
+        self.cell_port: Union[int, None] = None
         self._cell_volume: float = 0.0
-        self._wash_port: Union[int, None] = None
-        self._waste_port: Union[int, None] = None
+        self.wash_port: Union[int, None] = None
+        self.waste_port: Union[int, None] = None
 
         self._set_ports()
         self._initialize_pump()
@@ -85,7 +85,7 @@ class SamplingSystem:
             volume: Volume to be dispensed
         """
         # TODO: Dead volume handling
-        self._pump.draw_and_dispense(source_port, self._cell_port, volume, wait=1)
+        self._pump.draw_and_dispense(source_port, self.cell_port, volume, wait=1)
         self._update_cell_volume(volume)
 
     def dilute_cell(self, volume: float = 0, factor: float = 1) -> None:
@@ -99,14 +99,14 @@ class SamplingSystem:
         if volume == 0:
             volume = self._cell_volume * (factor - 1)
 
-        self.transfer_to_cell(self._wash_port, volume)
+        self.transfer_to_cell(self.wash_port, volume)
 
     def _wash_pump(self, cycles=3):
         """
         Washes the syringe pump for three times with its volume of wash liquid.
         """
         for _ in range(cycles):
-            self._pump.draw_and_dispense(self._wash_port, self._waste_port, self._config["pump_volume"], wait=1)
+            self._pump.draw_and_dispense(self.wash_port, self.waste_port, self._config["pump_volume"], wait=1)
 
     def wash_cell(self, wash_volume: float, cycles=3) -> None:
         """
@@ -115,7 +115,7 @@ class SamplingSystem:
         self._empty_cell()
 
         for _ in range(cycles):
-            self.transfer_to_cell(self._wash_port, wash_volume)
+            self.transfer_to_cell(self.wash_port, wash_volume)
             time.sleep(5)
             self._empty_cell()
 
@@ -123,7 +123,7 @@ class SamplingSystem:
         """
         Removes the entire amount of liquid from the cell.
         """
-        self._pump.draw_and_dispense(self._cell_port, self._waste_port, self._cell_volume + 2, wait=1)
+        self._pump.draw_and_dispense(self.cell_port, self.waste_port, self._cell_volume + 2, wait=1)
         self._update_cell_volume(-self._cell_volume)
 
     def _update_cell_volume(self, volume: float) -> None:

@@ -2,10 +2,13 @@
 __author__ = 'Felix Strieth-Kalthoff'
 
 from array import array
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Union, List
+from typing import Union
 import numpy as np
+from logging import Logger
 
+from Utils import ConfigLoader
 from .Binaries import BINARY_PATH
 import Potentiostat.BioLogic as KBIO  # TODO: Refactor and re-name to not import as global constant
 from .DataStructures import *
@@ -17,20 +20,21 @@ class EChemController(object):
     """
     Minimalistic API-type Interface to the Bio-Logic Potentiostats.
     """
+
+    required_settings: set = {
+        "port",
+        "channel",
+        "timeout"
+    }
+
     def __init__(
             self,
-            server: str,
-            channel: int,
-
+            config_file: Path,
+            logger: Logger,
     ):
         """
         Instantiates a (absolutely minimalistic and preliminary) version of an API-type interface
         to the Bio-Logic Potentiostats.
-
-        Args:
-            server: String definition of the connection port of the instrument. # TODO: Rename?
-            channel: Number of the channel to be used (counting from 1)
-
 
         Sets the following attributes:
             self.binary_path: Path to the directory where the binaries are located.
@@ -42,31 +46,43 @@ class EChemController(object):
         self.binary_path: Path = BINARY_PATH
         self._dll_functions: EClibDLLInterface = EClibDLLInterface(self.binary_path)
 
-        self.channel: int = channel - 1
-        self.device_id: int = self._connect(server)
+        self.config: dict = ConfigLoader.load_config(config_file, self.required_settings)
+        self.logger: Logger = logger
+
+        self.channel: int = self.config["channel"] - 1
+        self.device_id: int = self._connect()
 
         self.technique: Union[EChemMethod, None] = None
 
     def _connect(
             self,
-            server: str,
-            timeout: float = 5
     ) -> int:
         """
-        Establishes the connection to the instrument.
-
-        Parameters:
-            server: String representation of the connection port of the instrument.
-            timeout: Waiting time after which connection is cancelled.
+        Establishes the connection to the instrument and returns the device ID.
+        Performs checks on whether the connection to the instrument was loaded successfully.
 
         Returns:
-            id: TBD
-            device_name: TBD
+            device_id.value: Integer value of the device ID
+
+        Raises:
+            ConnectionError (if connection to the channel could not be established)
         """
-        # TODO: might be relevant to add some verbosity & checks here (device version, channel info)
-        #  for metadata logging etc.
+        port: str = self.config["port"]
+        timeout: int = self.config["timeout"]
+
         device_id, device_info = c_int32(), KBIO.DeviceInfo()
-        self._dll_functions("BL_Connect", server.encode(), timeout, device_id, device_info)
+        self._dll_functions("BL_Connect", port.encode(), timeout, device_id, device_info)
+
+        channel_info = KBIO.ChannelInfo()
+        self._dll_functions("BL_GetChannelInfos", device_id.value, self.channel, channel_info)
+
+        if not channel_info.is_kernel_loaded:
+            self.logger.error("The channel was not successfully loaded. No measurement can be performed.")
+            raise ConnectionError("The connection to the instrument could not be established.")
+
+        self.logger.info(f"Connection to the Potentiostat on {port} successfully established.")
+        self.logger.debug(device_info)
+        self.logger.debug(channel_info)
 
         return device_id.value
 
@@ -77,7 +93,7 @@ class EChemController(object):
     def load_technique(
             self,
             technique: str,
-            parameters: List[tuple]
+            set_parameters: dict
     ) -> None:
         """
         Public Method.
@@ -85,11 +101,12 @@ class EChemController(object):
 
         Args:
             technique: String definition of the measurement technique to be used. Must match the class name.
-            parameters: List of tuples of method parameters: (Name, Type, Value, [Optional: Cycle])
+            set_parameters: Dictionary of method parameters set/specified by the user
+                            (Keys can be either parameter descriptions or parameter names)
         """
         self.technique = self._get_technique(technique)
 
-        parameters_processed: KBIO.EccParams = self._load_parameters(parameters)
+        parameters_processed: KBIO.EccParams = self._load_parameters(set_parameters)
 
         self._dll_functions(
             "BL_LoadTechnique",
@@ -97,10 +114,12 @@ class EChemController(object):
             self.channel,
             self.technique.method_file().encode(),
             parameters_processed,
-            True,  # TODO: Figure out what is the role of the parameter "first"
-            True,  # TODO: Figure out what is the role of the parameter "last"
-            False  # TODO: Checks whether a Tkinter window pops up for parameter confirmation - optional / verbosity?
+            True,  # True if it is the first technique loaded to the channel
+            True,  # True if it is the last technique loaded to the channel
+            False  # Checks whether a Tkinter window pops up for parameter confirmation - optional / verbosity?
         )
+
+        self.logger.info(f"Method {self.technique} was successfully loaded to channel {self.channel + 1}.")
 
     def _get_technique(
             self,
@@ -119,20 +138,22 @@ class EChemController(object):
 
     def _load_parameters(
             self,
-            parameters: List[tuple]
+            set_parameters: dict
     ) -> KBIO.EccParams:
         """
-        Processes the parameters passed as a list of tuples (Parameter_Name, Type, Value, [Optional: Index]).
-        Converts all parameters into KBIO.EccParam objects.
+        Processes the parameters set by the user (passed as a dictionary of key–value pairs, where keys can be either
+        the parameter description or the parameter name, as required by the DLL function). Merges these parameters
+        with into the default method configuration.
         Generates and returns a single KBIO.EccParams object required for loading the method via the DLL.
 
         Args:
-            parameters: List of all parameters, each given as a tuple.
+            set_parameters: Dictionary of all human-set parameters
 
         Returns:
             KBIO.EccParms object of all parameters.
         """
-        parameter_objects = [self._define_parameter(*specification) for specification in parameters]
+        parameters_list = self.technique.load_parameters(set_parameters)
+        parameter_objects = [self._dll_functions.define_parameter(*specification) for specification in parameters_list]
 
         no_params = len(parameter_objects)
         parameter_array = KBIO.ECC_PARM_ARRAY(no_params)
@@ -142,39 +163,6 @@ class EChemController(object):
 
         return KBIO.EccParams(no_params, parameter_array)
 
-    def _define_parameter(
-            self,
-            label: str,
-            parameter_type: type,
-            value: Union[int, float, bool],
-            index: int = 0,
-    ) -> KBIO.EccParam:
-        """
-        Calls the respective internal function to write the parameter definition to the return object.
-
-        Args:
-            label: String of the variable name, as given in the DLL documentation.
-            parameter_type: Python type of the variable
-            value: Value of the variable
-            index: Index of the variable (in case this variable is set multiple times, 0 otherwise).
-
-        Returns:
-            None
-        """
-        type_definitions: dict = {
-            int: "BL_DefineIntParameter",
-            float: "BL_DefineSglParameter",
-            bool: "BL_DefineBoolParameter"
-        }
-        # TODO: Move this dictionary and a corresponding call method to the DLLInterface!
-
-        parameter = KBIO.EccParam()
-
-        function_name = type_definitions[parameter_type]
-        self._dll_functions(function_name, label.encode(), value, index, parameter)
-
-        return parameter
-
     ########################################################
     # METHODS RELATED TO ACTUALLY PERFORMING A MEASUREMENT #
     ########################################################
@@ -183,37 +171,37 @@ class EChemController(object):
             self
     ) -> np.ndarray:
         """
-        Performs the actual measurement by loading the technique and starting measurements on the channel.
+        Performs the actual measurement by loading the technique, starting measurements on the channel
+        and unpacking / decoding the data. Returns the measured data as a 2D Numpy array (method-specific format).
 
         Returns:
             results: 2D Numpy array of the results data
+
+        Raises:
+            ModuleNotFoundError (no technique loaded)
         """
-        # TODO: include verbosity here
-        # TODO: Refactor and modularize
         if not self.technique:
             raise ModuleNotFoundError("No Method has been loaded.")
 
         results: np.ndarray = np.array([])
 
-        self._dll_functions("BL_StartChannel", self.device_id, self.channel)  # TODO: handle via context manager?
+        with self._open_channel():
+            while True:
+                try:
+                    data: tuple = self._get_data()
+                    data_decoded, metadata = self.technique.extract_data(data, self._decode_numeric_to_single)
+                    results = self._merge_data(results, data_decoded)
 
-        while True:
-            data: tuple = self._get_data()
-            data_decoded, metadata = self.technique.decode_data(data, self._decode_numeric_to_single)
+                except StopIteration:
+                    if metadata["status"] == "STOP":
+                        break
+                    continue
 
-            # TODO: Refactor into smaller methods, maybe via exception handling in the decoding function?
-            if results.size == 0:
-                results = data_decoded
-            elif data_decoded.size == 0:
-                if metadata["status"] == "STOP":
-                    self.stop_channel()
-                    # TODO: Does this allow for re-running the same measurement on a different sample?
-                    #  If not, the technique should be unloaded here -> _close_measurement method?
+                except KeyboardInterrupt:
+                    self.logger.error("Measurement was interrupted through keyboard interrupt.")
                     break
-            else:
-                results = np.append(results, data_decoded, axis=0)
 
-        return self.technique.process_data(results)  # TODO: Does data processing need to go external from here?
+        return self.technique.process_data(results)
 
     def _get_data(
             self
@@ -238,6 +226,42 @@ class EChemController(object):
 
         return current_values, data_info, data_buffer
 
+    @staticmethod
+    def _merge_data(
+            old_data: np.ndarray,
+            new_data: np.ndarray
+    ) -> np.ndarray:
+        """
+        Appends a new ndarray to an existing ndarray using the numpy.append method.
+        Returns the new array if the existing array is empty. Raises a StopIteration if the new array is empty.
+
+        Args:
+            old_data: Existing numpy ndarray
+            new_data: Numpy ndarray to be appended
+
+        Returns:
+            Numpy ndarray as a merger of old and new array.
+
+        Raises:
+            StopIteration (if new_data is empty).
+        """
+        if old_data.size == 0:
+            return new_data
+
+        if new_data.size == 0:
+            raise StopIteration
+
+        return np.append(old_data, new_data, axis=0)
+
+    def _start_channel(
+            self
+    ) -> None:
+        """
+        Method to start a channel to begin a specific measurement.
+        """
+        self._dll_functions("BL_StartChannel", self.device_id, self.channel)
+        self.logger.info(f"Measurement of Technique {self.technique} started on channel {self.channel + 1}")
+
     def stop_channel(
             self
     ) -> None:
@@ -245,6 +269,17 @@ class EChemController(object):
         Method to shut down a channel after completion of a measurement.
         """
         self._dll_functions("BL_StopChannel", self.device_id, self.channel)
+        self.logger.info(f"Connection to Channel {self.channel + 1} closed.")
+
+    @contextmanager
+    def _open_channel(
+            self
+    ) -> None:
+        self._start_channel()
+        try:
+            yield
+        finally:
+            self.stop_channel()
 
     def _decode_numeric_to_single(
             self,

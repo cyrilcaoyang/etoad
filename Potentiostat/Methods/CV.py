@@ -7,6 +7,8 @@ class CV(EChemMethod):
     """
     Implementation of the Cyclic Voltammetry Method.
     """
+    method_name: str = "Cyclic Voltammetry"
+    method_name_short: str = "CV"
     method_file_name: str = "cv4.ecc"
     data_structure: tuple = ("Time", "Voltage", "Current", "Cycle")
 
