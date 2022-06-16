@@ -4,7 +4,7 @@ __author__ = 'Felix Strieth-Kalthoff'
 from array import array
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 import numpy as np
 from logging import Logger
 
@@ -52,7 +52,7 @@ class EChemController(object):
         self.config: dict = ConfigLoader.load_config(config_file, self.required_settings)
         self.logger: Logger = logger
 
-        self.channel: int = self.config["channel"] - 1
+        self.default_channel: int = self.config["default_channel_id"]
         self.device_id: int = self._connect()
 
         self.technique: Union[EChemMethod, None] = None
@@ -62,30 +62,35 @@ class EChemController(object):
     ) -> int:
         """
         Establishes the connection to the instrument and returns the device ID.
-        Performs checks on whether the connection to the instrument was loaded successfully.
+        Checks whether each channel can be addressed.
+
+        Args:
+            channels: List of available channels for the instrument.
 
         Returns:
             device_id.value: Integer value of the device ID
 
         Raises:
-            ConnectionError (if connection to the channel could not be established)
+            ConnectionError (if connection to the channels could not be established)
         """
         port: str = self.config["port"]
         timeout: int = self.config["timeout"]
 
         device_id, device_info = c_int32(), KBIO.DeviceInfo()
         self._dll_functions("BL_Connect", port.encode(), timeout, device_id, device_info)
+        self.logger.debug(device_info)
 
-        channel_info = KBIO.ChannelInfo()
-        self._dll_functions("BL_GetChannelInfos", device_id.value, self.channel, channel_info)
+        for channel in self.config["channel_ids"]:
+            channel_info = KBIO.ChannelInfo()
+            self._dll_functions("BL_GetChannelInfos", device_id.value, channel, channel_info)
 
-        if not channel_info.is_kernel_loaded:
-            self.logger.error("The channel was not successfully loaded. No measurement can be performed.")
-            raise ConnectionError("The connection to the instrument could not be established.")
+            if not channel_info.is_kernel_loaded:
+                self.logger.error(f"Channel {channel+1} was not successfully loaded. No measurement can be performed.")
+                raise ConnectionError("The connection to the instrument could not be established.")
+
+            self.logger.debug(channel_info)
 
         self.logger.info(f"Connection to the Potentiostat on {port} successfully established.")
-        self.logger.debug(device_info)
-        self.logger.debug(channel_info)
 
         return device_id.value
 
@@ -96,7 +101,8 @@ class EChemController(object):
     def load_technique(
             self,
             technique: str,
-            set_parameters: dict
+            set_parameters: dict,
+            channel: Union[int, None] = None
     ) -> None:
         """
         Public Method.
@@ -106,7 +112,11 @@ class EChemController(object):
             technique: String definition of the measurement technique to be used. Must match the class name.
             set_parameters: Dictionary of method parameters set/specified by the user
                             (Keys can be either parameter descriptions or parameter names)
+            channel: ID of the channel that the technique should be loaded to.
         """
+        if not channel:
+            channel = self.default_channel
+
         self.technique = self._get_technique(technique)
 
         parameters_processed: KBIO.EccParams = self._load_parameters(set_parameters)
@@ -114,7 +124,7 @@ class EChemController(object):
         self._dll_functions(
             "BL_LoadTechnique",
             self.device_id,
-            self.channel,
+            channel,
             self.technique.method_file().encode(),
             parameters_processed,
             True,  # True if it is the first technique loaded to the channel
@@ -122,7 +132,7 @@ class EChemController(object):
             False  # Checks whether a Tkinter window pops up for parameter confirmation - optional / verbosity?
         )
 
-        self.logger.info(f"Method {self.technique} was successfully loaded to channel {self.channel + 1}.")
+        self.logger.info(f"Method {self.technique} was successfully loaded to channel {channel+1}.")
 
     def _get_technique(
             self,
@@ -171,11 +181,15 @@ class EChemController(object):
     ########################################################
 
     def do_measurement(
-            self
+            self,
+            channel: Union[int, None] = None
     ) -> np.ndarray:
         """
         Performs the actual measurement by loading the technique, starting measurements on the channel
         and unpacking / decoding the data. Returns the measured data as a 2D Numpy array (method-specific format).
+
+        Args:
+            channel: ID of the channel to perform the measurement on.
 
         Returns:
             results: 2D Numpy array of the results data
@@ -186,12 +200,15 @@ class EChemController(object):
         if not self.technique:
             raise ModuleNotFoundError("No Method has been loaded.")
 
+        if not channel:
+            channel = self.default_channel
+
         results: np.ndarray = np.array([])
 
-        with self._open_channel():
+        with self._open_channel(channel):
             while True:
                 try:
-                    data: tuple = self._get_data()
+                    data: tuple = self._get_data(channel)
                     data_decoded, metadata = self.technique.extract_data(data, self._decode_numeric_to_single)
                     results = self._merge_data(results, data_decoded)
 
@@ -208,10 +225,14 @@ class EChemController(object):
         return self.technique.process_data(results)
 
     def _get_data(
-            self
+            self,
+            channel: int
     ) -> tuple:
         """
         Reads the data from the current channel, returns the metadata, current values, and all read-in data.
+
+        Args:
+            channel: ID of the channel to read the data from.
 
         Returns:
             current_values: CurrentValues object as a data infrastructure (save instrument state from DLL methods).
@@ -222,7 +243,7 @@ class EChemController(object):
         data_info: KBIO.DataInfo = KBIO.DataInfo()
         current_values: KBIO.CurrentValues = KBIO.CurrentValues()
 
-        self._dll_functions("BL_GetData", self.device_id, self.channel, data_buffer, data_info, current_values)
+        self._dll_functions("BL_GetData", self.device_id, channel, data_buffer, data_info, current_values)
 
         rows: int = data_info.NbRows
         columns: int = data_info.NbCols
@@ -258,32 +279,47 @@ class EChemController(object):
         return np.append(old_data, new_data, axis=0)
 
     def _start_channel(
-            self
+            self,
+            channel: int
     ) -> None:
         """
         Method to start a channel to begin a specific measurement.
+
+        Args:
+            channel: ID of the channel to start.
         """
-        self._dll_functions("BL_StartChannel", self.device_id, self.channel)
-        self.logger.info(f"Measurement of Technique {self.technique} started on channel {self.channel + 1}")
+        self._dll_functions("BL_StartChannel", self.device_id, channel)
+        self.logger.info(f"Measurement of Technique {self.technique} started on channel {channel+1}")
 
     def stop_channel(
-            self
+            self,
+            channel: int
     ) -> None:
         """
         Method to shut down a channel after completion of a measurement.
+
+        Args:
+            channel: ID of the channel to be stopped
         """
-        self._dll_functions("BL_StopChannel", self.device_id, self.channel)
-        self.logger.info(f"Connection to Channel {self.channel + 1} closed.")
+        self._dll_functions("BL_StopChannel", self.device_id, channel)
+        self.logger.info(f"Connection to Channel {channel+1} closed.")
 
     @contextmanager
     def _open_channel(
-            self
+            self,
+            channel: int
     ) -> None:
-        self._start_channel()
+        """
+        Context manager to open and close a specific channel for measurements.
+
+        Args:
+            channel: ID of the channel to be started and stopped
+        """
+        self._start_channel(channel)
         try:
             yield
         finally:
-            self.stop_channel()
+            self.stop_channel(channel)
 
     def _decode_numeric_to_single(
             self,

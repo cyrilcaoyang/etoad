@@ -45,3 +45,5 @@ def scatter_plot(
 
     if save:
         plt.savefig(file_name)
+
+    plt.close()

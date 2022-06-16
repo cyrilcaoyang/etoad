@@ -85,8 +85,8 @@ class EClibDLLInterface(object):
         """
         check_value: int = self._callable_functions[function_name](*args)
 
-        if not check_value == 0:
-            raise ConnectionError(f"Error upon execution of method {function_name}")
+#        if not check_value == 0:
+#            raise ConnectionError(f"Error upon execution of method {function_name}")
 
         return check_value
 
