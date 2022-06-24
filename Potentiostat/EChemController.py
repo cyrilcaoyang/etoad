@@ -26,7 +26,8 @@ class EChemController(object):
 
     required_settings: set = {
         "port",
-        "channel",
+        "channel_ids",
+        "default_channel_id",
         "timeout"
     }
 
@@ -116,6 +117,8 @@ class EChemController(object):
         """
         if not channel:
             channel = self.default_channel
+        else:
+            channel = channel - 1
 
         self.technique = self._get_technique(technique)
 
@@ -189,7 +192,7 @@ class EChemController(object):
         and unpacking / decoding the data. Returns the measured data as a 2D Numpy array (method-specific format).
 
         Args:
-            channel: ID of the channel to perform the measurement on.
+            channel: Number of the channel to perform the measurement on.
 
         Returns:
             results: 2D Numpy array of the results data
@@ -202,6 +205,8 @@ class EChemController(object):
 
         if not channel:
             channel = self.default_channel
+        else:
+            channel = channel - 1
 
         results: np.ndarray = np.array([])
 

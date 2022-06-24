@@ -39,7 +39,7 @@
     "name": "N_Cycles",
     "variable_type": "int",
     "value": 5,
-    "constraints": "x in range(1, 100)"
+    "constraints": "x in range(1, 500)"
   },
   "Start Averaging Interval": {
     "name": "Begin_measuring_I",

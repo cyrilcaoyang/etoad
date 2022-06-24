@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Union
 
 from pylab.instruments import XCPump
+from .AtmosphereHandler import AtmosphereHandler
 from Utils import ConfigLoader
 
 
@@ -30,7 +31,8 @@ class SamplingSystem:
         "default_velocity",
         "cell_port",
         "wash_port",
-        "waste_port"
+        "waste_port",
+        "relay_settings"
     }
 
     defined_ports: set = {
@@ -45,9 +47,12 @@ class SamplingSystem:
 
         Args:
             config_file: Path to the configuration file. Needs to contain the specified keys in self.required_settings.
+            initial_wash: Number of initial washing steps. Default: 3
         """
 
         self._config: dict = ConfigLoader.load_config(config_file, self.required_settings)
+
+        self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(**self._config["relay_settings"])
 
         self._pump: Union[XCPump, None] = None
         self.cell_port: Union[int, None] = None
@@ -104,6 +109,16 @@ class SamplingSystem:
 
         self.transfer_to_cell(self.wash_port, volume)
 
+    def purge_cell(self, purge_time: int = 10) -> None:
+        """
+        Purges the cell with inert gas.
+
+        Args:
+            purge_time: Purge time (in seconds).
+        """
+        with self._atmosphere_handler.open_atmosphere():
+            time.sleep(purge_time)
+
     def _wash_pump(self, cycles=3):
         """
         Washes the syringe pump for three times with its volume of wash liquid.
@@ -126,8 +141,9 @@ class SamplingSystem:
         """
         Removes the entire amount of liquid from the cell.
         """
-        self._pump.draw_and_dispense(self.cell_port, self.waste_port, self._cell_volume + 2, wait=1)
-        self._update_cell_volume(-self._cell_volume)
+        with self._atmosphere_handler.open_atmosphere():
+            self._pump.draw_and_dispense(self.cell_port, self.waste_port, self._cell_volume + 2, wait=1)
+            self._update_cell_volume(-self._cell_volume)
 
     def _update_cell_volume(self, volume: float) -> None:
         """

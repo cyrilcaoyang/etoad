@@ -11,9 +11,11 @@ POTENTIOSTAT_CONFIG = Path("Settings/potentiostat_settings.json")
 LOGGER_CONFIG = Path("Settings/logger_settings.json")
 DATA_PATH = Path(r"C:\Users\Potentiostat_SP-300\Desktop\AutoEChem_Data")
 
-sample_name: str = "Test"
-technique: str = "SWV"
+sample_name: str = "C2COBr2"
+technique: str = "CV"
 parameters: dict = {
+    "Voltage Profile": [0.1, 0.1, -0.5, 0.1, 0.1],
+    "Number of Cycles": 100
 }
 
 # Instantiation of the Logger and Controller Objects.

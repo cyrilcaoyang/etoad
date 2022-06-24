@@ -6,5 +6,10 @@
   "default_velocity": 500,
   "cell_port": 10,
   "wash_port": 12,
-  "waste_port": 11
+  "waste_port": 11,
+  "relay_settings": {
+    "port": "com5",
+    "module_address": 3,
+    "channel": 0
+  }
 }
