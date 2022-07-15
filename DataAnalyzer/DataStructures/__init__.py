@@ -1,0 +1,1 @@
+from .AnalyzerDataStructuer import ScatterCurve
