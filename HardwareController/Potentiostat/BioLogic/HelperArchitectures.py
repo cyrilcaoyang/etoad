@@ -1,4 +1,4 @@
-import Potentiostat.BioLogic as KBIO
+import kbio_types as KBIO
 
 # TODO: Refactor and properly implement
 

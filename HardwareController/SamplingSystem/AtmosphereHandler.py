@@ -1,4 +1,3 @@
-import time
 from contextlib import contextmanager
 from modbus_tk.modbus_rtu import RtuMaster
 import modbus_tk.defines as cst

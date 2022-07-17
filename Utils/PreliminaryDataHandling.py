@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def save_data(
+def save_as_pkl(
         object_to_save: Any,
         file_name: Path
 ) -> None:
@@ -19,6 +19,28 @@ def save_data(
     """
     with open(file_name, "wb") as pklfile:
         pickle.dump(object_to_save, pklfile)
+
+
+def save_as_csv(
+        object_to_save: dict,
+        file_name: Path
+) -> None:
+    """
+    Saves a dictionary as a csv file.
+    Possible dictionary formats:
+        str: Union[str, int, float, bool]
+        str: Union[List[Union[str, int, float, bool]], Tuple[Union[str, int, float, bool]]]
+
+    Args:
+        object_to_save: Dictionary of the abovementioned format
+        file_name: Path to the file where the csv file should be stored.
+    """
+    with open(file_name, "w") as csv_file:
+        for key, value in zip(object_to_save.keys(), object_to_save.values()):
+            if isinstance(value, (str, int, float, bool)):
+                csv_file.write(f"{key},{value}\n")
+            elif isinstance(value, (list, tuple)):
+                csv_file.write(f"{key},{','.join(value)}\n")
 
 
 def scatter_plot(

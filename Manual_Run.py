@@ -2,9 +2,9 @@ from pathlib import Path
 import numpy as np
 
 # Import the Controller for the Potentiostat and some Helper Functions
-from Potentiostat import EChemController
+from HardwareController import EChemController
 from Utils import get_logger, timestamp_datetime
-from Utils.PreliminaryDataHandling import scatter_plot, save_data
+from Utils.PreliminaryDataHandling import scatter_plot, save_as_pkl
 
 # Definition of Global Variables (PRELIMINARY!)
 POTENTIOSTAT_CONFIG = Path("Settings/potentiostat_settings.json")
@@ -50,7 +50,7 @@ scatter_plot(
     file_name=DATA_PATH / f"{experiment_name}.png"
 )
 
-save_data(
+save_as_pkl(
     results,
     file_name=DATA_PATH / f"{experiment_name}.pkl"
 )

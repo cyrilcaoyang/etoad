@@ -1,7 +1,7 @@
 import time
 from pathlib import Path
-from SamplingSystem import SamplingSystem
-from SamplingSystem.AtmosphereHandler import AtmosphereHandler
+from HardwareController import SamplingSystem
+from HardwareController.SamplingSystem.AtmosphereHandler import AtmosphereHandler
 from Utils import ConfigLoader
 
 SAMPLER_SETTINGS = Path(__file__).parent / "Settings" / "sampler_settings.json"

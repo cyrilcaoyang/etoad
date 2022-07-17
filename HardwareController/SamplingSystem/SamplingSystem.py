@@ -1,6 +1,7 @@
 import time
 from pathlib import Path
 from typing import Union
+from logging import Logger
 
 from pylab.instruments import XCPump
 from .AtmosphereHandler import AtmosphereHandler
@@ -41,18 +42,21 @@ class SamplingSystem:
         "waste_port"
     }
 
-    def __init__(self, config_file: Path, initial_wash: int = 3):
+    def __init__(self, config_file: Path, logger: Logger, initial_wash: int = 3):
         """
         Creates an instance of the SamplingSystem class.
 
         Args:
             config_file: Path to the configuration file. Needs to contain the specified keys in self.required_settings.
+            logger: Logger object
             initial_wash: Number of initial washing steps. Default: 3
         """
 
         self._config: dict = ConfigLoader.load_config(config_file, self.required_settings)
 
         self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(**self._config["relay_settings"])
+
+        self._logger: Logger = logger
 
         self._pump: Union[XCPump, None] = None
         self.cell_port: Union[int, None] = None
@@ -95,6 +99,7 @@ class SamplingSystem:
         """
         self._pump.draw_and_dispense(source_port, self.cell_port, volume, wait=1)
         self._update_cell_volume(volume)
+        self._logger.debug(f"{volume} mL Transferred from Vial {source_port} to the Measurement Cell.")
 
     def dilute_cell(self, volume: float = 0, factor: float = 1) -> None:
         """
@@ -119,6 +124,8 @@ class SamplingSystem:
         with self._atmosphere_handler.open_atmosphere():
             time.sleep(purge_time)
 
+        self._logger.debug(f"Cell was purged with Nitrogen gas for {purge_time} sec.")
+
     def _wash_pump(self, cycles=3):
         """
         Washes the syringe pump for three times with its volume of wash liquid.
@@ -136,6 +143,8 @@ class SamplingSystem:
             self.transfer_to_cell(self.wash_port, wash_volume)
             time.sleep(5)
             self._empty_cell()
+
+        self._logger.debug("Measurement Cell was successfully emptied and washed.")
 
     def _empty_cell(self):
         """

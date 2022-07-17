@@ -7,7 +7,7 @@ from typing import Any, Union, Callable
 
 from Utils import get_bit_mode
 from .DataStructures import *
-import Potentiostat.BioLogic as KBIO
+import BioLogic as KBIO
 
 
 class EClibDLLInterface(object):

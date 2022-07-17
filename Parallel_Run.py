@@ -3,9 +3,9 @@ from threading import Thread
 from pathlib import Path
 
 # Import the Controller for the Potentiostat and some Helper Functions
-from Potentiostat import EChemController
+from HardwareController import EChemController
 from Utils import get_logger
-from Utils.PreliminaryDataHandling import scatter_plot, save_data
+from Utils.PreliminaryDataHandling import scatter_plot, save_as_pkl
 
 # Definition of Global Variables (PRELIMINARY!)
 POTENTIOSTAT_CONFIG = Path("Settings/potentiostat_settings.json")
@@ -43,7 +43,7 @@ def measure(
     POTENTIOSTAT.load_technique(technique_name, technique_parameters, channel)
     data = POTENTIOSTAT.do_measurement(channel)
     scatter_plot(data[:, 1], data[:, 2], show=False, save=True, file_name=data_path / f"{sample_name}.png")
-    save_data(data, data_path / f"{sample_name}.pkl")
+    save_as_pkl(data, data_path / f"{sample_name}.pkl")
 
 
 if __name__ == "__main__":

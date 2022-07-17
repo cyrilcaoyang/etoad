@@ -4,13 +4,13 @@ __author__ = 'Felix Strieth-Kalthoff'
 from array import array
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union
 import numpy as np
 from logging import Logger
 
 from Utils import ConfigLoader
 from .Binaries import BINARY_PATH
-import Potentiostat.BioLogic as KBIO  # TODO: Refactor and re-name to not import as global constant
+import BioLogic as KBIO
 from .DataStructures import *
 from .Methods import *
 from .DLL_Binding import EClibDLLInterface
@@ -64,9 +64,6 @@ class EChemController(object):
         """
         Establishes the connection to the instrument and returns the device ID.
         Checks whether each channel can be addressed.
-
-        Args:
-            channels: List of available channels for the instrument.
 
         Returns:
             device_id.value: Integer value of the device ID
