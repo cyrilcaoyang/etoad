@@ -23,6 +23,11 @@ class ScatterCurve(object):
         self.data = np.hstack((data[:, [column_x_index]], data[:, [column_y_index]]))
 
     def y_predictor(self, x: float) -> float:
+
+        # ATTN: Is this linear interpolation between two data points?
+        # ATTN: a) This has a problem once you have a non-monotonic sequence of data points (e.g. two CV cycles)
+        # ATTN: b) Numpy already has a (better + more efficient) solution to this -> numpy.interp()
+
         """
 
         Args:
@@ -43,6 +48,9 @@ class ScatterCurve(object):
         return y
 
     def integral_operator(self) -> float:
+
+        # ATTN: Numpy has a faster and more accurate solution for this: numpy.trapz()
+
         """
 
         Returns:
@@ -61,6 +69,9 @@ class ScatterCurve(object):
         return integral
 
     def first_derivative(self) -> np.ndarray:
+
+        # ATTN: Numpy has a more accurate and efficient solution to this: numpy.gradient()
+
         """
         Assign first derivative of the selected data
         Returns:
@@ -74,6 +85,11 @@ class ScatterCurve(object):
         return first_derivative
 
     def first_derivative_peak_detection(self) -> Tuple[list, list]:
+
+        # ATTN: This only works for determining zero crossings with negative second derivative.
+        # ATTN: There are probably more efficient ways to do this, maybe check something like this:
+        # https://python.tutorialink.com/efficiently-detect-sign-changes-in-python/
+
         """
         Find the row index of peak inside the data
         Args:
@@ -86,7 +102,7 @@ class ScatterCurve(object):
         first_derivative_array = self.first_derivative()
         upper_peak = list()
         lower_peak = list() #todo: delete lower peak not necessary
-        for i in range(1, first_derivative_array.size):
+        for i in range(1, first_derivative_array.size):  # ATTN: Iteration is always slow :-)
             if first_derivative_array[i] < 0 < first_derivative_array[i - 1]:
                 upper_peak.append(i)
         return upper_peak, lower_peak

@@ -5,8 +5,11 @@ import copy
 from ..DataStructures import ScatterCurve
 from typing import Tuple
 
+# ATTN: We could discuss the use of abstract base classes as class prototypes at some point (similar to the EChemMethod.py)
+#  That would also include some further inheritance rather than re-coding certain methods.
 
-class CV_Analyzer(object):
+
+class CVAnalyzer(object):
 
     def __init__(self, data):
         self.data = data
@@ -50,14 +53,17 @@ class CV_Analyzer(object):
             [[ cycle, peak voltage, peak current]
              [ cycle, peak voltage, peak current]]
         """
-        total_cycle_nums: int = self._acquire_cycle_num() + 1
+        # TODO: make this method better readable and understandable
+        #  probably break down into several sub-routines
+
+        total_cycle_nums: int = self._acquire_cycle_num() + 1  # ATTN: It might make more sense to pass the number of cycles than to infer it from the data
         integral_data = list()  # todo: refactor
         peak_data = list()
         for cycle_num in range(total_cycle_nums):
             cycle_data: np.ndarray = self._acquire_data_at_cycle_n(cycle_num)
             cycle_data = self._forward_backward_gradient(cycle_data)
-            upper_cycle: np.ndarry = cycle_data[cycle_data[:, 4] < 0]
-            lower_cycle: np.ndarry = cycle_data[cycle_data[:, 4] > 0]
+            upper_cycle: np.ndarray = cycle_data[cycle_data[:, 4] < 0]
+            lower_cycle: np.ndarray = cycle_data[cycle_data[:, 4] > 0]
             upper_scatter = ScatterCurve(upper_cycle, 1, 2)
             lower_scatter = ScatterCurve(lower_cycle, 1, 2)
             # finding integral

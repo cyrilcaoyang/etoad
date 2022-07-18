@@ -1,2 +1,2 @@
-from .CV_Utils import CV_Analyzer
-from .Pulse_Utils import Pulse_Analyzer
+from .CV_Utils import CVAnalyzer
+from .Pulse_Utils import PulseAnalyzer

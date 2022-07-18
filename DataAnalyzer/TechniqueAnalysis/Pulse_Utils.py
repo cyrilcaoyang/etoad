@@ -6,12 +6,19 @@ from ..DataStructures import ScatterCurve
 from typing import Tuple
 import scipy.signal as sps
 
-class Pulse_Analyzer(object):
+# ATTN: We could discuss the use of abstract base classes as class prototypes at some point (similar to the EChemMethod.py)
+#  That would also include some further inheritance rather than re-coding certain methods.
+
+
+class PulseAnalyzer(object):
 
     def __init__(self,data):
         self.data = data
 
     def peak_detection(self, data) -> list:
+
+        # ATTN: Method already exists in scipy (and is probably more efficient and reliable) -> scipy.signal.find_peaks
+
         """
         Provide all the peak index position in the data array using local maximum detection
         Args:
@@ -21,7 +28,6 @@ class Pulse_Analyzer(object):
              [time, voltage, current]]
 
         Returns: a list of peak index
-
         """
         peaks = list()
         current = data[:, 2].flatten()
@@ -42,8 +48,12 @@ class Pulse_Analyzer(object):
         Returns: same data format but current being threholded
 
         """
-        copyarray = data.copy()
-        current = copyarray[:, 2] * (copyarray[:, 2] > np.max(copyarray[:, 2] * 0.05))
+
+        # ATTN: Basing this on the height of the maximum peak might not be useful for experimental measurements:
+        #  What happens if there is a measurement without peak in the voltage window?
+
+        copyarray = data.copy() # ATTN: Why are you copying?
+        current = copyarray[:, 2] * (copyarray[:, 2] > np.max(copyarray[:, 2] * 0.05))  # TODO: ??? Completely random threshold ???
         copyarray[:, 2] = current
         return copyarray
 
@@ -74,7 +84,7 @@ class Pulse_Analyzer(object):
         """
         peak_data = list()
         data = self.high_frequency_noise_filter(0.3)
-        data_thres = self.threshold_denoising(data)
+        data_thres = self.threshold_denoising(data)  # ATTN: Careful with this!
         peaks = self.peak_detection(data_thres)
         for index in peaks:
             peak_voltage = self.data[index][1]
@@ -93,7 +103,7 @@ class Pulse_Analyzer(object):
 
         """
         peak_data = list()
-        data_thres = self.threshold_denoising(self.data)
+        data_thres = self.threshold_denoising(self.data)  # ATTN: Careful with this!
         peaks = self.peak_detection(data_thres)
         for index in peaks:
             peak_voltage = self.data[index][1]
