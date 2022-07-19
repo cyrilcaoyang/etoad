@@ -16,6 +16,7 @@ class SamplingSystem:
     Public Methods to be called from external:
         transfer_to_cell(source_port: int, volume: float) -> None
         dilute_cell(volume: float = 0, factor: float = 1) -> None
+        purge_cell(purge_time: int = 10) -> None
         wash_cell(volume: float, cycles: int = 3) -> None
     """
 
@@ -30,6 +31,7 @@ class SamplingSystem:
         "pump_volume",
         "initial_valve",
         "default_velocity",
+        "dead_volume",
         "cell_port",
         "wash_port",
         "waste_port",
@@ -97,6 +99,9 @@ class SamplingSystem:
             source_port: Port from which the liquid should be moved to the cell.
             volume: Volume to be dispensed
         """
+        self._pump.draw_and_dispense(source_port, self.waste_port, self._config["dead_volume"], wait=1)
+        # TODO: improve this very quick & dirty dead volume handling
+
         self._pump.draw_and_dispense(source_port, self.cell_port, volume, wait=1)
         self._update_cell_volume(volume)
         self._logger.debug(f"{volume} mL Transferred from Vial {source_port} to the Measurement Cell.")
@@ -114,7 +119,7 @@ class SamplingSystem:
 
         self.transfer_to_cell(self.wash_port, volume)
 
-    def purge_cell(self, purge_time: int = 10) -> None:
+    def purge_cell(self, purge_time: float = 10) -> None:
         """
         Purges the cell with inert gas.
 

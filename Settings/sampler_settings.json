@@ -4,6 +4,7 @@
   "pump_volume": 2.5,
   "initial_valve": 12,
   "default_velocity": 500,
+  "dead_volume": 0.1,
   "cell_port": 10,
   "wash_port": 12,
   "waste_port": 11,
