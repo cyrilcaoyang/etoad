@@ -7,7 +7,7 @@ from typing import Any, Union, Callable
 
 from Utils import get_bit_mode
 from .DataStructures import *
-import BioLogic as KBIO
+import HardwareController.Potentiostat.BioLogic as KBIO  # TODO: refactor properly and remove this ugly import
 
 
 class EClibDLLInterface(object):

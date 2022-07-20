@@ -44,7 +44,7 @@ class SamplingSystem:
         "waste_port"
     }
 
-    def __init__(self, config_file: Path, logger: Logger, initial_wash: int = 3):
+    def __init__(self, config_file: Path, logger: Logger, initial_wash: int = 1):
         """
         Creates an instance of the SamplingSystem class.
 
@@ -68,6 +68,7 @@ class SamplingSystem:
 
         self._set_ports()
         self._initialize_pump(initial_wash)
+        self._logger.info("Autosampler and inert gas handling were successfully initialized. ")
 
     def _initialize_pump(self, initial_wash: int = 3) -> None:
         """
@@ -91,20 +92,21 @@ class SamplingSystem:
         for port in self.defined_ports:
             setattr(self, port, self._config[port])
 
-    def transfer_to_cell(self, source_port: int, volume: float) -> None:
+    def transfer_to_cell(self, source_port: int, volume: float, wash_line: bool = False) -> None:
         """
         Transfers a given amount of liquid to the measurement cell.
 
         Args:
             source_port: Port from which the liquid should be moved to the cell.
             volume: Volume to be dispensed
+            wash_line: Whether or not to wash the line to remove contaminations, e.g. from previous samples.
         """
-        self._pump.draw_and_dispense(source_port, self.waste_port, self._config["dead_volume"], wait=1)
-        # TODO: improve this very quick & dirty dead volume handling
+        if wash_line:
+            self._pump.draw_and_dispense(source_port, self.waste_port, self._config["dead_volume"], wait=1)
+            self._wash_pump(1)
 
-        self._pump.draw_and_dispense(source_port, self.cell_port, volume, wait=1)
+        self._pump.draw_and_dispense(source_port, self.cell_port, volume + self._config["dead_volume"], wait=2)
         self._update_cell_volume(volume)
-        self._logger.debug(f"{volume} mL Transferred from Vial {source_port} to the Measurement Cell.")
 
     def dilute_cell(self, volume: float = 0, factor: float = 1) -> None:
         """

@@ -1,4 +1,5 @@
-import kbio_types as KBIO
+#import kbio_types as KBIO
+from .kbio_types import *
 
 # TODO: Refactor and properly implement
 
@@ -20,7 +21,7 @@ def pp_plural(nb, label, num=True, nothing=''):
     return en_clair
 
 
-class LPDeviceInfo(KBIO.DeviceInfo):  # TODO: Needs to be re-named properly
+class LPDeviceInfo(DeviceInfo):  # TODO: Needs to be re-named properly
     """
     Object Infrastructure that the DLL interface needs for writing device information.
     """
@@ -32,11 +33,11 @@ class LPDeviceInfo(KBIO.DeviceInfo):  # TODO: Needs to be re-named properly
         Returns:
             device.name: Name of the instrument.
         """
-        device = KBIO.DEVICE(self.DeviceCode)
+        device = DEVICE(self.DeviceCode)
         return device.name
 
 
-class ChannelInfo(KBIO.ChannelInfo):
+class ChannelInfo(ChannelInfo):
     """
     Object infrastructure that the DLL interface needs for writing channel information.
 
@@ -45,43 +46,43 @@ class ChannelInfo(KBIO.ChannelInfo):
     """
     @property
     def firmware(self):
-        firmware = KBIO.FIRMWARE(self.FirmwareCode)
+        firmware = FIRMWARE(self.FirmwareCode)
         return firmware.name
 
     @property
     def has_no_firmware(self):
-        firmware = KBIO.FIRMWARE(self.FirmwareCode)
+        firmware = FIRMWARE(self.FirmwareCode)
         has_no_firmware = (firmware.value == 0)
         return has_no_firmware
 
     @property
     def is_kernel_loaded(self):
-        firmware = KBIO.FIRMWARE(self.FirmwareCode)
+        firmware = FIRMWARE(self.FirmwareCode)
         return (firmware.name == "KERNEL")
 
     @property
     def board(self):
-        board = KBIO.CHANNEL_BOARD(self.BoardVersion)
+        board = CHANNEL_BOARD(self.BoardVersion)
         return board.name
 
     @property
     def state(self):
-        state = KBIO.PROG_STATE(self.State)
+        state = PROG_STATE(self.State)
         return state.name
 
     @property
     def amplifier(self):
-        amplifier = KBIO.AMPLIFIER(self.AmpCode)
+        amplifier = AMPLIFIER(self.AmpCode)
         return amplifier.name
 
     @property
     def min_IRange(self):
-        min_IRange = KBIO.I_RANGE(self.MinIRange)
+        min_IRange = I_RANGE(self.MinIRange)
         return min_IRange.name
 
     @property
     def max_IRange(self):
-        max_IRange = KBIO.I_RANGE(self.MaxIRange)
+        max_IRange = I_RANGE(self.MaxIRange)
         return max_IRange.name
 
     def __str__(self):

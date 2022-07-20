@@ -14,19 +14,13 @@
       "task": "measure",
       "technique": "CV",
       "parameters": {
-        "Voltage Profile": [0, 0, 0, 0, 0],
-        "Number of Cycles": 10
+        "Voltage Profile": [0, 0, -0.8, 0, 0],
+        "Number of Cycles": 5
       },
-      "update_parameters": [
-        {
-          "parameter": "Voltage Profile",
-          "from measurement": "SWV",
-          "key": "cv_voltage_range"
-        }
-      ]
+      "update_parameters": []
     }
   },
-  "Sample Volume": 0.200,
+  "Sample Volume": 0.5,
   "Total Volume": 5.0,
   "Purge": 15,
   "Wash": {

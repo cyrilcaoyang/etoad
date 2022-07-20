@@ -1,7 +1,7 @@
 import logging
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Union, Any
+from typing import Union, Any, Optional
 import numpy as np
 
 from Utils import get_logger
@@ -32,6 +32,7 @@ class WorkflowManager(object):
         "Protocol Name",
         "Steps",
         "Sample Volume",
+        "Total Volume",
         "Purge",
         "Wash"
     }
@@ -46,7 +47,8 @@ class WorkflowManager(object):
             logger_settings: Path,
             potentiostat_settings: Path,
             sampler_settings: Path,
-            data_path: Path
+            data_path: Path,
+            logfile: Optional[Path] = None
     ):
         """
         Instantiates the workflow manager object by instantiating the individual modules:
@@ -60,8 +62,11 @@ class WorkflowManager(object):
             potentiostat_settings: Path to the json file containing the potentiostat settings
             sampler_settings: Path to the json file containing the sampler settings
             data_path: Path to the folder where data should be stored.
+            logfile: Optional - name of the logfile used.
         """
-        self.logger: logging.Logger = get_logger(logger_settings, logger_name="EChem")  # TODO: Make more flexible?
+        self.logger: logging.Logger = get_logger(logger_settings, logger_name="EChem", logfile=logfile)  # TODO: Make more flexible?
+        self.logger.info("SYSTEM INITIALIZATION")
+
         self.potentiostat: EChemController = EChemController(potentiostat_settings, logger=self.logger)
         self.sampling_system: SamplingSystem = SamplingSystem(sampler_settings, logger=self.logger)
         self.analyzer: None = None  # TODO: implement Jackie's data analyzer
@@ -72,7 +77,7 @@ class WorkflowManager(object):
             sample_name: str,
             sample_location: int,
             workflow_path: Path
-    ) -> None:
+    ) -> dict:
         """
         Executes a specified measurement workflow for a given sample.
 
@@ -80,18 +85,25 @@ class WorkflowManager(object):
             sample_name: Name of the sample to be measured
             sample_location: Position of the sample on the autosampler.
             workflow_path: Path to the json file that specifies the workflow to be executed.
+
+        Returns:
+            result: Dictionary of all steps executed and their respective results.
         """
         workflow: dict = ConfigLoader.load_config(workflow_path, self._required_settings)
         self.logger.info(f"Starting Protocol {workflow['Protocol Name']} for sample {sample_name}.")
 
-        with self._sample_in_cell(sample_location, workflow["Sample Volume"], workflow["Purge"], **workflow["Wash"]):
+        result: dict = {"Sample Name": sample_name, "Workflow": workflow["Protocol Name"]}
+
+        with self._sample_in_cell(sample_location, workflow["Sample Volume"], workflow["Total Volume"], workflow["Purge"], **workflow["Wash"]):
             for step, step_details in zip(workflow["Steps"], workflow["Steps"].values()):
                 try:
-                    result: dict = self._execute_step(sample_name, step, result, **step)
+                    result: dict = self._execute_step(sample_name, step, result, **step_details)
                 except SkipExecution:
                     continue
                 except StopExecution:
                     break
+
+        return result
 
     def _execute_step(
             self,
@@ -113,7 +125,7 @@ class WorkflowManager(object):
             "measure": self._run_measurement,
             "dilute": self._dilute_cell,
         }
-
+        self.logger.info(f"Now executing {step_name}.")
         # TODO: implement data saving as individual step with details?
 
         return executable_steps[kwargs["task"]](sample_name, step_name, previous_results, **kwargs)
@@ -123,6 +135,7 @@ class WorkflowManager(object):
             self,
             autosampler_position: int,
             sample_volume: float,
+            total_volume: float,
             purge_time: float,
             wash_volume: float = 5,
             washing_cycles: int = 3
@@ -134,15 +147,19 @@ class WorkflowManager(object):
         Args:
              autosampler_position: Vial number on the autosampler.
              sample_volume: Volume to be transferred to the cell.
+             total_volume: Total volume of the sample in the cell (after dilution).
              purge_time: Time for purging with nitrogen gas.
              wash_volume: Volume to wash the cell.
              washing_cycles: Iterations for washing the cell
         """
-        self.sampling_system.transfer_to_cell(autosampler_position, sample_volume)
+        self.sampling_system.transfer_to_cell(autosampler_position, sample_volume, wash_line=True)
+        self.sampling_system.dilute_cell(volume=total_volume-sample_volume)
+        self.logger.info(f"Sample was successfully transferred to the measurement cell ({sample_volume}+{total_volume-sample_volume} mL).")
         self.sampling_system.purge_cell(purge_time)
         try:
             yield
         finally:
+            self.logger.info(f"Measurements for sample completed.")
             self.sampling_system.wash_cell(wash_volume, washing_cycles)
 
     def _run_measurement(
@@ -153,7 +170,8 @@ class WorkflowManager(object):
             technique: str,
             parameters: dict,
             update_parameters: list,
-            channel: Union[int, None] = None
+            channel: Union[int, None] = None,
+            **kwargs
     ) -> dict:
         """
         Runs a specified measurement on the instrument by loading the technique, running the measurement and evaluating
@@ -174,10 +192,9 @@ class WorkflowManager(object):
         self.potentiostat.load_technique(technique, parameters, channel)
         raw_data: np.ndarray = self.potentiostat.do_measurement(channel)
 
-        analysis_results: dict = self.analyzer.analyze_data(technique, parameters, results)  # TODO: double-check once analyzer is implemented
+        analysis_results: dict = {}  # self.analyzer.analyze_data(technique, parameters, raw_data)  # TODO: double-check once analyzer is implemented
         self._save_data(sample_name, step_name, raw_data, analysis_results)
         results[step_name] = analysis_results
-
         return results
 
     def _save_data(

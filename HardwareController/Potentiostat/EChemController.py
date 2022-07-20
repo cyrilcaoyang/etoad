@@ -10,7 +10,7 @@ from logging import Logger
 
 from Utils import ConfigLoader
 from .Binaries import BINARY_PATH
-import BioLogic as KBIO
+from ..Potentiostat import BioLogic as KBIO
 from .DataStructures import *
 from .Methods import *
 from .DLL_Binding import EClibDLLInterface
