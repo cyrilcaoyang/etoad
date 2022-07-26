@@ -1,21 +1,22 @@
 from pathlib import Path
 import numpy as np
+import matplotlib.pyplot as plt
 
 from HardwareController import EChemController
-from Utils import get_logger, timestamp_datetime, scatter_plot
+from Utils import get_logger, timestamp_datetime
 
 
-PARENT_DIR = Path(__file__).parent.parent
+PARENT_DIR = Path(__file__).parent
 
 logger = get_logger(
-    config_file=PARENT_DIR / "Settings" / "logger_settings.json",
+    config_file=PARENT_DIR / "test_settings" / "logger_settings.json",
     logger_name="EChem",
     logfile=Path(f"Test_Potentiostat_{timestamp_datetime()}.log")
 )
 
 
 potentiostat = EChemController(
-    config_file=PARENT_DIR / "Settings" / "potentiostat_settings.json",
+    config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
     logger=logger
 )
 
@@ -29,25 +30,24 @@ potentiostat.load_technique(
 
 results: np.ndarray = potentiostat.do_measurement()
 
-scatter_plot(
-    results[:, 1],
-    results[:, 2],
-)
+plt.scatter(results[:, 1], results[:, 2])
+plt.show()
+_ = input("Press any key to continue.")
+plt.close()
 
 
 # Performs a Cyclic Voltammetry Measurement (10 Cycles between 0 and -0.5 V)
-
+"""
 potentiostat.load_technique(
     technique="CV",
     set_parameters={
-        "Voltage Profile": [0, 0, -0.5, 0, 0],
-        "Number of Cycles": 10
+        "Voltage Profile": [0.5, 0.5, -0.5, 0.5, 0.5],
+        "Number of Cycles": 5
     }
 )
 
 results: np.ndarray = potentiostat.do_measurement()
 
-scatter_plot(
-    results[:, 1],
-    results[:, 2],
-)
+plt.scatter(results[:, 1], results[:, 2])
+plt.show()
+"""
