@@ -5,11 +5,10 @@ from typing import Union, Any, Optional
 import numpy as np
 
 from Utils import get_logger
-from Utils import save_as_pkl, save_as_csv
-from Utils import timestamp_datetime
 from Utils import ConfigLoader
 from Utils import SkipExecution, StopExecution
 from HardwareController import EChemController, SamplingSystem
+from DataAnalyzer import DataAnalyzer
 
 
 class WorkflowManager(object):
@@ -69,8 +68,7 @@ class WorkflowManager(object):
 
         self.potentiostat: EChemController = EChemController(potentiostat_settings, logger=self.logger)
         self.sampling_system: SamplingSystem = SamplingSystem(sampler_settings, logger=self.logger)
-        self.analyzer: None = None  # TODO: implement Jackie's data analyzer
-        self.data_path: Path = data_path
+        self.analyzer: DataAnalyzer = DataAnalyzer(data_path)
 
     def measure_sample(
             self,
@@ -89,6 +87,7 @@ class WorkflowManager(object):
         Returns:
             result: Dictionary of all steps executed and their respective results.
         """
+        # TODO: rename the sample by including a timestamp?
         workflow: dict = ConfigLoader.load_config(workflow_path, self._required_settings)
         self.logger.info(f"Starting Protocol {workflow['Protocol Name']} for sample {sample_name}.")
 
@@ -99,6 +98,7 @@ class WorkflowManager(object):
                 try:
                     result: dict = self._execute_step(sample_name, step, result, **step_details)
                 except SkipExecution:
+                    self.logger.info(f"Execution of {step} will be skipped.")
                     continue
                 except StopExecution:
                     break
@@ -126,7 +126,6 @@ class WorkflowManager(object):
             "dilute": self._dilute_cell,
         }
         self.logger.info(f"Now executing {step_name}.")
-        # TODO: implement data saving as individual step with details?
 
         return executable_steps[kwargs["task"]](sample_name, step_name, previous_results, **kwargs)
 
@@ -154,7 +153,7 @@ class WorkflowManager(object):
         """
         self.sampling_system.transfer_to_cell(autosampler_position, sample_volume, wash_line=True)
         self.sampling_system.dilute_cell(volume=total_volume-sample_volume)
-        self.logger.info(f"Sample was successfully transferred to the measurement cell ({sample_volume}+{total_volume-sample_volume} mL).")
+        self.logger.info(f"Sample was successfully transferred to the measurement cell ({sample_volume} + {total_volume-sample_volume} mL).")
         self.sampling_system.purge_cell(purge_time)
         try:
             yield
@@ -170,6 +169,7 @@ class WorkflowManager(object):
             technique: str,
             parameters: dict,
             update_parameters: list,
+            analysis_settings: dict,
             channel: Union[int, None] = None,
             **kwargs
     ) -> dict:
@@ -184,43 +184,32 @@ class WorkflowManager(object):
             technique: Name of the measurement technique
             parameters: Dictionary of measurement parameters deviating from the default values.
             update_parameters: List of dictionaries of parameters that need to be inferred from previous measurements.
+            analysis_settings: Dictionary of keywords and specifications for data analysis.
             channel: Measurement channel (if None, the default channel is selected).
         """
         if update_parameters:
-            parameters = self._update_parameters(update_parameters, parameters, results)
+            parameters = self._update_parameters(
+                update_settings=update_parameters,
+                parameters=parameters,
+                previous_results=results)
 
-        self.potentiostat.load_technique(technique, parameters, channel)
+        self.potentiostat.load_technique(
+            technique=technique,
+            set_parameters=parameters,
+            channel=channel)
+
         raw_data: np.ndarray = self.potentiostat.do_measurement(channel)
 
-        analysis_results: dict = {}  # self.analyzer.analyze_data(technique, parameters, raw_data)  # TODO: double-check once analyzer is implemented
-        self._save_data(sample_name, step_name, raw_data, analysis_results)
+        analysis_results: dict = self.analyzer.analyze_data(
+            sample_name=sample_name,
+            experiment_name=step_name,
+            technique=technique,
+            analysis_settings=analysis_settings,
+            raw_data=raw_data
+        )
+
         results[step_name] = analysis_results
         return results
-
-    def _save_data(
-            self,
-            sample_name: str,
-            step_name: str,
-            raw_data: np.ndarray,
-            analysis_results: dict
-    ) -> None:
-        """
-        Saves the experimental results (raw data as .pkl and analysis results as .csv) into a folder
-        named after the sample name. Creates this folder if it does not exist.
-
-        Args:
-             sample_name: Name of the sample
-             step_name: Name of the executed step
-             raw_data: Raw experimental results, as returned by the potentiostat.
-             analysis_results: Results of the experimental analysis
-        """
-        sample_dir = self.data_path / sample_name
-        sample_dir.mkdir(parents=True, exist_ok=True)
-
-        file_basename = f"{sample_name}_{step_name}_{timestamp_datetime()}"
-
-        save_as_pkl(raw_data, sample_dir / f"{file_basename}.pkl")
-        save_as_csv(analysis_results, sample_dir / f"{file_basename}.csv")
 
     def _dilute_cell(
             self,
@@ -274,9 +263,19 @@ class WorkflowManager(object):
         for param_to_update in update_settings:
             new_value: Any = previous_results[param_to_update["from measurement"]][param_to_update["key"]]
 
-            if new_value in self._exception_keywords:
-                raise self._exception_keywords[new_value]
+            if isinstance(new_value, str):
+                if new_value in self._exception_keywords:
+                    raise self._exception_keywords[new_value]
 
             parameters[param_to_update["parameter"]] = new_value
 
         return parameters
+
+    def shutdown_system(
+            self
+    ) -> None:
+        """
+        Transfers 5 mL solvent to the sample cell for keeping the electrode surfaces wet.
+        Shuts the system down by disconnecting from the potentiostat and the sampling system.
+        """
+        self._dilute_cell("shutdown", "shutdown", volume=5.0, results={})

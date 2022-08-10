@@ -40,14 +40,24 @@ class SWV(EChemMethod):
 
         Returns:
             processed_data: 2D Numpy array of all pulse data points.
-
         """
-        differential_current: np.array = extracted_data[:, 2][0::2] - extracted_data[:, 2][1::2]
+        # TODO: implement same to DPV analysis...
+
+        pulse_high: np.array = extracted_data[:, 2][0::2]
+        pulse_low: np.array = extracted_data[:, 2][1::2]
+        no_data_points: int = pulse_low.shape[0]
+
+        # in rare cases, it happens that the total number of data points extracted from the channel is odd...
+        if not pulse_high.shape[0] == no_data_points:
+            pulse_high = pulse_high[no_data_points]
+
+        differential_current: np.array = pulse_high - pulse_low
+
         processed_data: np.ndarray = np.vstack(
             (
-                extracted_data[:, 0][0::2],  # Time from Column 0
-                extracted_data[:, 1][0::2],  # Voltage from Column 1
-                differential_current         # Differential Current from Column 2
+                extracted_data[:, 0][0::2][:no_data_points],  # Time from Column 0
+                extracted_data[:, 1][0::2][:no_data_points],  # Voltage from Column 1
+                differential_current                          # Differential Current from Column 2
             )
         )
 

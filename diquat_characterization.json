@@ -1,0 +1,59 @@
+{
+  "Protocol Name": "Diquat Characterization",
+  "Steps": {
+    "SWV": {
+      "task": "measure",
+      "technique": "SWV",
+      "parameters": {
+        "Initial Voltage": -1.2,
+        "Final Voltage": 0.8
+      },
+      "update_parameters": [],
+      "analysis_settings": {
+        "Plot": {
+          "title": "Square Wave Voltammetry"
+        },
+        "Peak Picking": {},
+        "CV Parameters": {
+          "filters": [
+            {
+              "key": "peak",
+              "operation": "x < 0"
+            }
+          ],
+          "selection": {
+            "key": "peak",
+            "operation": "max(x)"
+          }
+        }
+      }
+    },
+    "CV": {
+      "task": "measure",
+      "technique": "CV",
+      "parameters": {
+        "Voltage Profile": [0, 0, 0, 0, 0],
+        "Number of Cycles": 100
+      },
+      "update_parameters": [
+        {
+          "parameter": "Voltage Profile",
+          "from measurement": "SWV",
+          "key": "CV Parameters"
+        }
+      ],
+      "analysis_settings": {
+        "Plot": {},
+        "Peak Picking": {},
+        "Integration": {}
+      }
+    }
+  },
+  "Sample Volume": 0.5,
+  "Total Volume": 5.0,
+  "Purge": 30,
+  "Wash": {
+    "wash_volume": 5.0,
+    "washing_cycles": 3
+  }
+}

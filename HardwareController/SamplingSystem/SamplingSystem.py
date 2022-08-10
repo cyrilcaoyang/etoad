@@ -62,12 +62,16 @@ class SamplingSystem:
 
         self._pump: Union[XCPump, None] = None
         self.cell_port: Union[int, None] = None
-        self._cell_volume: float = 0.0
+
         self.wash_port: Union[int, None] = None
         self.waste_port: Union[int, None] = None
 
         self._set_ports()
         self._initialize_pump(initial_wash)
+
+        self._cell_volume: float = 5.0
+        self._empty_cell()
+
         self._logger.info("Autosampler and inert gas handling were successfully initialized. ")
 
     def _initialize_pump(self, initial_wash: int = 3) -> None:
@@ -139,6 +143,20 @@ class SamplingSystem:
         """
         for _ in range(cycles):
             self._pump.draw_and_dispense(self.wash_port, self.waste_port, self._config["pump_volume"], wait=1)
+
+    def wash_autosampler_position(self, sampler_position: int, no_cycles: int = 3) -> None:
+        """
+        Discards a sample in the autosampler and washes the vial.
+
+        Args:
+            sampler_position: Source port of the sample vial that should be cleaned.
+            no_cycles: Number of wash cycles.
+        """
+        self._pump.draw_and_dispense(sampler_position, self.waste_port, 6, wait=1)
+        self._wash_pump(1)
+        for _ in range(no_cycles):
+            self._pump.draw_and_dispense(self.wash_port, sampler_position, 5)
+            self._pump.draw_and_dispense(sampler_position, self.waste_port, 6)
 
     def wash_cell(self, wash_volume: float, cycles=3) -> None:
         """

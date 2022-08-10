@@ -92,6 +92,8 @@ class EChemController(object):
 
         return device_id.value
 
+    # TODO: check if there is a function like BL_Disconnect, write the corresponding method for that
+
     #################################################################
     # METHODS RELATED TO LOADING TECHNIQUES AND DEFINING PARAMETERS #
     #################################################################
