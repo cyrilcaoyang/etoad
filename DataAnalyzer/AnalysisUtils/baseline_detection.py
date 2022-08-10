@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import sparse
+from scipy.spatial import ConvexHull
 from scipy.sparse.linalg import spsolve
 
 
@@ -59,3 +60,46 @@ def als_baseline_removal(
     """
     baseline = als_baseline_detection(values, smoothing, weighting, iterations)
     return values - baseline
+
+
+def rubberband_baseline_detection(
+        x_values: np.ndarray,
+        y_values: np.ndarray,
+):
+    """
+    Performs rubberband fitting of a spectral baseline.
+    Identifies a convex hull around the spectrum by identifying the local minima of the data as the hull vertices.
+    Rolls the hull vertices to start by the one with the minimum value, then takes them in ascending order.
+    Generates the baseline as a linear interpolation of the hull vertices.
+
+    Args:
+        x_values: Numpy array of the x values.
+        y_values: Numpy array of the y values.
+
+    Returns:
+        Numpy ndarray of the baseline.r
+    """
+    hull_vertex_indices: np.ndarray = ConvexHull(np.column_stack((x_values, y_values))).vertices
+    indices_rolled: np.ndarray = np.roll(hull_vertex_indices, -hull_vertex_indices.argmin())
+    indices_final = indices_rolled[:indices_rolled.argmax()]
+
+    return np.interp(x_values, x_values[indices_final], y_values[indices_final])
+
+
+def rubberband_baseline_removal(
+        x_values: np.ndarray,
+        y_values: np.ndarray,
+):
+    """
+    Performs a rubberband fitting of the spectral baseline. Subtracts the baseline from the y values, and returns
+    the corrected y values.
+
+    Args:
+        x_values: Numpy array of the x values.
+        y_values: Numpy array of the y values.
+
+    Returns:
+        Numpy ndarray of the corrected y values.
+    """
+    baseline: np.ndarray = rubberband_baseline_detection(x_values, y_values)
+    return y_values - baseline

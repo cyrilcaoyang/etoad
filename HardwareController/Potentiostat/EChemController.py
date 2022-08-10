@@ -3,6 +3,7 @@ __author__ = 'Felix Strieth-Kalthoff'
 
 from array import array
 from contextlib import contextmanager
+from ctypes import Array
 from pathlib import Path
 from typing import Union
 import numpy as np
@@ -62,8 +63,10 @@ class EChemController(object):
             self,
     ) -> int:
         """
-        Establishes the connection to the instrument and returns the device ID.
-        Checks whether each channel can be addressed.
+        Sets up the potentiostat device.
+            1. Establishes the connection to the device.
+            2. Loads the firmware to the channels.
+            3. Checks for functionality of all channels.
 
         Returns:
             device_id.value: Integer value of the device ID
@@ -71,28 +74,54 @@ class EChemController(object):
         Raises:
             ConnectionError (if connection to the channels could not be established)
         """
+        # Establish connection to the device (-> BL_Connect)
         port: str = self.config["port"]
         timeout: int = self.config["timeout"]
-
         device_id, device_info = c_int32(), KBIO.DeviceInfo()
         self._dll_functions("BL_Connect", port.encode(), timeout, device_id, device_info)
         self.logger.debug(device_info)
 
+        # Load Firmware to all channels specified in the config (BL_LoadFirmware)
+        # ATTN: Had problems with this before -> copying the original xlx and bin files to the binaries folder helped...
+        channels_array = KBIO.ChannelsArray()
         for channel in self.config["channel_ids"]:
+            channels_array[channel] = c_bool(True)
+        results_array = KBIO.ResultsArray()
+        self._dll_functions(
+            "BL_LoadFirmware",
+            device_id.value,
+            channels_array,
+            results_array,
+            KBIO.MAX_SLOT_NB,
+            False,
+            False,
+            self._dll_functions.get_firmware_file("bin").encode(),
+            self._dll_functions.get_firmware_file("xlx").encode()
+        )
+
+        # Check if firmware was loaded and channel is ready (BL_GetChannelInfos)
+        for channel in self.config["channel_ids"]:
+
             channel_info = KBIO.ChannelInfo()
             self._dll_functions("BL_GetChannelInfos", device_id.value, channel, channel_info)
+            self.logger.debug(channel_info)
 
             if not channel_info.is_kernel_loaded:
                 self.logger.error(f"Channel {channel+1} was not successfully loaded. No measurement can be performed.")
                 raise ConnectionError("The connection to the instrument could not be established.")
 
-            self.logger.debug(channel_info)
-
         self.logger.info(f"Connection to the Potentiostat on {port} successfully established.")
 
         return device_id.value
 
-    # TODO: check if there is a function like BL_Disconnect, write the corresponding method for that
+    def disconnect(
+            self
+    ) -> None:
+        """
+        Disconnects the potentiostat.
+        """
+        self._dll_functions("BL_Disconnect", self.device_id)
+        self.logger.info("Connection to the potentiostat was successfully closed.")
 
     #################################################################
     # METHODS RELATED TO LOADING TECHNIQUES AND DEFINING PARAMETERS #

@@ -14,9 +14,6 @@ class CVAnalyzer(EChemDataAnalyzer):
         "Integration" -> determines the integral within each CV cycle
         "Plot" -> plots the voltammograms
     """
-
-    # TODO: delete first few cycles from analysis, put parameter somewhere?
-
     analysis_method_name: str = "CV"
 
     def __init__(self, *args):
