@@ -21,6 +21,7 @@ potentiostat = EChemController(
 )
 
 
+
 # Performs a Square Wave Voltammetry Measurement with Default Parameters
 
 potentiostat.load_technique(
@@ -30,14 +31,16 @@ potentiostat.load_technique(
 
 results: np.ndarray = potentiostat.do_measurement()
 
+potentiostat.disconnect()
+
 plt.scatter(results[:, 1], results[:, 2])
 plt.show()
 _ = input("Press any key to continue.")
 plt.close()
 
-
-# Performs a Cyclic Voltammetry Measurement (10 Cycles between 0 and -0.5 V)
 """
+# Performs a Cyclic Voltammetry Measurement (10 Cycles between 0 and -0.5 V)
+
 potentiostat.load_technique(
     technique="CV",
     set_parameters={

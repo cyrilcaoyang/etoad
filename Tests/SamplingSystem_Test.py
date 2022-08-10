@@ -18,7 +18,9 @@ sampler = SamplingSystem(
     initial_wash=0
 )
 
+sampler.disconnect()
 
+"""
 # Transfers 1.0 mL from autosampler position 1 to the cell
 
 sampler.transfer_to_cell(
@@ -34,3 +36,4 @@ sampler.wash_cell(
     wash_volume=5.0,
     cycles=1
 )
+"""

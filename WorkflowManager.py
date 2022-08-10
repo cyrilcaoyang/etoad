@@ -32,6 +32,7 @@ class WorkflowManager(object):
         "Steps",
         "Sample Volume",
         "Total Volume",
+        "Discard Sample",
         "Purge",
         "Wash"
     }
@@ -93,7 +94,14 @@ class WorkflowManager(object):
 
         result: dict = {"Sample Name": sample_name, "Workflow": workflow["Protocol Name"]}
 
-        with self._sample_in_cell(sample_location, workflow["Sample Volume"], workflow["Total Volume"], workflow["Purge"], **workflow["Wash"]):
+        with self._sample_in_cell(
+            autosampler_position=sample_location,
+            sample_volume=workflow["Sample Volume"],
+            total_volume=workflow["Total Volume"],
+            purge_time=workflow["Purge"],
+            discard_sample=workflow["Discard Sample"],
+            **workflow["Wash"]
+        ):
             for step, step_details in zip(workflow["Steps"], workflow["Steps"].values()):
                 try:
                     result: dict = self._execute_step(sample_name, step, result, **step_details)
@@ -136,6 +144,7 @@ class WorkflowManager(object):
             sample_volume: float,
             total_volume: float,
             purge_time: float,
+            discard_sample: bool,
             wash_volume: float = 5,
             washing_cycles: int = 3
     ) -> None:
@@ -151,7 +160,7 @@ class WorkflowManager(object):
              wash_volume: Volume to wash the cell.
              washing_cycles: Iterations for washing the cell
         """
-        self.sampling_system.transfer_to_cell(autosampler_position, sample_volume, wash_line=True)
+        self.sampling_system.transfer_to_cell(autosampler_position, sample_volume)
         self.sampling_system.dilute_cell(volume=total_volume-sample_volume)
         self.logger.info(f"Sample was successfully transferred to the measurement cell ({sample_volume} + {total_volume-sample_volume} mL).")
         self.sampling_system.purge_cell(purge_time)
@@ -159,6 +168,8 @@ class WorkflowManager(object):
             yield
         finally:
             self.logger.info(f"Measurements for sample completed.")
+            if discard_sample:
+                self.sampling_system.wash_autosampler_position(autosampler_position)
             self.sampling_system.wash_cell(wash_volume, washing_cycles)
 
     def _run_measurement(
@@ -279,3 +290,6 @@ class WorkflowManager(object):
         Shuts the system down by disconnecting from the potentiostat and the sampling system.
         """
         self._dilute_cell("shutdown", "shutdown", volume=5.0, results={})
+        self.potentiostat.disconnect()
+        self.sampling_system.disconnect()
+

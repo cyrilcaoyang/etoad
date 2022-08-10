@@ -44,7 +44,7 @@ class SamplingSystem:
         "waste_port"
     }
 
-    def __init__(self, config_file: Path, logger: Logger, initial_wash: int = 1):
+    def __init__(self, config_file: Path, logger: Logger, initial_wash: int = 1, cell_filled: bool = True):
         """
         Creates an instance of the SamplingSystem class.
 
@@ -69,8 +69,11 @@ class SamplingSystem:
         self._set_ports()
         self._initialize_pump(initial_wash)
 
-        self._cell_volume: float = 5.0
-        self._empty_cell()
+        if cell_filled:
+            self._cell_volume: float = 5.0
+            self._empty_cell()
+        else:
+            self._cell_volume: float = 0
 
         self._logger.info("Autosampler and inert gas handling were successfully initialized. ")
 
@@ -103,7 +106,7 @@ class SamplingSystem:
         Args:
             source_port: Port from which the liquid should be moved to the cell.
             volume: Volume to be dispensed
-            wash_line: Whether or not to wash the line to remove contaminations, e.g. from previous samples.
+            wash_line: Whether to wash the line to remove contaminations, e.g. from previous samples.
         """
         if wash_line:
             self._pump.draw_and_dispense(source_port, self.waste_port, self._config["dead_volume"], wait=1)
@@ -152,7 +155,7 @@ class SamplingSystem:
             sampler_position: Source port of the sample vial that should be cleaned.
             no_cycles: Number of wash cycles.
         """
-        self._pump.draw_and_dispense(sampler_position, self.waste_port, 6, wait=1)
+        self._pump.draw_and_dispense(sampler_position, self.waste_port, 7.5, wait=1)
         self._wash_pump(1)
         for _ in range(no_cycles):
             self._pump.draw_and_dispense(self.wash_port, sampler_position, 5)
@@ -160,11 +163,17 @@ class SamplingSystem:
 
     def wash_cell(self, wash_volume: float, cycles=3) -> None:
         """
-        Washes the cell for three times with the given volume of the wash solution.
+        Washes the cell for n times:
+            - first time: 15 mL of wash solution to wash off also the sides of the measurement cell
+            - other n-1 times: given volume of the wash solution.
         """
         self._empty_cell()
 
-        for _ in range(cycles):
+        self.transfer_to_cell(self.wash_port, 15)
+        time.sleep(5)
+        self._empty_cell()
+
+        for _ in range(cycles-1):
             self.transfer_to_cell(self.wash_port, wash_volume)
             time.sleep(5)
             self._empty_cell()
@@ -187,6 +196,13 @@ class SamplingSystem:
             volume: Volume added to (positive) / removed from (negative) the cell.
         """
         self._cell_volume += volume
+
+    def disconnect(self) -> None:
+        """
+        Closes the connection to the pump by closing the pyvisa resource manager.
+        """
+        self._pump.manager.close()
+        self._logger.info("Connection to the sampling system was successfully closed.")
 
 
 

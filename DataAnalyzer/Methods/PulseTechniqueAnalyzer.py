@@ -1,9 +1,10 @@
 from typing import List
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 
 from .EChemDataAnalyzer import EChemDataAnalyzer
-from ..AnalysisUtils import als_baseline_detection, filter_peaks, select_peaks
+from ..AnalysisUtils import rubberband_baseline_removal, estimate_noise, filter_peaks, select_peaks
 from ..AnalysisUtils import DataVisualizer
 
 
@@ -19,6 +20,24 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
     """
     analysis_method_name: str = "PulsedTechniques"
 
+    def __init__(self, *args):
+        super().__init__(*args)
+        self._process_raw_data()
+
+    def _process_raw_data(
+            self
+    ) -> None:
+        """
+        Processes the raw data by
+            - sorting the voltages from negative to positive
+            - taking the absolute value of the currents
+        to account for a possible pos -> neg scanning direction.
+        Overrides self._raw_data.
+        """
+        idx_sorted: np.ndarray = np.argsort(self._raw_data[:, 1])
+        self._raw_data = self._raw_data[idx_sorted, :]
+        self._raw_data[:, 2] = abs(self._raw_data[:, 2])
+
     def _set_methods(self):
         """
         Implementation of the abstract method.
@@ -32,9 +51,8 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
     def _peak_picking(
             self,
-            baseline_smoothing: float,
-            baseline_weighting: float,
             min_peak_width: float,
+            min_signal_noise: float,
             rel_height: float,
             **kwargs
     ) -> None:
@@ -45,20 +63,23 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         Writes the peak list (each peak as a dictionary) into self._analysis_results.
 
         Args:
-             baseline_smoothing: Smoothing parameter for the baseline fitting (default approx. 1E7).
-             baseline_weighting: Parameter for weighting deviations from the baseline (default approx. 1E-2).
              min_peak_width: Minimum width of a peak to be considered.
+             min_height_baseline: Minimum height of a peak (relative to the baseline)
              rel_height: Relative height (from the top) to determine onset / offset and peak width.
         """
-        baseline: np.ndarray = als_baseline_detection(
-            self._raw_data[:, 2],
-            smoothing=baseline_smoothing,
-            weighting=baseline_weighting
+        currents_corrected: np.ndarray = rubberband_baseline_removal(
+            self._raw_data[:, 1],
+            self._raw_data[:, 2]
+        )
+
+        noise: float = estimate_noise(
+            data=currents_corrected,
+            min_peak_width=min_peak_width
         )
 
         peaks_picked, peak_properties = find_peaks(
-            self._raw_data[:, 2],
-            height=5*baseline,
+            currents_corrected,
+            height=min_signal_noise*noise,
             width=min_peak_width,
             rel_height=rel_height
         )
@@ -82,6 +103,11 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         """
         peaks: list = []
 
+        if not peaks_picked.any():
+            return peaks
+
+        max_shape_factor = max([peak_properties["peak_heights"][i] / peak_properties["widths"][i] for i in range(len(peaks_picked))])
+
         for i, peak_idx in enumerate(peaks_picked):
 
             onset_idx = int(peak_properties["left_ips"][i])
@@ -96,6 +122,9 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
                     "peak_idx": peak_idx,
                     "offset_idx": offset_idx,
                     "height": peak_properties["peak_heights"][i],
+                    "width": peak_properties["widths"][i],
+                    "shape_factor": peak_properties["peak_heights"][i] / peak_properties["widths"][i],
+                    "rel_shape_factor": peak_properties["peak_heights"][i] / peak_properties["widths"][i] / max_shape_factor,
                     "overlap": False
                 }
             )
@@ -106,6 +135,8 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             if peak1["offset"] > peak2["onset"]:
                 peak1["overlap"] = True
                 peak2["overlap"] = True
+                peak2["offset"] = peak1["offset"]
+                peak1["offset"] = peak2["onset"]
 
         return peaks
 

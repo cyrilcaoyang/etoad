@@ -14,17 +14,8 @@ logger = get_logger(
 sampler = SamplingSystem(
     config_file=echem_path / "Settings" / "sampler_settings.json",
     logger=logger,
-    initial_wash=0
+    initial_wash=0,
+    cell_filled=False
 )
 
-sampler._cell_volume = 5
-
-for position in range(1, 7):
-    sampler.wash_autosampler_position(position)
-
-sampler.wash_cell(
-    wash_volume=5.0,
-    cycles=3
-)
-
-sampler.dilute_cell(volume=5)
+sampler.wash_cell(3)

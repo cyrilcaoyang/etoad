@@ -5,8 +5,8 @@
       "task": "measure",
       "technique": "SWV",
       "parameters": {
-        "Initial Voltage": -1.2,
-        "Final Voltage": 0.8
+        "Initial Voltage": 0.8,
+        "Final Voltage": -1.2
       },
       "update_parameters": [],
       "analysis_settings": {
@@ -19,6 +19,10 @@
             {
               "key": "peak",
               "operation": "x < 0"
+            },
+            {
+              "key": "rel_shape_factor",
+              "operation": "x > 0.1"
             }
           ],
           "selection": {
@@ -49,8 +53,9 @@
       }
     }
   },
-  "Sample Volume": 0.5,
+  "Sample Volume": 5.0,
   "Total Volume": 5.0,
+  "Discard Sample": true,
   "Purge": 30,
   "Wash": {
     "wash_volume": 5.0,

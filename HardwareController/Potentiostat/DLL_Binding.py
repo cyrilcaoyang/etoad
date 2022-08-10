@@ -20,6 +20,11 @@ class EClibDLLInterface(object):
         define_parameter(label: str, parameter_type: type, value, index: Optional[int]): Wrapper for param specification
     """
 
+    _firmware: dict = {
+        "bin": "kernel4.bin",
+        "xlx": "Vmp_iv_0395_aa.xlx"
+    }
+
     _dll_files: dict = {
         32: "EClib.dll",
         64: "EClib64.dll"
@@ -58,11 +63,11 @@ class EClibDLLInterface(object):
 
     def __init__(
             self,
-            binary_path:
-            Path
+            binary_path: Path
     ):
-        dll_path: Path = self._get_dll_file(binary_path)
-        self._callable_functions: dict = self._bind_dll_functions(dll_path)
+        self._binary_path: Path = binary_path
+        self._dll_path: Path = self._get_dll_file(binary_path)
+        self._callable_functions: dict = self._bind_dll_functions(self._dll_path)
 
     def __call__(
             self,
@@ -85,8 +90,8 @@ class EClibDLLInterface(object):
         """
         check_value: int = self._callable_functions[function_name](*args)
 
-#        if not check_value == 0:
-#            raise ConnectionError(f"Error upon execution of method {function_name}")
+        if not check_value == 0:
+            raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
 
         return check_value
 
@@ -161,3 +166,19 @@ class EClibDLLInterface(object):
         self.__call__(function_name, label.encode(), value, index, parameter)
 
         return parameter
+
+    def get_firmware_file(
+            self,
+            file_type: str
+    ) -> str:
+        """
+        Returns the absolute path to the firmware file (specified by the file type) as a string.
+
+        Args:
+            file_type: Type of firmware file to be returned (xlx or bin).
+
+        Returns:
+            Absolute path to the firmware file as a string.
+        """
+        firmware_file: Path = self._binary_path / self._firmware[file_type]
+        return str(firmware_file)

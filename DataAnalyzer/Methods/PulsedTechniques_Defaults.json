@@ -1,12 +1,15 @@
 {
   "Peak Picking": {
-    "baseline_smoothing": 1E7,
-    "baseline_weighting": 1E-2,
-    "min_peak_width": 5,
+    "min_peak_width": 2.5,
+    "min_signal_noise": 5,
     "rel_height": 0.95
   },
   "CV Parameters": {
     "filters": [
+      {
+        "key": "rel_shape_factor",
+        "operation": "x > 0.3"
+      }
     ],
     "selection": {
       "key": "peak",
@@ -14,7 +17,7 @@
     },
     "min_voltage": -1.3,
     "max_voltage": 0.8,
-    "additional_voltage": 0.3
+    "additional_voltage": 0.1
   },
   "Plot": {
     "title": ""
