@@ -12,18 +12,27 @@ manager: WorkflowManager = WorkflowManager(
     logfile=data_dir / "Data" / f"{file_name}_{timestamp_datetime()}.log",
     potentiostat_settings=data_dir / "Settings" / "potentiostat_settings.json",
     sampler_settings=data_dir / "Settings" / "sampler_settings.json",
-    data_path=data_dir / "Data"
+    data_path=Path(r"C:\Users\Potentiostat_SP-300\Desktop\AutoEChem_Data")
 )
 
 samples: dict = {
-    "C2Br2-6NMePh": 1,
-    "C3Br2-4,4-DPA": 2
+    "K4FeCN6-1": 9,
+    # "C3Br2-6Br": 1,
+    # "C2Br2-6NMePh": 2,
+    # "C3Br2-55NMePh": 3,
+    "C2Br2-33NMePh": 4,
+    "C2Br2-55NMePh": 5,
+    # "C3Br2-44NHPh": 6,
+    "K4FeCN6-2": 9,
+    # "C2Br2-Aza": 7,
+    # "C3Br2-44NH2": 8
 }
 
-manager.measure_sample(
-    sample_name="K2[Fe(CN)6]",
-    sample_location=9,
-    workflow_path=Path("reference.json")
-)
+for sample in samples:
+    manager.measure_sample(
+        sample_name=sample,
+        sample_location=samples[sample],
+        workflow_path=Path("diquat_characterization.json")
+    )
 
 manager.shutdown_system()

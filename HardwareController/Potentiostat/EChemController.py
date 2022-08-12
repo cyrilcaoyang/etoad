@@ -36,6 +36,7 @@ class EChemController(object):
             self,
             config_file: Path,
             logger: Logger,
+            simulation_mode: bool = False
     ):
         """
         Instantiates a (absolutely minimalistic and preliminary) version of an API-type interface
@@ -49,10 +50,12 @@ class EChemController(object):
             self.technique: Class describing the experimental technique (inherited from EChemMethod).
         """
         self.binary_path: Path = BINARY_PATH
-        self._dll_functions: EClibDLLInterface = EClibDLLInterface(self.binary_path)
+        self._dll_functions: EClibDLLInterface = EClibDLLInterface(self.binary_path, logger, simulation_mode)
 
         self.config: dict = ConfigLoader.load_config(config_file, self.required_settings)
         self.logger: Logger = logger
+
+        self._simulation: bool = simulation_mode
 
         self.default_channel: int = self.config["default_channel_id"]
         self.device_id: int = self._connect()
@@ -106,7 +109,7 @@ class EChemController(object):
             self._dll_functions("BL_GetChannelInfos", device_id.value, channel, channel_info)
             self.logger.debug(channel_info)
 
-            if not channel_info.is_kernel_loaded:
+            if not channel_info.is_kernel_loaded and not self._simulation:
                 self.logger.error(f"Channel {channel+1} was not successfully loaded. No measurement can be performed.")
                 raise ConnectionError("The connection to the instrument could not be established.")
 
