@@ -2,7 +2,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
-from HardwareController import EChemController
+from HardwareController.Potentiostat.EChemController import EChemController
 from Utils import get_logger, timestamp_datetime
 
 
@@ -17,19 +17,15 @@ logger = get_logger(
 
 potentiostat = EChemController(
     config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
-    logger=logger
+    logger=logger,
+    simulation_mode=True
 )
 
 
 
 # Performs a Square Wave Voltammetry Measurement with Default Parameters
 
-potentiostat.load_technique(
-    technique="SWV",
-    set_parameters={}
-)
-
-results: np.ndarray = potentiostat.do_measurement()
+results: np.ndarray = potentiostat.do_measurement(technique="SWV", set_parameters={})
 
 potentiostat.disconnect()
 
