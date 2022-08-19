@@ -70,42 +70,77 @@ class EChemMethod(metaclass=ABCMeta):
             set_parameters: Dictionary of parameters set by the user.
 
         Returns:
-            parameters_list: List of parameters as arguments for the DLL function for setting parameter objects
+            list_of_parameters_list: List of the list of parameters as arguments for the DLL function for setting parameter objects
         """
         config: dict = self._get_config(set_parameters)
-        parameters_list: list = self._parse_parameters(config)
+        technique_parameters: dict = config["TechniqueParameters"]
+        meta_parameters: dict = config["Meta Parameters"]
+        list_of_parameters_list: list = list()
+        for iteration_num in range(meta_parameters["iterations"]):
+            list_of_parameters_list.append(self._parse_parameters(technique_parameters, iteration_num))
 
-        return parameters_list
+        return list_of_parameters_list
 
     def _parse_parameters(
             self,
-            config: dict
+            technique_parameters: dict,
+            iteration_num: int
     ) -> list:
         """
         Parses the parameters (as given in the dictionary / json file) as a list of tuples (as required as args
         for the DLL functions).
 
         Args:
-            config: Dictionary of parameter names and specifications (as given in the json file).
-
+            technique_parameters: Dictionary of parameter names and specifications (as given in the json file).
+            iteration_num: meta parameter specify the iteration for the parameters (start from 0)
         Returns:
             parameters_list: List of tuples of arguments for the DLL function.
         """
+        #todo: refactor the function
+        #4 cases to handle
+        #"changed_over_iterations"->True - 1d list (for changing parms that is previous a single object such as Ei from SWV)  -2d list (for changing parms such as 5 single list)
+        #"changed_over_iterations"->False - 1d list    -single object
         parameters_list: list = []
 
-        for parameter_details in config.values():
+        for parameter_details in technique_parameters.values():
             if type(parameter_details["value"]) is list:
-                for i, value in enumerate(parameter_details["value"]):
-                    args: tuple = self._validate_parameter(
-                        name=parameter_details["name"],
-                        variable_type=parameter_details["variable_type"],
-                        value=value,
-                        constraints=parameter_details["constraints"],
-                        index=i
-                    )
-                    parameters_list.append(args)
+                if parameter_details["changed_over_iterations"]:
+                    if type(parameter_details["value"][iteration_num]) is list:
+                        for i, value in enumerate(parameter_details["value"][iteration_num]):
+                            args: tuple = self._validate_parameter(
+                                name=parameter_details["name"],
+                                variable_type=parameter_details["variable_type"],
+                                value=value,
+                                constraints=parameter_details["constraints"],
+                                index=i
+                            )
+                            parameters_list.append(args)
+                    else:
+                        args: tuple = self._validate_parameter(
+                            name=parameter_details["name"],
+                            variable_type=parameter_details["variable_type"],
+                            value=parameter_details["value"][iteration_num],
+                            constraints=parameter_details["constraints"],
+                        )
+                        parameters_list.append(args)
+
+                else:
+                    for i, value in enumerate(parameter_details["value"]):
+                        args: tuple = self._validate_parameter(
+                            name=parameter_details["name"],
+                            variable_type=parameter_details["variable_type"],
+                            value=value,
+                            constraints=parameter_details["constraints"],
+                            index=i
+                        )
+                        parameters_list.append(args)
             else:
-                args: tuple = self._validate_parameter(**parameter_details)
+                args: tuple = self._validate_parameter(
+                            name=parameter_details["name"],
+                            variable_type=parameter_details["variable_type"],
+                            value=parameter_details["value"],
+                            constraints=parameter_details["constraints"],
+                        )
                 parameters_list.append(args)
 
         return parameters_list
@@ -171,6 +206,7 @@ class EChemMethod(metaclass=ABCMeta):
         Raises:
             KeyError (if the key in parameters_set is not found in the default config).
         """
+        # todo: implement the version with set_parameters after changing json structure into meta and technical
         parameters: dict = self._load_default_config()
 
         for key in set_parameters:
@@ -289,6 +325,7 @@ class EChemMethod(metaclass=ABCMeta):
         Returns the unprocessed data, if not declared for a specific child class.
         """
         return extracted_data
+
 
     @staticmethod
     def _merge_data(

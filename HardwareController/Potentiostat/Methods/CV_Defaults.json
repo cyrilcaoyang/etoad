@@ -1,12 +1,12 @@
 {
   "Meta Parameters": {
-    "no_iterations": 2
+    "iterations": 2
   },
   "TechniqueParameters": {
     "Voltage Profile": {
       "name": "Voltage_step",
       "variable_type": "float",
-      "changed_over_cycles": false,
+      "changed_over_iterations": false,
       "value": [
         0.5,
         0.5,
@@ -19,7 +19,7 @@
     "Voltage vs OCV": {
       "name": "vs_initial",
       "variable_type": "bool",
-      "changed_over_cycles": false,
+      "changed_over_iterations": false,
       "value": [
         false,
         false,
@@ -32,46 +32,52 @@
     "Scan Rate": {
       "name": "Scan_Rate",
       "variable_type": "float",
-      "change_over_cycles": true
+      "changed_over_iterations": true,
       "value": [
         [0.05, 0.05, 0.05, 0.05, 0.05],
-        [0.01, 0.02, 0.01, 0.01, 0.01]
+        [0.1, 0.1, 0.1, 0.1, 0.1]
       ],
       "constraints": "0 < x < 0.5"
     },
     "Scan Number": {
       "name": "Scan_number",
       "variable_type": "int",
+      "changed_over_iterations": false,
       "value": 2,
       "constraints": "x in range(1, 10)"
     },
     "Voltage Interval Size": {
       "name": "Record_every_dE",
       "variable_type": "float",
+      "changed_over_iterations": false,
       "value": 0.01,
       "constraints": "0 < x < 1"
     },
     "Average over Interval": {
       "name": "Average_over_dE",
       "variable_type": "bool",
+      "changed_over_iterations": false,
       "value": true,
       "constraints": null
     },
     "Number of Cycles": {
       "name": "N_Cycles",
       "variable_type": "int",
+      "changed_over_iterations": false,
       "value": 5,
       "constraints": "x in range(1, 500)"
     },
     "Start Averaging Interval": {
       "name": "Begin_measuring_I",
       "variable_type": "float",
+      "changed_over_iterations": false,
       "value": 0,
       "constraints": "0 <= x <= 1"
     },
     "End Averaging Interval": {
       "name": "End_measuring_I",
       "variable_type": "float",
+      "changed_over_iterations": false,
       "value": 1.0,
       "constraints": "0 <= x <= 1"
     }
