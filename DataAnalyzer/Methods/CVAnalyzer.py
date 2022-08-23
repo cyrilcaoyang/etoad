@@ -112,9 +112,9 @@ class CVAnalyzer(EChemDataAnalyzer):
         peaks = [
             {
                 "peak_type": peak_type,
-                "voltage": 0.5 * (half_cycle[idx, 1] + half_cycle[idx + 1, 1]),
-                "current": 0.5 * (half_cycle[idx, 2] + half_cycle[idx + 1, 2]),
-                "peak_idx": idx
+                "voltage": float(round(0.5 * (half_cycle[idx, 1] + half_cycle[idx + 1, 1]), 3)),
+                "current": float(round(0.5 * (half_cycle[idx, 2] + half_cycle[idx + 1, 2]), 3)),
+                "peak_idx": int(idx)
             }
             for idx in peak_indices
         ]
@@ -140,7 +140,7 @@ class CVAnalyzer(EChemDataAnalyzer):
             reduction, oxidation = self._get_half_cycles(cycle)
             reduction_integral = -np.trapz(reduction[:, 2], reduction[:, 1])
             oxidation_integral = np.trapz(oxidation[:, 2], oxidation[:, 1])
-            integrals.append(oxidation_integral - reduction_integral)
+            integrals.append(float(round(oxidation_integral - reduction_integral, 3)))
 
         self._analysis_results["Integration"] = integrals
 

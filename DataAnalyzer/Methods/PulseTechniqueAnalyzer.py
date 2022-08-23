@@ -115,16 +115,16 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
             peaks.append(
                 {
-                    "onset": self._raw_data[onset_idx, 1],
-                    "offset": self._raw_data[offset_idx, 1],
-                    "peak": self._raw_data[peak_idx, 1],
-                    "onset_idx": onset_idx,
-                    "peak_idx": peak_idx,
-                    "offset_idx": offset_idx,
-                    "height": peak_properties["peak_heights"][i],
-                    "width": peak_properties["widths"][i],
-                    "shape_factor": peak_properties["peak_heights"][i] / peak_properties["widths"][i],
-                    "rel_shape_factor": peak_properties["peak_heights"][i] / peak_properties["widths"][i] / max_shape_factor,
+                    "onset": float(round(self._raw_data[onset_idx, 1], 3)),
+                    "offset": float(round(self._raw_data[offset_idx, 1], 3)),
+                    "peak": float(round(self._raw_data[peak_idx, 1], 3)),
+                    "onset_idx": int(onset_idx),
+                    "peak_idx": int(peak_idx),
+                    "offset_idx": int(offset_idx),
+                    "height": float(round(peak_properties["peak_heights"][i], 3)),
+                    "width": float(round(peak_properties["widths"][i], 3)),
+                    "shape_factor": float(round(peak_properties["peak_heights"][i] / peak_properties["widths"][i], 3)),
+                    "rel_shape_factor": float(round(peak_properties["peak_heights"][i] / peak_properties["widths"][i] / max_shape_factor, 3)),
                     "overlap": False
                 }
             )

@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Tuple, List, Dict
-
+from logging import Logger
 import matplotlib.figure
 import numpy as np
 
 from Utils import timestamp_datetime
-from Utils import save_as_pkl
+from Utils import save_as_pkl, save_as_csv, save_as_json
 from .Methods import CVAnalyzer, PulseTechniqueAnalyzer, EChemDataAnalyzer
 
 
@@ -22,15 +22,18 @@ class DataAnalyzer:
 
     def __init__(
             self,
-            data_path: Path
+            data_path: Path,
+            logger: Logger
     ):
         """
         Instantiates the general data analyzer.
 
         Args:
             data_path: Path to the folder where experimental data is stored.
+            logger: Logger object
         """
         self._data_path: Path = data_path
+        self._logger: Logger = logger
 
     def analyze_data(
             self,
@@ -58,6 +61,7 @@ class DataAnalyzer:
 
         analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](analysis_settings, raw_data)
         analysis_results, figures = analyzer.run_analysis()
+        self._logger.info(f"Data Analysis Completed: {analysis_results}")
 
         self._save_data(raw_data, analysis_results, figures, sample_dir, basename)
 
@@ -86,8 +90,8 @@ class DataAnalyzer:
 
         return sample_dir, file_basename
 
-    @staticmethod
     def _save_data(
+            self,
             raw_data: np.ndarray,
             analysis_results: dict,
             figures: Dict[str, matplotlib.figure.Figure],
@@ -101,10 +105,13 @@ class DataAnalyzer:
             raw_data: Numpy ndarray of the obtained raw data.
             analysis_results: Dictionary of all analysis results returned by the EChemAnalyzer
         """
-        save_as_pkl(raw_data, sample_dir / f"{file_basename}.pkl")
-        save_as_pkl(analysis_results, sample_dir / f"{file_basename}_analysis.pkl")
-        # TODO: find proper way to save the analysis results in a human-readable format
-        # TODO: include logging here
+        # save_as_pkl(raw_data, sample_dir / f"{file_basename}.pkl")
+        save_as_csv(raw_data, sample_dir / f"{file_basename}.csv")
+        self._logger.info(f"Raw data was saved to {sample_dir / f'{file_basename}.csv'}")
+
+        # save_as_pkl(analysis_results, sample_dir / f"{file_basename}_analysis.pkl")
+        save_as_json(analysis_results, sample_dir / f"{file_basename}_analysis.json")
+        self._logger.info(f"Analysis results were saved to {sample_dir / f'{file_basename}_analysis.json'}")
 
         for fig_name, figure in zip(figures, figures.values()):
             figure.savefig(sample_dir / f"{file_basename}_{fig_name}.png", transparent=True, dpi=600)

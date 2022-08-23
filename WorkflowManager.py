@@ -69,7 +69,7 @@ class WorkflowManager(object):
 
         self.potentiostat: EChemController = EChemController(potentiostat_settings, logger=self.logger)
         self.sampling_system: SamplingSystem = SamplingSystem(sampler_settings, logger=self.logger)
-        self.analyzer: DataAnalyzer = DataAnalyzer(data_path)
+        self.analyzer: DataAnalyzer = DataAnalyzer(data_path, logger=self.logger)
 
     def measure_sample(
             self,
@@ -166,6 +166,13 @@ class WorkflowManager(object):
         self.sampling_system.purge_cell(purge_time)
         try:
             yield
+
+        # TODO: Put an exception handling here to log possible exception tracebacks before the finally block is reached
+        #       Requires knowing the types of exception, or catching the parent class of exception, which might be
+        #       dangerous
+        #       Alternative: Catch Exception as sth, log the traceback, and then raise sth again
+        #                    That definitely requires some trying before...I have never done that before
+
         finally:
             self.logger.info(f"Measurements for sample completed.")
             if discard_sample:
