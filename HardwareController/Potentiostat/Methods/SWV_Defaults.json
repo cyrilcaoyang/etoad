@@ -1,13 +1,13 @@
 {
-  "Meta Parameters": {
-    "iterations": 2
+  "IterationSettings": {
+    "no_iterations": 1
   },
   "TechniqueParameters": {
     "Initial Voltage": {
       "name": "Ei",
       "variable_type": "float",
-      "changed_over_iterations": true,
-      "value": [-0.5,0.5],
+      "changed_over_iterations": false,
+      "value": 0.5,
       "constraints": "-1.3 <= x <= 1.0"
     },
     "Initial Voltage vs OCV": {
@@ -28,7 +28,7 @@
       "name": "Ef",
       "variable_type": "float",
       "changed_over_iterations": true,
-      "value": [0.5,-0.50],
+      "value": -0.5,
       "constraints": "-1.3 <= x <= 1.0"
     },
     "Final Voltage vs OCV": {

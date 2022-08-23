@@ -175,7 +175,7 @@ class EChemController(object):
 
     def _load_parameters(
             self,
-            parameters_list: dict,
+            parameters_list: list,
     ) -> KBIO.EccParams:
         """
         Processes the parameters set by the user (passed as a dictionary of key–value pairs, where keys can be either
@@ -203,7 +203,46 @@ class EChemController(object):
     # METHODS RELATED TO ACTUALLY PERFORMING A MEASUREMENT #
     ########################################################
 
-    def _do_measurement_no_iteration(
+    def do_measurement(
+            self,
+            technique: str,
+            set_parameters: dict,
+            channel: Union[int, None] = None
+    ) -> np.ndarray:
+        """
+        Method that loop through load technique and do measurement for iteration of measurements
+
+
+        Args:
+            technique: String definition of the measurement technique to be used. Must match the class name.
+            set_parameters: Dictionary of method parameters set/specified by the user
+                            (Keys can be either parameter descriptions or parameter names)
+            channel: ID of the channel that the technique should be loaded to.
+
+        Returns:
+            results: 2D Numpy array of the results data
+        """
+        if not channel:
+            channel = self.default_channel
+        else:
+            channel = channel - 1
+
+        self.technique = self._get_technique(technique)
+
+        parameters_per_iteration = self.technique.load_parameters(set_parameters)
+
+        results: np.ndarray = np.array([])
+
+        for iteration_num in range(len(parameters_per_iteration)):
+            parameters_list = parameters_per_iteration[iteration_num]
+            self._load_technique(parameters_list, channel)
+            iteration_results: np.ndarray = self._run_measurement_iteration(channel)
+            iteration_results = np.hstack((iteration_results, np.full((iteration_results.shape[0], 1), iteration_num, dtype=int)))
+            results = self._merge_data(results, iteration_results)
+
+        return results
+
+    def _run_measurement_iteration(
             self,
             channel: Union[int, None] = None
     ) -> np.ndarray:
@@ -222,11 +261,6 @@ class EChemController(object):
         """
         if not self.technique:
             raise ModuleNotFoundError("No Method has been loaded.")
-
-        if not channel:
-            channel = self.default_channel
-        else:
-            channel = channel - 1
 
         results: np.ndarray = np.array([])
 
@@ -364,40 +398,3 @@ class EChemController(object):
     # METHODS RELATED TO PERFORMING MEASUREMENT OF MULTIPLE SEQUENTIAL TECHNIQUE #
     ##############################################################################
 
-    def do_measurement(
-            self,
-            technique: str,
-            set_parameters: dict,
-            channel: Union[int, None] = None
-    ) -> np.ndarray:
-        """
-        Method that loop through load technique and do measurement for iteration of measurements
-
-
-        Args:
-            technique: String definition of the measurement technique to be used. Must match the class name.
-            set_parameters: Dictionary of method parameters set/specified by the user
-                            (Keys can be either parameter descriptions or parameter names)
-            channel: ID of the channel that the technique should be loaded to.
-
-        Returns:
-            results: 2D Numpy array of the results data
-        """
-        if not channel:
-            channel = self.default_channel
-        else:
-            channel = channel - 1
-
-        self.technique = self._get_technique(technique)
-
-        list_of_parameters_list = self.technique.load_parameters(set_parameters)
-
-        results: np.ndarray = np.array([])
-
-        for iteration_num in range(len(list_of_parameters_list)):
-            parameters_list = list_of_parameters_list[iteration_num]
-            self._load_technique(parameters_list, channel)
-            cycle_of_iteration: np.ndarray = self._do_measurement_no_iteration(channel)
-            results = self._merge_data(results, cycle_of_iteration)
-
-        return results
