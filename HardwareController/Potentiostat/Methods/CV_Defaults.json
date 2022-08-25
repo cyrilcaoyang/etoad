@@ -1,6 +1,6 @@
 {
-  "Meta Parameters": {
-    "iterations": 2
+  "IterationSettings": {
+    "no_iterations": 1
   },
   "TechniqueParameters": {
     "Voltage Profile": {
@@ -32,11 +32,8 @@
     "Scan Rate": {
       "name": "Scan_Rate",
       "variable_type": "float",
-      "changed_over_iterations": true,
-      "value": [
-        [0.05, 0.05, 0.05, 0.05, 0.05],
-        [0.1, 0.1, 0.1, 0.1, 0.1]
-      ],
+      "changed_over_iterations": false,
+      "value": [0.05, 0.05, 0.05, 0.05, 0.05],
       "constraints": "0 < x < 0.5"
     },
     "Scan Number": {
