@@ -5,11 +5,12 @@ from array import array
 from contextlib import contextmanager
 from ctypes import Array
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 import numpy as np
 from logging import Logger
 
 from Utils import ConfigLoader
+from Utils import RealtimePlotter, ThreadWithReturn
 from .Binaries import BINARY_PATH
 from ..Potentiostat import BioLogic as KBIO
 from .DataStructures import *
@@ -29,7 +30,8 @@ class EChemController(object):
         "port",
         "channel_ids",
         "default_channel_id",
-        "timeout"
+        "timeout",
+        "plot_in_real_time"
     }
 
     def __init__(
@@ -236,24 +238,61 @@ class EChemController(object):
         else:
             channel = channel - 1
 
+        with self._open_channel(channel):
+
+            gui_window = RealtimePlotter(
+                self.technique.method_name,
+                self.technique.data_structure[1],
+                self.technique.data_structure[2]
+            ) if self.config["plot_in_real_time"] else None
+            # ATTN: This is currently hard-coded, assuming that the column structure is always the same
+
+            measurement = ThreadWithReturn(target=self._run_channel, args=[channel, gui_window])
+            measurement.start()
+            if gui_window:
+                gui_window()
+            results = measurement.join()
+
+        return results
+
+    def _run_channel(self, channel: int, realtime_plotter: Optional[RealtimePlotter]) -> np.ndarray:
+        """
+        Private method to continuously run the actual measurement on a channel. Requires a technique to be loaded to
+        the channel before.
+        Should be executed on a single thread to not block the main thread during measurement.
+
+        Args:
+            channel: Number of the channel
+            realtime_plotter: Optional, RealtimePlotter instance (Tk Window) to plot the obtained data in real time.
+
+        Returns:
+            np.ndarray: Data acquired from the channel and preprocessed by the technique specifications.
+        """
         results: np.ndarray = np.array([])
 
-        with self._open_channel(channel):
-            while True:
-                try:
-                    data: tuple = self._get_data(channel)
-                    data_decoded, metadata = self.technique.extract_data(data, self._decode_numeric_to_single)
-                    results = self._merge_data(results, data_decoded)
+        while True:
+            try:
+                data: tuple = self._get_data(channel)
+                data_decoded, metadata = self.technique.extract_data(data, self._decode_numeric_to_single)
+                results = self._merge_data(results, data_decoded)
 
-                except StopIteration:
-                    if metadata["status"] == "STOP":
-                        break
-                    continue
+                if realtime_plotter and np.any(results):
+                    preprocessed_data = self.technique.process_data(results)
+                    realtime_plotter.update_plot(preprocessed_data[:, 1], preprocessed_data[:, 2])
+                    # ATTN: This is currently hard-coded, assuming that the column structure is always the same
 
-                # Breaks the while loop upon keyboard interrupt - closes channel connection via context manager
-                except KeyboardInterrupt:
-                    self.logger.error("Measurement was interrupted through keyboard interrupt.")
+            except StopIteration:
+                if metadata["status"] == "STOP":
                     break
+                continue
+
+            # Breaks the while loop upon keyboard interrupt - closes channel connection via context manager
+            except KeyboardInterrupt:
+                self.logger.error("Measurement was interrupted through keyboard interrupt.")
+                break
+
+        if realtime_plotter:
+            realtime_plotter.close_plot()
 
         return self.technique.process_data(results)
 

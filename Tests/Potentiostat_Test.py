@@ -14,7 +14,6 @@ logger = get_logger(
     logfile=Path(f"Test_Potentiostat_{timestamp_datetime()}.log")
 )
 
-
 potentiostat = EChemController(
     config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
     logger=logger
@@ -33,24 +32,18 @@ results: np.ndarray = potentiostat.do_measurement()
 
 potentiostat.disconnect()
 
-plt.scatter(results[:, 1], results[:, 2])
-plt.show()
-_ = input("Press any key to continue.")
-plt.close()
 
-"""
-# Performs a Cyclic Voltammetry Measurement (10 Cycles between 0 and -0.5 V)
+# Performs a Cyclic Voltammetry Measurement (2 Cycles between 0 and -0.5 V)
 
-potentiostat.load_technique(
-    technique="CV",
-    set_parameters={
-        "Voltage Profile": [0.5, 0.5, -0.5, 0.5, 0.5],
-        "Number of Cycles": 5
-    }
-)
-
-results: np.ndarray = potentiostat.do_measurement()
-
-plt.scatter(results[:, 1], results[:, 2])
-plt.show()
-"""
+# potentiostat.load_technique(
+#     technique="CV",
+#     set_parameters={
+#         "Voltage Profile": [0, 0, -0.5, 0, 0],
+#         "Number of Cycles": 2
+#     }
+# )
+#
+# results: np.ndarray = potentiostat.do_measurement()
+#
+# plt.scatter(results[:, 1], results[:, 2])
+# plt.show()
