@@ -1,11 +1,11 @@
 from typing import List
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 
 from .EChemDataAnalyzer import EChemDataAnalyzer
 from ..AnalysisUtils import rubberband_baseline_removal, estimate_noise, filter_peaks, select_peaks
 from ..AnalysisUtils import DataVisualizer
+from ..AnalysisUtils import significant_digits
 
 
 class PulseTechniqueAnalyzer(EChemDataAnalyzer):
@@ -115,16 +115,16 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
             peaks.append(
                 {
-                    "onset": float(round(self._raw_data[onset_idx, 1], 3)),
-                    "offset": float(round(self._raw_data[offset_idx, 1], 3)),
-                    "peak": float(round(self._raw_data[peak_idx, 1], 3)),
+                    "onset": significant_digits(self._raw_data[onset_idx, 1], 3),
+                    "offset": significant_digits(self._raw_data[offset_idx, 1], 3),
+                    "peak": significant_digits(self._raw_data[peak_idx, 1], 3),
                     "onset_idx": int(onset_idx),
                     "peak_idx": int(peak_idx),
                     "offset_idx": int(offset_idx),
-                    "height": float(round(peak_properties["peak_heights"][i], 3)),
-                    "width": float(round(peak_properties["widths"][i], 3)),
-                    "shape_factor": float(round(peak_properties["peak_heights"][i] / peak_properties["widths"][i], 3)),
-                    "rel_shape_factor": float(round(peak_properties["peak_heights"][i] / peak_properties["widths"][i] / max_shape_factor, 3)),
+                    "height": significant_digits(peak_properties["peak_heights"][i], 3),
+                    "width": significant_digits(peak_properties["widths"][i], 3),
+                    "shape_factor": significant_digits(peak_properties["peak_heights"][i] / peak_properties["widths"][i], 3),
+                    "rel_shape_factor": significant_digits(peak_properties["peak_heights"][i] / peak_properties["widths"][i] / max_shape_factor, 3),
                     "overlap": False
                 }
             )

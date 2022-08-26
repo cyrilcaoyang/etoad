@@ -18,7 +18,7 @@
           "filters": [
             {
               "key": "peak",
-              "operation": "x > 0"
+              "operation": "x > -0.2"
             },
             {
               "key": "rel_shape_factor",
@@ -37,7 +37,7 @@
       "technique": "CV",
       "parameters": {
         "Voltage Profile": [0, 0, 0, 0, 0],
-        "Number of Cycles": 10
+        "Number of Cycles": 100
       },
       "update_parameters": [
         {
@@ -53,12 +53,12 @@
       }
     }
   },
-  "Sample Volume": 0.25,
+  "Sample Volume": 1.0,
   "Total Volume": 5.0,
-  "Discard Sample": false,
+  "Discard Sample": true,
   "Purge": 30,
   "Wash": {
     "wash_volume": 5.0,
-    "washing_cycles": 3
+    "washing_cycles": 1
   }
 }

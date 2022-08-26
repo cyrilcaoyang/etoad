@@ -3,7 +3,7 @@
     "name": "Ei",
     "variable_type": "float",
     "value": -0.5,
-    "constraints": "-1.3 <= x <= 1.0"
+    "constraints": "-2.0 <= x <= 1.5"
   },
   "Initial Voltage vs OCV": {
     "name": "OCi",
@@ -21,7 +21,7 @@
     "name": "Ef",
     "variable_type": "float",
     "value": 0.5,
-    "constraints": "-1.3 <= x <= 1.0"
+    "constraints": "-2.0 <= x <= 1.5"
   },
   "Final Voltage vs OCV": {
     "name": "OCf",

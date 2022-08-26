@@ -19,17 +19,12 @@ manager: WorkflowManager = WorkflowManager(
 # Defines the sample names and locations
 
 samples: dict = {
-    # "K4FeCN6-start": 9,
-    # "C3I2-6Br": 1,
-    # "C3Br2-6NMePh": 2,
-    "C3Br2-55NMePh": 3,
-    "C3Br2-2TPA": 4,
-    "K4FeCN6-mid": 9,
-    # "C2Br2-55NMePh": 5,
-    "C3Br2-Aza": 6,
-    "C2Br2-Aza": 7,
-    # "C3Br2-44NH2": 8,
-    # "K4FeCN6-end": 9
+    # "C2Br2-55NMePh ACN": 1,
+    # "C2BF4-55NMePh in ACN": 2,
+    # "C3Br2-55NMePh in ACN": 3,
+    "C3Br2-33Me in water": 7,
+    # "C3Br2-Aza in water": 8,
+    # "K4FeCN6 in water": 9
 }
 
 
@@ -39,7 +34,7 @@ for sample in samples:
     manager.measure_sample(
         sample_name=sample,
         sample_location=samples[sample],
-        workflow_path=Path("routine_simple_scans.json")
+        workflow_path=Path("routine_neg_potential_stability.json")
     )
 
 manager.shutdown_system()

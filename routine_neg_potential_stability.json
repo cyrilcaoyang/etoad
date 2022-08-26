@@ -1,9 +1,9 @@
 {
   "Protocol Name": "Diquat Potentials and Stability",
   "Steps": {
-    "DPV": {
+    "SWV": {
       "task": "measure",
-      "technique": "DPV",
+      "technique": "SWV",
       "parameters": {
         "Initial Voltage": 0.8,
         "Final Voltage": -1.2
@@ -11,14 +11,14 @@
       "update_parameters": [],
       "analysis_settings": {
         "Plot": {
-          "title": "Differential Pulsed Voltammetry"
+          "title": "Square Wave Voltammetry"
         },
         "Peak Picking": {},
         "CV Parameters": {
           "filters": [
             {
               "key": "peak",
-              "operation": "x < 0"
+              "operation": "x < 0.1"
             },
             {
               "key": "rel_shape_factor",
@@ -42,7 +42,7 @@
       "update_parameters": [
         {
           "parameter": "Voltage Profile",
-          "from measurement": "DPV",
+          "from measurement": "SWV",
           "key": "CV Parameters"
         }
       ],
@@ -53,7 +53,7 @@
       }
     }
   },
-  "Sample Volume": 1.0,
+  "Sample Volume": 0.5,
   "Total Volume": 5.0,
   "Discard Sample": false,
   "Purge": 30,

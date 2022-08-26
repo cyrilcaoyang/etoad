@@ -3,3 +3,4 @@ from .baseline_detection import rubberband_baseline_detection, rubberband_baseli
 from .noise_estimation import estimate_noise
 from .peak_selection import filter_peaks, select_peaks
 from .DataVisualizer import DataVisualizer
+from .significant_digits import significant_digits

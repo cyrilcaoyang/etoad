@@ -3,6 +3,7 @@ import numpy as np
 
 from .EChemDataAnalyzer import EChemDataAnalyzer
 from ..AnalysisUtils import DataVisualizer
+from ..AnalysisUtils import significant_digits
 
 
 class CVAnalyzer(EChemDataAnalyzer):
@@ -112,8 +113,8 @@ class CVAnalyzer(EChemDataAnalyzer):
         peaks = [
             {
                 "peak_type": peak_type,
-                "voltage": float(round(0.5 * (half_cycle[idx, 1] + half_cycle[idx + 1, 1]), 3)),
-                "current": float(round(0.5 * (half_cycle[idx, 2] + half_cycle[idx + 1, 2]), 3)),
+                "voltage": significant_digits(0.5 * (half_cycle[idx, 1] + half_cycle[idx + 1, 1]), 3),
+                "current": significant_digits(0.5 * (half_cycle[idx, 2] + half_cycle[idx + 1, 2]), 3),
                 "peak_idx": int(idx)
             }
             for idx in peak_indices
@@ -140,7 +141,7 @@ class CVAnalyzer(EChemDataAnalyzer):
             reduction, oxidation = self._get_half_cycles(cycle)
             reduction_integral = -np.trapz(reduction[:, 2], reduction[:, 1])
             oxidation_integral = np.trapz(oxidation[:, 2], oxidation[:, 1])
-            integrals.append(float(round(oxidation_integral - reduction_integral, 3)))
+            integrals.append(significant_digits(oxidation_integral - reduction_integral, 3))
 
         self._analysis_results["Integration"] = integrals
 

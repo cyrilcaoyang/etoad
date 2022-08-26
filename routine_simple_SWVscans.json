@@ -1,0 +1,28 @@
+{
+  "Protocol Name": "Simple SWV scans",
+  "Steps": {
+    "SWV-reduction": {
+      "task": "measure",
+      "technique": "SWV",
+      "parameters": {
+        "Initial Voltage": 1.4,
+        "Final Voltage": -1.6
+      },
+      "update_parameters": [],
+      "analysis_settings": {
+        "Plot": {
+          "title": "SWV - Reduction"
+        },
+        "Peak Picking": {}
+      }
+    }
+  },
+  "Sample Volume": 0.5,
+  "Total Volume": 1.0,
+  "Discard Sample": true,
+  "Purge": 30,
+  "Wash": {
+    "wash_volume": 1.0,
+    "washing_cycles": 3
+  }
+}
