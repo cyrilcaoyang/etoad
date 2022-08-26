@@ -18,20 +18,40 @@ logger = get_logger(
 potentiostat = EChemController(
     config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
     logger=logger,
-    simulation_mode=True
+    simulation_mode=False
 )
 
 
 
 # Performs a Square Wave Voltammetry Measurement with Default Parameters
 
-results: np.ndarray = potentiostat.do_measurement(technique="SWV", set_parameters={})
+results: np.ndarray = potentiostat.do_measurement(
+    technique="CV",
+    set_parameters={
+        "TechniqueParameters": {
+            "Voltage Profile": {
+                "value": [0, 0, -0.5, 0, 0]
+            }
+        },
+        "Scan Rate": {
+            "changed_over_iterations": True,
+            "value": [
+                [0.05, 0.05, 0.05, 0.05, 0.05],
+                [0.1, 0.1, 0.1, 0.1, 0.1],
+                [0.2, 0.2, 0.2, 0.2, 0.2]
+            ]
+        },
+        "Number of Cycles": {
+            "value": 2
+        }
+    }
+)
 
 potentiostat.disconnect()
 
-plt.scatter(results[:, 1], results[:, 2])
+plt.plot(results[:, 1], results[:, 2])
 plt.show()
-_ = input("Press any key to continue.")
+print("yey")
 plt.close()
 
 """

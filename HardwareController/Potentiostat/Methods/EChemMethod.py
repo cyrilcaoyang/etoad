@@ -100,7 +100,7 @@ class EChemMethod(metaclass=ABCMeta):
         all_parameters: list = []
 
         for parameter_details in technique_parameters.values():
-            if parameter_details["changed_over_iterations"]:
+            if parameter_details["changed_over_iterations"] is True:
                 all_parameters.extend(self._parse_single_parameter(parameter_details["value"][iteration_num], parameter_details))
             else:
                 all_parameters.extend(self._parse_single_parameter(parameter_details["value"], parameter_details))
