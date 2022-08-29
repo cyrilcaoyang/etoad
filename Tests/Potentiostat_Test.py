@@ -1,34 +1,44 @@
+import threading
 from pathlib import Path
 
 from HardwareController.Potentiostat.EChemController import EChemController
 from Interface import GraphicalInterface
-from Utils import timestamp_datetime
+from Utils import timestamp_datetime, get_dropbox_path
 
 
-PARENT_DIR = Path(__file__).parent
+PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 
 logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "test_settings" / "logger_settings_v2.json",
+    logging_config=PARENT_DIR / "logger_settings_v2.json",
     log_file=Path(f"Test_Potentiostat_{timestamp_datetime()}.log")
 )
 
 
-potentiostat = EChemController(
-    config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
-    logger=logger
-)
+def do_measurement():
 
-potentiostat.load_technique(
-    technique="SWV",
-    set_parameters={
-        "Initial Voltage": -0.5,
-        "Final Voltage": 0.8,
-    }
-)
+    potentiostat = EChemController(
+        config_file=PARENT_DIR / "potentiostat_settings.json",
+        logger=logger
+    )
 
-results = potentiostat.do_measurement()
+    logger.sample_name = "K4[Fe(CN)6]"
 
-potentiostat.disconnect()
+    potentiostat.load_technique(
+        technique="SWV",
+        set_parameters={
+            "Initial Voltage": -0.5,
+            "Final Voltage": 0.8,
+        }
+    )
+
+    results = potentiostat.do_measurement()
+    potentiostat.disconnect()
+    # logger.stop_gui()
+
+
+threading.Thread(target=do_measurement).start()
+logger.start_gui()
+
 """
 # Performs a Cyclic Voltammetry Measurement (5 Cycles between 0.5 and -0.5 V)
 
