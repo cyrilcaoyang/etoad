@@ -109,7 +109,7 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
 
         Returns:
             self._analysis results: Dictionary of all analysis results.
-            self._figures: Dictionary of all figure objects created upon analysis.
+            self._figures: Dictionary of all _figure objects created upon analysis.
         """
         for step, step_config in zip(self._analysis_steps, self._analysis_steps.values()):
             self._analysis_methods[step](**step_config)

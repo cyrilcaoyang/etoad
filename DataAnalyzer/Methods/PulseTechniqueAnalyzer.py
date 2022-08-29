@@ -189,7 +189,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             **kwargs
     ) -> None:
         """
-        Plots the raw data by creating a figure object, saves the figure object to self._figures.
+        Plots the raw data by creating a _figure object, saves the _figure object to self._figures.
 
         Args:
             title: Title of the plot

@@ -3,14 +3,12 @@ __author__ = 'Felix Strieth-Kalthoff'
 
 from array import array
 from contextlib import contextmanager
-from ctypes import Array
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union
 import numpy as np
-from logging import Logger
 
 from Utils import ConfigLoader
-from Utils import RealtimePlotter, ThreadWithReturn
+from Interface import GraphicalInterface
 from .Binaries import BINARY_PATH
 from ..Potentiostat import BioLogic as KBIO
 from .DataStructures import *
@@ -24,6 +22,9 @@ class EChemController(object):
 
     Public Methods:
         load_technique(technique: str, set_parameters: dict)
+        do_measurement(channel: int)
+        stop_channel(channel: int)
+        disconnect()
     """
 
     required_settings: set = {
@@ -37,7 +38,7 @@ class EChemController(object):
     def __init__(
             self,
             config_file: Path,
-            logger: Logger,
+            logger: GraphicalInterface,
     ):
         """
         Instantiates a (absolutely minimalistic and preliminary) version of an API-type interface
@@ -54,7 +55,7 @@ class EChemController(object):
         self._dll_functions: EClibDLLInterface = EClibDLLInterface(self.binary_path)
 
         self.config: dict = ConfigLoader.load_config(config_file, self.required_settings)
-        self.logger: Logger = logger
+        self.logger: GraphicalInterface = logger
 
         self.default_channel: int = self.config["default_channel_id"]
         self.device_id: int = self._connect()
@@ -240,22 +241,18 @@ class EChemController(object):
 
         with self._open_channel(channel):
 
-            gui_window = RealtimePlotter(
+            self.logger.start_plotting(
                 self.technique.method_name,
                 self.technique.data_structure[1],
                 self.technique.data_structure[2]
-            ) if self.config["plot_in_real_time"] else None
+            )
             # ATTN: This is currently hard-coded, assuming that the column structure is always the same
 
-            measurement = ThreadWithReturn(target=self._run_channel, args=[channel, gui_window])
-            measurement.start()
-            if gui_window:
-                gui_window()
-            results = measurement.join()
+            results = self._run_channel(channel)
 
         return results
 
-    def _run_channel(self, channel: int, realtime_plotter: Optional[RealtimePlotter]) -> np.ndarray:
+    def _run_channel(self, channel: int) -> np.ndarray:
         """
         Private method to continuously run the actual measurement on a channel. Requires a technique to be loaded to
         the channel before.
@@ -263,7 +260,6 @@ class EChemController(object):
 
         Args:
             channel: Number of the channel
-            realtime_plotter: Optional, RealtimePlotter instance (Tk Window) to plot the obtained data in real time.
 
         Returns:
             np.ndarray: Data acquired from the channel and preprocessed by the technique specifications.
@@ -276,9 +272,9 @@ class EChemController(object):
                 data_decoded, metadata = self.technique.extract_data(data, self._decode_numeric_to_single)
                 results = self._merge_data(results, data_decoded)
 
-                if realtime_plotter and np.any(results):
+                if np.any(results):
                     preprocessed_data = self.technique.process_data(results)
-                    realtime_plotter.update_plot(preprocessed_data[:, 1], preprocessed_data[:, 2])
+                    self.logger.update_plot(preprocessed_data[:, 1], preprocessed_data[:, 2])
                     # ATTN: This is currently hard-coded, assuming that the column structure is always the same
 
             except StopIteration:
@@ -290,9 +286,6 @@ class EChemController(object):
             except KeyboardInterrupt:
                 self.logger.error("Measurement was interrupted through keyboard interrupt.")
                 break
-
-        if realtime_plotter:
-            realtime_plotter.close_plot()
 
         return self.technique.process_data(results)
 

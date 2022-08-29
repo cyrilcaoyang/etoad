@@ -1,14 +1,13 @@
 from pathlib import Path
 
 from HardwareController import SamplingSystem
-from Utils import get_logger
+from Interface import GraphicalInterface
 from Utils.DropboxPath import get_dropbox_path
 
 echem_path: Path = get_dropbox_path() / "PythonScript" / "EChem"
 
-logger = get_logger(
-    config_file=echem_path / "Settings" / "logger_settings.json",
-    logger_name="EChem"
+logger = GraphicalInterface(
+    logging_config=echem_path / "Settings" / "logger_settings.json"
 )
 
 sampler = SamplingSystem(

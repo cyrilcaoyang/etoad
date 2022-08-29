@@ -1,15 +1,15 @@
 from pathlib import Path
 
 from HardwareController import SamplingSystem
-from Utils import get_logger, timestamp_datetime
+from Utils import timestamp_datetime
+from Interface import GraphicalInterface
 
 
 PARENT_DIR = Path(__file__).parent
 
-logger = get_logger(
-    config_file=PARENT_DIR / "test_settings" / "logger_settings.json",
-    logger_name="EChem",
-    logfile=Path(f"Test_Sampling_System_{timestamp_datetime()}.log")
+logger = GraphicalInterface(
+    logging_config=PARENT_DIR / "test_settings" / "logger_settings_v2.json",
+    log_file=Path(f"Test_Sampling_System_{timestamp_datetime()}.log")
 )
 
 sampler = SamplingSystem(

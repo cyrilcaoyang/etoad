@@ -56,7 +56,7 @@ class DataVisualizer(object):
             yaxis_percent: Format the y axis as percent.
 
         Returns:
-            matplotlib.figure.Figure object of the plot.
+            matplotlib._figure.Figure object of the plot.
         """
         figure: matplotlib.figure.Figure = plt.figure()
         ax = figure.add_subplot(1, 1, 1)
@@ -99,7 +99,7 @@ class DataVisualizer(object):
             legend: List of legend entries for each curve to be plotted.
 
         Returns:
-            matplotlib.figure.Figure object of the plot.
+            matplotlib._figure.Figure object of the plot.
 
         Raises:
             IndexError if the color array does not have a length of 1, 2 or len(data_to_plot)

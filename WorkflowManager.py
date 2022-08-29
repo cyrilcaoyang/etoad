@@ -1,12 +1,12 @@
-import logging
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Union, Any, Optional
 import numpy as np
 
-from Utils import get_logger
+from Interface import GraphicalInterface
 from Utils import ConfigLoader
 from Utils import SkipExecution, StopExecution
+from Utils import ThreadWithReturn
 from HardwareController import EChemController, SamplingSystem
 from DataAnalyzer import DataAnalyzer
 
@@ -64,14 +64,79 @@ class WorkflowManager(object):
             data_path: Path to the folder where data should be stored.
             logfile: Optional - name of the logfile used.
         """
-        self.logger: logging.Logger = get_logger(logger_settings, logger_name="EChem", logfile=logfile)  # TODO: Make more flexible?
+        # TODO: Refactor to hide private attributes
+        self.logger: GraphicalInterface = GraphicalInterface(logger_settings, log_file=logfile)
+        self.potentiostat_settings = potentiostat_settings
+        self.sampler_settings = sampler_settings
+        self.data_path = data_path
+
+        self.potentiostat: Optional[EChemController] = None
+        self.sampling_system: Optional[SamplingSystem] = None
+        self.analyzer: Optional[DataAnalyzer] = None
+
+        self.samples: list = list()
+
+    def submit_samples(self, samples: list[dict]) -> None:
+        """
+        Public method to submit all samples to measure to the WorkflowManager.
+        Each sample should be given as a dictionary with the keys "sample_name", "sample_location" and "workflow_path".
+        Must be called before the system is started.
+
+        Args:
+            samples: List of samples (each one given as a dictionary)
+
+        Raises:
+            KeyError if any of the samples does not contain all required keys.
+        """
+        for sample in samples:
+            if {"sample_name", "sample_location", "workflow_path"}.issubset(sample.keys()):
+                self.samples.append(sample)
+            else:
+                raise KeyError(f"The settings for sample {sample} are inclomplete.")
+
+    def start_system(self) -> dict:
+        """
+        Public method to start all measurements previously loaded to the WorkflowManager.
+        Starts the multithreaded operation:
+            - main thread: GUI
+            - side thread: Measurement
+
+        Returns:
+            dict: Dictionary of all results.
+
+        Raises:
+            ValueError if no samples have been loaded.
+        """
+        if not self.samples:
+            raise ValueError("No samples have been submitted – system initialization will be skipped.")
+
+        measurements = ThreadWithReturn(target=self._run_system)
+        measurements.start()
+        self.logger.start_gui()
+        results: dict = measurements.join()
+        return results
+
+    def _run_system(self):
+        """
+        Method to run the entire WorkflowManager – needs to be started on a separate thread with the GUI active.
+        Initializes the potentiostat, sampling system and analyzer.
+        Runs the measurement for each sample in the samples attribute.
+        Closes the system after all measurements are completed, and sends the "close" command to the GUI
+        (will eventually liberate the main thread).
+        """
         self.logger.info("SYSTEM INITIALIZATION")
+        self.potentiostat: EChemController = EChemController(self.potentiostat_settings, logger=self.logger)
+        self.sampling_system: SamplingSystem = SamplingSystem(self.sampler_settings, logger=self.logger)
+        self.analyzer: DataAnalyzer = DataAnalyzer(self.data_path, logger=self.logger)
 
-        self.potentiostat: EChemController = EChemController(potentiostat_settings, logger=self.logger)
-        self.sampling_system: SamplingSystem = SamplingSystem(sampler_settings, logger=self.logger)
-        self.analyzer: DataAnalyzer = DataAnalyzer(data_path, logger=self.logger)
+        results: dict = dict()
+        for sample in self.samples:
+            results[sample["sample_name"]] = self._measure_sample(sample)
 
-    def measure_sample(
+        self.shutdown_system()
+        return results
+
+    def _measure_sample(
             self,
             sample_name: str,
             sample_location: int,
@@ -91,6 +156,7 @@ class WorkflowManager(object):
         # TODO: rename the sample by including a timestamp?
         workflow: dict = ConfigLoader.load_config(workflow_path, self._required_settings)
         self.logger.info(f"Starting Protocol {workflow['Protocol Name']} for sample {sample_name}.")
+        self.logger.sample_name = sample_name
 
         result: dict = {"Sample Name": sample_name, "Workflow": workflow["Protocol Name"]}
 
@@ -160,10 +226,12 @@ class WorkflowManager(object):
              wash_volume: Volume to wash the cell.
              washing_cycles: Iterations for washing the cell
         """
+        self.logger.experiment_name = "Filling Cell"
         self.sampling_system.transfer_to_cell(autosampler_position, sample_volume)
         self.sampling_system.dilute_cell(volume=total_volume-sample_volume)
         self.logger.info(f"Sample was successfully transferred to the measurement cell ({sample_volume} + {total_volume-sample_volume} mL).")
         self.sampling_system.purge_cell(purge_time)
+        self.logger.experiment_name = "Purging Cell"
         try:
             yield
 
@@ -175,6 +243,7 @@ class WorkflowManager(object):
 
         finally:
             self.logger.info(f"Measurements for sample completed.")
+            self.logger.experiment_name = "Emptying Cell"
             if discard_sample:
                 self.sampling_system.wash_autosampler_position(autosampler_position)
             self.sampling_system.wash_cell(wash_volume, washing_cycles)
@@ -295,8 +364,10 @@ class WorkflowManager(object):
         """
         Transfers 5 mL solvent to the sample cell for keeping the electrode surfaces wet.
         Shuts the system down by disconnecting from the potentiostat and the sampling system.
+        Sends the stop command to the GUI and liberates the main thread.
         """
         self._dilute_cell("shutdown", "shutdown", volume=5.0, results={})
         self.potentiostat.disconnect()
         self.sampling_system.disconnect()
+        self.logger.stop_gui()
 

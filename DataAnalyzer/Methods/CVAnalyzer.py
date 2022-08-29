@@ -28,7 +28,7 @@ class CVAnalyzer(EChemDataAnalyzer):
         Separates the raw CV data into a list of np.ndarrays. Each ndarray represents one CV cycle.
         Overrides self._raw_data.
         """
-        skip_cycles: int = 2  # TODO: figure out a more flexible way to include this
+        skip_cycles: int = 2  # TODO: _figure out a more flexible way to include this
         no_cycles: int = int(np.max(self._raw_data[:, 3]))
         self._raw_data = [self._raw_data[self._raw_data[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
 
@@ -165,7 +165,7 @@ class CVAnalyzer(EChemDataAnalyzer):
             **kwargs
     ) -> None:
         """
-        Plots the raw data by creating a figure object, saves the figure object to self._figures.
+        Plots the raw data by creating a _figure object, saves the _figure object to self._figures.
 
         Args:
             title: Title of the plot
