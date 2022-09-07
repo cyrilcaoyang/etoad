@@ -34,7 +34,7 @@
       "variable_type": "float",
       "changed_over_iterations": false,
       "value": [0.05, 0.05, 0.05, 0.05, 0.05],
-      "constraints": "0 < x < 0.5"
+      "constraints": "0 < x <= 1"
     },
     "Scan Number": {
       "name": "Scan_number",
