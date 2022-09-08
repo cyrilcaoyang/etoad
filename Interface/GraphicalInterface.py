@@ -1,4 +1,5 @@
 import logging
+import tkinter
 from logging import Logger
 import tkinter as tk
 from pathlib import Path
@@ -12,6 +13,9 @@ from .GenericHandler import GenericHandler
 from .SlackBotHandler import SlackBotHandler
 from Utils import ConfigLoader
 from PIL import Image, ImageTk
+from .TkErrorHandling import TkErrorCatcher
+
+tkinter.CallWrapper = TkErrorCatcher
 
 matplotlib.use("TkAgg")
 
@@ -260,8 +264,11 @@ class GraphicalInterface(Logger):
             x_values: 1D Numpy array of x values to plot
             y_values: 1D Numpy array of y values to plot
         """
-        self._figure_details["plot"].clear()
-        self._figure_details["plot"].set_xlabel(self._figure_details["x_axis_title"], fontname="Arial", fontweight="bold")
-        self._figure_details["plot"].set_ylabel(self._figure_details["y_axis_title"], fontname="Arial", fontweight="bold")
-        self._figure_details["plot"].plot(x_values, y_values, color=GREEN, linewidth=2)
-        self._figure.tight_layout()
+        try:
+            self._figure_details["plot"].clear()
+            self._figure_details["plot"].set_xlabel(self._figure_details["x_axis_title"], fontname="Arial", fontweight="bold")
+            self._figure_details["plot"].set_ylabel(self._figure_details["y_axis_title"], fontname="Arial", fontweight="bold")
+            self._figure_details["plot"].plot(x_values, y_values, color=GREEN, linewidth=2)
+            self._figure.tight_layout()
+        except IndexError:
+            pass

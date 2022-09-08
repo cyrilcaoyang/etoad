@@ -30,8 +30,8 @@ def do_measurement():
             "Final Voltage": 0.8,
         }
     )
-
     results = potentiostat.do_measurement()
+
     potentiostat.disconnect()
     # logger.stop_gui()
 

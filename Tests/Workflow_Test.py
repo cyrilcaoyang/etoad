@@ -7,7 +7,7 @@ from Utils import timestamp_datetime
 PARENT_DIR = Path(__file__).parent
 
 manager: WorkflowManager = WorkflowManager(
-    logger_settings=PARENT_DIR / "test_settings" / "logger_settings_v2.json",
+    logger_settings=PARENT_DIR / "test_settings" / "logger_settings.json",
     logfile=Path(f"Test_Workflow_Manager_{timestamp_datetime()}.log"),
     potentiostat_settings=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
     sampler_settings=PARENT_DIR / "test_settings" / "sampler_settings.json",
@@ -22,8 +22,7 @@ manager: WorkflowManager = WorkflowManager(
 #   - Data analysis, visualization and storage
 #   - Cell cleaning after the measurements
 
-# TODO: provide a proper workflow json file here
 manager.submit_samples([
-    {"sample_name": "Test_Sample", "sample_location": 1, "workflow_path": Path("test_workflow.json")}
+    {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_routine.json")}
 ])
 manager.start_system()

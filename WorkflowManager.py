@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Union, Any, Optional
+from typing import Union, Any, Optional, List
 import numpy as np
 
 from Interface import GraphicalInterface
@@ -76,7 +76,7 @@ class WorkflowManager(object):
 
         self.samples: list = list()
 
-    def submit_samples(self, samples: list[dict]) -> None:
+    def submit_samples(self, samples: List[dict]) -> None:
         """
         Public method to submit all samples to measure to the WorkflowManager.
         Each sample should be given as a dictionary with the keys "sample_name", "sample_location" and "workflow_path".
@@ -131,7 +131,7 @@ class WorkflowManager(object):
 
         results: dict = dict()
         for sample in self.samples:
-            results[sample["sample_name"]] = self._measure_sample(sample)
+            results[sample["sample_name"]] = self._measure_sample(**sample)
 
         self.shutdown_system()
         return results

@@ -36,3 +36,4 @@ samples: list = [
 # Submit the samples to the WorkflowManager, and start the measurements
 manager.submit_samples(samples)
 results = manager.start_system()
+
