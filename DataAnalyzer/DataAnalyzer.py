@@ -105,6 +105,5 @@ class DataAnalyzer:
         save_as_pkl(analysis_results, sample_dir / f"{file_basename}_analysis.pkl")
         # TODO: find proper way to save the analysis results in a human-readable format
         # TODO: include logging here
-
         for fig_name, figure in zip(figures, figures.values()):
             figure.savefig(sample_dir / f"{file_basename}_{fig_name}.png", transparent=True, dpi=600)

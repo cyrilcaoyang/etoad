@@ -7,7 +7,8 @@ EChemMethod:
 -parse_parameters:
 	added ther iteration number to seperate the 
 parameter
-	added 
+	implemented code that handle iterations in the config dictionary value section.
+	Further rules need to be specified
 
 -load_parameters:
 	changed return value parameters_list into a list of the list of the parameters of that specific iteration
