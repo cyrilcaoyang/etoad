@@ -5,6 +5,7 @@ from .EChemDataAnalyzer import EChemDataAnalyzer
 from ..AnalysisUtils import DataVisualizer
 import itertools
 
+
 class CVAnalyzer(EChemDataAnalyzer):
     """
     Implementation of the EChemDataAnalyzer for cyclic voltammetry.
@@ -18,10 +19,10 @@ class CVAnalyzer(EChemDataAnalyzer):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self._seperate_iterations()
+        self._separate_iterations()
         self._separate_cycles()
 
-    def _seperate_iterations(
+    def _separate_iterations(
             self
     ) -> None:
         """
@@ -29,11 +30,14 @@ class CVAnalyzer(EChemDataAnalyzer):
         Each ndarray represents one CV iteration.
         Overrides self._raw_data.
         """
-        no_iterations: int = int(np.max(self._raw_data[:,4])+1)
-        self._raw_data = {f"iteration_{iteration}": self._raw_data[self._raw_data[:,4] == iteration] for iteration in range(no_iterations)}
+        # TODO: Why is this method here? This is something that now needs to be done for every measurement, not only for CV
+        #       -> Should be a method of the parent class (FSK, Sep 13)
+        no_iterations: int = int(np.max(self._raw_data[:, 4]) + 1)
+        # TODO: Is there any reason to use a dictionary instead of a numpy ndarray here?
+        #       -> Numpy is way easier to deal with, and way (!) more computationally efficient (FSK, Sep 13)
+        self._raw_data = {f"iteration_{iteration}": self._raw_data[self._raw_data[:, 4] == iteration] for iteration in range(no_iterations)}
         for iteration in range(no_iterations):
             self._analysis_results[f"iteration_{iteration}"] = {}
-
 
     def _separate_cycles(
             self
@@ -43,12 +47,10 @@ class CVAnalyzer(EChemDataAnalyzer):
         Each ndarray represents one CV cycle.
         Overrides self._raw_data.
         """
-        for iteration,data_of_iteration in zip(self._raw_data.keys(),self._raw_data.values()):
+        for iteration, iteration_data in zip(self._raw_data.keys(), self._raw_data.values()):
             skip_cycles: int = 2  # TODO: figure out a more flexible way to include this
-            no_cycles: int = int(np.max(data_of_iteration[:, 3])+1)
-            self._raw_data[iteration] = [data_of_iteration[data_of_iteration[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
-
-
+            no_cycles: int = int(np.max(iteration_data[:, 3]) + 1)
+            self._raw_data[iteration] = [iteration_data[iteration_data[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
 
     def _set_methods(
             self
@@ -90,7 +92,7 @@ class CVAnalyzer(EChemDataAnalyzer):
     ) -> None:
         """
         Performs peak picking for the raw CV data.
-        Divides each CV cycle into oxidation  and reduction half, and determines the maxima and minima, respectively.
+        Divides each CV cycle into oxidation and reduction half, and determines the maxima and minima, respectively.
         Stores all data in self._analysis_results.
 
         Args:
@@ -104,13 +106,20 @@ class CVAnalyzer(EChemDataAnalyzer):
                 peaks_per_iteration.append(peaks)
             self._analysis_results[iteration]["Peak Picking"] = peaks_per_iteration
 
+        # TODO: Plotting the Peaks vs the Scan Rate should be its own method rather than a sub-routine in the peak
+        #       picking. It's a rather specific analysis method for multiple scans with different scan rates.
+        #       How would we handle it one wants to plot something else than the voltage vs. scan rate? (FSK, Sep 13)
         if plot:
             all_peaks: list = []
             for iteration in self._analysis_results.keys():
                 peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[iteration]["Peak Picking"]))
-                peaks_position: np.ndarray = np.array(pd.DataFrame(peaks_per_iteration)["voltage"])
-                peaks_position: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage","current"]]
+                peaks_position: np.ndarray = np.array(pd.DataFrame(peaks_per_iteration)["voltage"])  # TODO: This line does nothing (Hint: An IDE is your friend here :-) )!
+                peaks_position: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]  # TODO: Why are you using a pandas dataframe here?
                 peaks_position["scan_rate"] = self._get_scan_rate(self._raw_data[iteration][0])
+                # ATTN: How much sense does it make to infer the scan rate from the raw data?
+                #       -> The scan rate is already pre-defined by the measurement parameters, and should be taken
+                #          from there
+                #          (not an urgent fix, but something to keep in mind, FSK, Sep 13)
                 all_peaks.append(np.array(peaks_position))
 
             figure = DataVisualizer.plot_multiple_curves(
@@ -121,6 +130,8 @@ class CVAnalyzer(EChemDataAnalyzer):
                 legend=[f"Iteration {i}" for i in range(1, len(all_peaks) + 1)]
             )
 
+            # TODO: Change where the figure object is saved to.
+            #       iteration is a variable that is local to the for loop above... (FSK, Sep 13)
             self._figures[f"CV_{iteration}"] = figure
 
     @staticmethod
@@ -225,6 +236,8 @@ class CVAnalyzer(EChemDataAnalyzer):
         Args:
             title: Title of the plot
         """
+        # ATTN: Do we always want to generate one plot per iteration, or do we want the option to get all data
+        #       in one plot? (FSK, Sep 13)
 
         for iteration in self._raw_data.keys():
             figure = DataVisualizer.plot_multiple_curves(

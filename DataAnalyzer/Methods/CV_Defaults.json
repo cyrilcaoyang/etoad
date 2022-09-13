@@ -2,7 +2,9 @@
   "Initialization": {
     "skip_cycles": 2
   },
-  "Peak Picking": {"plot": true},
+  "Peak Picking": {
+    "plot": true
+  },
   "Plot": {
     "title": "Cyclic Voltammetry"
   },

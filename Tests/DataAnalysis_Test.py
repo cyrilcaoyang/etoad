@@ -1,17 +1,16 @@
-from pathlib import Path
 import numpy as np
-import matplotlib.pyplot as plt
 from DataAnalyzer import DataAnalyzer
 import pickle
 from pathlib import Path
 
 data_analyzer: DataAnalyzer = DataAnalyzer(Path(r"C:\Users\Lenovo\Desktop\The Matter Lab\Test_Data"))
+
 data_analyzer.analyze_data(
     sample_name="test",
     experiment_name="test",
     technique="CV",
     analysis_settings={
-        "Plot": {"title": "Test CV Measurement", "plot": True},
+        "Plot": {"title": "Test CV Measurement", "plot": True},  # TODO: The "Plot" method doesn't have any kwarg named "plot"...
         "Peak Picking": {},
         "Integration": {}
     },

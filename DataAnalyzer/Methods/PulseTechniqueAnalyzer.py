@@ -57,10 +57,14 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         Args:
             data_of_iteration: One iteration from Multi-SWV raw data.
         """
-        if data_of_iteration[:,1][0] < data_of_iteration[:,1][-1]:
-            return {"oxidation":data_of_iteration}
+        # TODO: Is there any particular reason why you're separating "oxidation" and "reduction"?
+        #       (Btw, why are you storing it as a dictionary?)
+        #       Where does it make a difference if the cycle is an oxidation or a reduction?
+
+        if data_of_iteration[:, 1][0] < data_of_iteration[:, 1][-1]:
+            return {"oxidation": data_of_iteration}
         else:
-            return {"reduction":data_of_iteration}
+            return {"reduction": data_of_iteration}
 
     def _separate_iterations(
             self
@@ -71,8 +75,11 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         The ndarray represents one SWV iteration.
         Overrides self._raw_data.
         """
-        no_iterations = int(np.max(self._raw_data[:,3])+1)
-        self._raw_data = {f"iteration_{iteration}": self._raw_data[self._raw_data[:,3] == iteration] for iteration in range(no_iterations)}
+        # TODO: See discussion in the CV analyzer. You have this code piece in duplicate
+        #       -> It should go to the parent class (FSK, Sep 13)
+        no_iterations = int(np.max(self._raw_data[:, 3]) + 1)
+        # TODO: Same discussion as in the CV analyzer. Why is this a dictionary? (FSK, Sep 13)
+        self._raw_data = {f"iteration_{iteration}": self._raw_data[self._raw_data[:, 3] == iteration] for iteration in range(no_iterations)}
         for iteration in self._raw_data.keys():
             self._raw_data[iteration] = self._classify_oxidation_reduction(self._raw_data[iteration])
             self._analysis_results[iteration] = {}
@@ -122,9 +129,12 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
                 data_of_iteration = self._process_reduction_data(
                     reduction_data=data_of_iteration
                 )
+                # ATTN: This is a very "shady" use of the fact that data_of_iteration might be a mutable object that
+                #       points to somewhere in the memory, and that you can modify the object but keep the pointer to
+                #       the memory. This re-definition of the variable should happen before you link it in the
+                #       peak_selection_parms. (FSK, Sep 13)
+
             self._pick_peaks(**peak_selection_parms)
-
-
 
     def _pick_peaks(
             self,
@@ -151,6 +161,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             data_of_iteration[:, 1],
             data_of_iteration[:, 2]
         )
+        # ATTN: Rubberband baseline removal can now deal with both positive and negative peaks in any arbitrary order (FSK, Sep 13)
 
         noise: float = estimate_noise(
             data=currents_corrected,
@@ -164,7 +175,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             rel_height=rel_height
         )
 
-        self._analysis_results[iteration]["Peak Picking"] = self._get_peak_data(data_of_iteration,peaks_picked, peak_properties,redox_process)
+        self._analysis_results[iteration]["Peak Picking"] = self._get_peak_data(data_of_iteration, peaks_picked, peak_properties, redox_process)
 
     @staticmethod
     def _get_peak_data(
@@ -194,6 +205,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             onset_idx = int(peak_properties["left_ips"][i])
             offset_idx = int(peak_properties["right_ips"][i])
             height = -peak_properties["peak_heights"][i] if redox_process == "reduction" else peak_properties["peak_heights"][i]
+
             peaks.append(
                 {
                     "onset": data_of_iteration[onset_idx, 1],
@@ -219,9 +231,10 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
                 peak2["offset"] = peak1["offset"]
                 peak1["offset"] = peak2["onset"]
 
+        # TODO: I just realized that this is a very good place to get the peak integration at pretty much no
+        #       computational overhead. (FSK, Sep 13)
+
         return peaks
-
-
 
     def _get_cv_parameters(
             self,
