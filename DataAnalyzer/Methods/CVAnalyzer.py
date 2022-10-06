@@ -22,23 +22,6 @@ class CVAnalyzer(EChemDataAnalyzer):
         self._separate_iterations()
         self._separate_cycles()
 
-    def _separate_iterations(
-            self
-    ) -> None:
-        """
-        Separates the raw CV data into a dictionary of np.ndarrays. Each key represents the iteration number.
-        Each ndarray represents one CV iteration.
-        Overrides self._raw_data.
-        """
-        # TODO: Why is this method here? This is something that now needs to be done for every measurement, not only for CV
-        #       -> Should be a method of the parent class (FSK, Sep 13)
-        no_iterations: int = int(np.max(self._raw_data[:, 4]) + 1)
-        # TODO: Is there any reason to use a dictionary instead of a numpy ndarray here?
-        #       -> Numpy is way easier to deal with, and way (!) more computationally efficient (FSK, Sep 13)
-        self._raw_data = {f"iteration_{iteration}": self._raw_data[self._raw_data[:, 4] == iteration] for iteration in range(no_iterations)}
-        for iteration in range(no_iterations):
-            self._analysis_results[f"iteration_{iteration}"] = {}
-
     def _separate_cycles(
             self
     ) -> None:
@@ -62,6 +45,7 @@ class CVAnalyzer(EChemDataAnalyzer):
         self._analysis_methods = {
             "Peak Picking": self._peak_picking,
             "Integration": self._integration,
+            "Peaks scanrate": self._plot_peaks_scanrate,
             "Plot": self._plot
         }
 
@@ -105,34 +89,6 @@ class CVAnalyzer(EChemDataAnalyzer):
                 peaks: list = self._pick_peaks(reduction, maxima=False) + self._pick_peaks(oxidation, maxima=True)
                 peaks_per_iteration.append(peaks)
             self._analysis_results[iteration]["Peak Picking"] = peaks_per_iteration
-
-        # TODO: Plotting the Peaks vs the Scan Rate should be its own method rather than a sub-routine in the peak
-        #       picking. It's a rather specific analysis method for multiple scans with different scan rates.
-        #       How would we handle it one wants to plot something else than the voltage vs. scan rate? (FSK, Sep 13)
-        if plot:
-            all_peaks: list = []
-            for iteration in self._analysis_results.keys():
-                peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[iteration]["Peak Picking"]))
-                peaks_position: np.ndarray = np.array(pd.DataFrame(peaks_per_iteration)["voltage"])  # TODO: This line does nothing (Hint: An IDE is your friend here :-) )!
-                peaks_position: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]  # TODO: Why are you using a pandas dataframe here?
-                peaks_position["scan_rate"] = self._get_scan_rate(self._raw_data[iteration][0])
-                # ATTN: How much sense does it make to infer the scan rate from the raw data?
-                #       -> The scan rate is already pre-defined by the measurement parameters, and should be taken
-                #          from there
-                #          (not an urgent fix, but something to keep in mind, FSK, Sep 13)
-                all_peaks.append(np.array(peaks_position))
-
-            figure = DataVisualizer.plot_multiple_curves(
-                data_to_plot=[(iteration[:, 2], iteration[:, 0]) for iteration in all_peaks],
-                x_label="Scan Rate / V*sec^-1",
-                y_label="Voltage / V",
-                title="Peaks vs iterations", #TODO: change to "Peaks vs Scanrate"
-                legend=[f"Iteration {i}" for i in range(1, len(all_peaks) + 1)]
-            )
-
-            # TODO: Change where the figure object is saved to.
-            #       iteration is a variable that is local to the for loop above... (FSK, Sep 13)
-            self._figures[f"CV_{iteration}"] = figure
 
     @staticmethod
     def _get_scan_rate(data_of_one_cycle: np.ndarray) -> float:
@@ -249,3 +205,30 @@ class CVAnalyzer(EChemDataAnalyzer):
             )
 
             self._figures[f"CV_{iteration}"] = figure
+
+    def _plot_peaks_scanrate(self):
+        """
+        Plot Peaks_Voltage vs Scanrate and save the figure object in self.figures["CV_Peaks_Scanrate"]
+        """
+
+        all_peaks: list = []
+        for iteration in self._analysis_results.keys():
+            peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[iteration]["Peak Picking"]))
+            peaks_position: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[
+                ["voltage", "current"]]  # TODO: Why are you using a pandas dataframe here?
+            peaks_position["scan_rate"] = self._get_scan_rate(self._raw_data[iteration][0])
+            # ATTN: How much sense does it make to infer the scan rate from the raw data?
+            #       -> The scan rate is already pre-defined by the measurement parameters, and should be taken
+            #          from there
+            #          (not an urgent fix, but something to keep in mind, FSK, Sep 13)
+            all_peaks.append(np.array(peaks_position))
+
+        figure = DataVisualizer.plot_multiple_curves(
+            data_to_plot=[(peaks_per_iteration[:, 2], peaks_per_iteration[:, 0]) for peaks_per_iteration in all_peaks],
+            x_label="Scan Rate / V*sec^-1",
+            y_label="Voltage / V",
+            title="Peaks vs Scanrate",
+            legend=[f"Iteration {i}" for i in range(1, len(all_peaks) + 1)]
+        )
+
+        self._figures["CV_Peaks_Scanrate"] = figure

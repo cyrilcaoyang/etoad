@@ -57,32 +57,10 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         Args:
             data_of_iteration: One iteration from Multi-SWV raw data.
         """
-        # TODO: Is there any particular reason why you're separating "oxidation" and "reduction"?
-        #       (Btw, why are you storing it as a dictionary?)
-        #       Where does it make a difference if the cycle is an oxidation or a reduction?
-
         if data_of_iteration[:, 1][0] < data_of_iteration[:, 1][-1]:
-            return {"oxidation": data_of_iteration}
+            return "oxidation"
         else:
-            return {"reduction": data_of_iteration}
-
-    def _separate_iterations(
-            self
-    ) -> None:
-        """
-        Separates the processed Multi-SWV data into a dictionary of a dictionary of ndarry.
-        The first key is "iteration_number". The second key is "oxidation" or "reduction".
-        The ndarray represents one SWV iteration.
-        Overrides self._raw_data.
-        """
-        # TODO: See discussion in the CV analyzer. You have this code piece in duplicate
-        #       -> It should go to the parent class (FSK, Sep 13)
-        no_iterations = int(np.max(self._raw_data[:, 3]) + 1)
-        # TODO: Same discussion as in the CV analyzer. Why is this a dictionary? (FSK, Sep 13)
-        self._raw_data = {f"iteration_{iteration}": self._raw_data[self._raw_data[:, 3] == iteration] for iteration in range(no_iterations)}
-        for iteration in self._raw_data.keys():
-            self._raw_data[iteration] = self._classify_oxidation_reduction(self._raw_data[iteration])
-            self._analysis_results[iteration] = {}
+            return "reduction"
 
     def _set_methods(self):
         """
@@ -92,7 +70,8 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         self._analysis_methods = {
             "Peak Picking": self._peak_picking,
             #"CV Parameters": self._get_cv_parameters,
-            "Plot": self._plot
+            "Plot": self._plot,
+            "Integration": self._integration
         }
 
     def _peak_picking(
@@ -114,8 +93,14 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
              rel_height: Relative height (from the top) to determine onset / offset and peak width.
         """
         for iteration in self._raw_data.keys():
-            redox_process: str = list(self._raw_data[iteration].keys())[0]
-            data_of_iteration = self._raw_data[iteration][redox_process]
+            data_of_iteration = self._raw_data[iteration]
+            redox_process = self._classify_oxidation_reduction(data_of_iteration)
+
+            if redox_process == "reduction":
+                data_of_iteration = self._process_reduction_data(
+                    reduction_data=data_of_iteration
+                )
+
             peak_selection_parms = {
                 "data_of_iteration": data_of_iteration,
                 "iteration": iteration,
@@ -124,16 +109,6 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
                 "rel_height": rel_height,
                 "redox_process": redox_process
             }
-
-            if redox_process == "reduction":
-                data_of_iteration = self._process_reduction_data(
-                    reduction_data=data_of_iteration
-                )
-                # ATTN: This is a very "shady" use of the fact that data_of_iteration might be a mutable object that
-                #       points to somewhere in the memory, and that you can modify the object but keep the pointer to
-                #       the memory. This re-definition of the variable should happen before you link it in the
-                #       peak_selection_parms. (FSK, Sep 13)
-
             self._pick_peaks(**peak_selection_parms)
 
     def _pick_peaks(
@@ -293,7 +268,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         """
         data_all_iterations: list = []
         for iteration in self._raw_data.keys():
-            data_all_iterations.append(self._raw_data[iteration].get(list(self._raw_data[iteration].keys())[0]))
+            data_all_iterations.append(self._raw_data[iteration])
         figure = DataVisualizer.plot_multiple_curves(
             data_to_plot=[(iteration[:, 1], iteration[:, 2]) for iteration in data_all_iterations],
             x_label="Voltage / V",
@@ -303,3 +278,37 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         )
 
         self._figures[self.analysis_method_name] = figure
+
+
+    def _integration(
+        self,
+        plot: bool,
+        **kwargs
+    ) -> None:
+        """
+        Integrates the area within the SWV cycle by computing the integral of the SWV data
+        Saves the list of integrals to self._analysis_results.
+
+        Args:
+            plot: Whether to plot the iteration vs. integral plot.
+        """
+        integrals: list = []
+        for iteration in self._raw_data.keys():
+            data_iteration = self._raw_data[iteration]
+            integral = np.trapz(data_iteration[:, 2], data_iteration[:, 1])
+            integrals.append(integral)
+            self._analysis_results[iteration]["Integration"] = integrals
+
+        relative_integrals = np.asarray(integrals) / max(integrals)
+
+        if plot:
+            figure = DataVisualizer.plot_single_curve(
+                x_values=list(range(1, len(list(self._raw_data.keys())) + 1)),
+                y_values=relative_integrals,
+                x_label=f"SWV_{iteration}",
+                y_label="Relative Integral",
+                title="SWV Integration",
+                yaxis_percent=True
+            )
+
+            self._figures[f"SWV_Integration"] = figure

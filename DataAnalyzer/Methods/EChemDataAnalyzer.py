@@ -53,6 +53,8 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
         self._analysis_results: dict = dict()
         self._figures: dict = dict()
 
+
+
     @abstractmethod
     def _set_methods(
             self
@@ -99,6 +101,22 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
             updated_steps[step].update(analysis_steps[step])
 
         return updated_steps
+
+    def _separate_iterations(
+            self
+    ) -> None:
+        """
+        Separates the raw CV data into a dictionary of np.ndarrays. Each key represents the iteration number.
+        Each ndarray represents one CV iteration.
+        Overrides self._raw_data.
+        """
+
+        no_iterations: int = int(np.max(self._raw_data[:, -1]) + 1)
+        self._raw_data = {f"iteration_{iteration}": self._raw_data[self._raw_data[:, -1] == iteration] for iteration in range(no_iterations)}
+        # TODO: Same discussion as in the CV analyzer. Why is this a dictionary? (FSK, Sep 13)
+        for iteration in range(no_iterations):
+            self._analysis_results[f"iteration_{iteration}"] = {}
+
 
     def run_analysis(
             self,
