@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from HardwareController import SamplingSystem
-from Utils import timestamp_datetime
-from Interface import GraphicalInterface
+from src.etoad.HardwareController import SamplingSystem
+from src.etoad.Utils import timestamp_datetime
+from src.etoad.Interface import GraphicalInterface
 
 
 PARENT_DIR = Path(__file__).parent

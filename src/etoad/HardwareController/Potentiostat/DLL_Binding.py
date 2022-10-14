@@ -5,9 +5,9 @@ import ctypes
 from pathlib import Path
 from typing import Any, Union, Callable
 
-from Utils import get_bit_mode
+from etoad.Utils import get_bit_mode
 from .DataStructures import *
-import HardwareController.Potentiostat.BioLogic as KBIO  # TODO: refactor properly and remove this ugly import
+import etoad.HardwareController.Potentiostat.BioLogic as KBIO  # TODO: refactor properly and remove this ugly import
 
 
 class EClibDLLInterface(object):

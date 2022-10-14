@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import Tuple, List, Dict
+from typing import Tuple, Dict
 from logging import Logger
 import matplotlib.figure
 import numpy as np
 
-from Utils import timestamp_datetime
-from Utils import save_as_pkl, save_as_csv, save_as_json
+from ..Utils import timestamp_datetime
+from ..Utils import save_as_csv, save_as_json
 from .Methods import CVAnalyzer, PulseTechniqueAnalyzer, EChemDataAnalyzer
 
 

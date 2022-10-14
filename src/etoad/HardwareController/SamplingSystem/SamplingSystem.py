@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Union
 from logging import Logger
 
-from pylab.instruments import XCPump
+from .TecanPump import TecanPump
 from .AtmosphereHandler import AtmosphereHandler
-from Utils import ConfigLoader
+from etoad.Utils import ConfigLoader
 
 
 class SamplingSystem:
@@ -81,9 +81,9 @@ class SamplingSystem:
         """
         Creates an instance of the XCPump, sets the velocity and primes the pump.
         """
-        self._pump: XCPump = XCPump(
-            visa=self._config["visa_address"],
-            addr=self._config["device_address"],
+        self._pump: TecanPump = TecanPump(
+            visa_address=self._config["visa_address"],
+            device_address=self._config["device_address"],
             init_valve=self._config["initial_valve"],
             syringe_volume=self._config["pump_volume"],
         )

@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from HardwareController import SamplingSystem
-from Interface import GraphicalInterface
-from Utils.DropboxPath import get_dropbox_path
+from src.etoad.HardwareController import SamplingSystem
+from src.etoad.Interface import GraphicalInterface
+from src.etoad.Utils.DropboxPath import get_dropbox_path
 
 echem_path: Path = get_dropbox_path() / "PythonScript" / "EChem"
 

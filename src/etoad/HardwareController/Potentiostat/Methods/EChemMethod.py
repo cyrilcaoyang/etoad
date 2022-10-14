@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Callable, Tuple, Union
 import numpy as np
 from ..BioLogic import TECH_ID, PROG_STATE, CurrentValues, DataInfo, DataBuffer
-from Utils import ConfigLoader
+from etoad.Utils import ConfigLoader
 
 
 class EChemMethod(metaclass=ABCMeta):

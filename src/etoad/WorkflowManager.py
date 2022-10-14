@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import Union, Any, Optional, List
 import numpy as np
 
-from Interface import GraphicalInterface
-from Utils import ConfigLoader
-from Utils import SkipExecution, StopExecution
-from Utils import ThreadWithReturn
-from HardwareController import EChemController, SamplingSystem
-from DataAnalyzer import DataAnalyzer
+from .Interface import GraphicalInterface
+from .Utils import ConfigLoader
+from .Utils import SkipExecution, StopExecution
+from .Utils import ThreadWithReturn
+from .HardwareController import EChemController, SamplingSystem
+from .DataAnalyzer import DataAnalyzer
 
 
 class WorkflowManager(object):
@@ -124,10 +124,7 @@ class WorkflowManager(object):
         Closes the system after all measurements are completed, and sends the "close" command to the GUI
         (will eventually liberate the main thread).
         """
-        self.logger.info("SYSTEM INITIALIZATION")
-        self.potentiostat: EChemController = EChemController(self.potentiostat_settings, logger=self.logger)
-        self.sampling_system: SamplingSystem = SamplingSystem(self.sampler_settings, logger=self.logger)
-        self.analyzer: DataAnalyzer = DataAnalyzer(self.data_path, logger=self.logger)
+        self.initialize_system()
 
         results: dict = dict()
         for sample in self.samples:
@@ -135,6 +132,19 @@ class WorkflowManager(object):
 
         self.shutdown_system()
         return results
+
+    def initialize_system(self, initial_wash: int = 1, sample_in_cell: bool = True) -> None:
+        """
+        Initializes the system by initializing the potentiostat, the sampling system and the data analyzer.
+
+        Args:
+            initial_wash: Number of initial syringe washes.
+            sample_in_cell: If the cell needs to be emptied before starting the workflow.
+        """
+        self.logger.info("SYSTEM INITIALIZATION")
+        self.potentiostat: EChemController = EChemController(self.potentiostat_settings, logger=self.logger)
+        self.sampling_system: SamplingSystem = SamplingSystem(self.sampler_settings, logger=self.logger, initial_wash=initial_wash, cell_filled=sample_in_cell)
+        self.analyzer: DataAnalyzer = DataAnalyzer(self.data_path, logger=self.logger)
 
     def _measure_sample(
             self,
@@ -196,7 +206,7 @@ class WorkflowManager(object):
             kwargs: Keyword arguments for the specific step to be executed.
         """
         executable_steps: dict = {
-            "measure": self._run_measurement,
+            "measure": self.run_measurement,
             "dilute": self._dilute_cell,
         }
         self.logger.info(f"Now executing {step_name}.")
@@ -248,7 +258,7 @@ class WorkflowManager(object):
                 self.sampling_system.wash_autosampler_position(autosampler_position)
             self.sampling_system.wash_cell(wash_volume, washing_cycles)
 
-    def _run_measurement(
+    def run_measurement(
             self,
             sample_name: str,
             step_name: str,

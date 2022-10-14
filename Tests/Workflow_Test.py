@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from WorkflowManager import WorkflowManager
-from Utils import timestamp_datetime
+from src.Utils import timestamp_datetime
 
 
 PARENT_DIR = Path(__file__).parent
