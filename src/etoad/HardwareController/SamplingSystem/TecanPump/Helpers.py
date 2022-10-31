@@ -1,3 +1,6 @@
+__author__ = "Tony C. Wu (@verysure), Felix Strieth-Kalthoff (@felix-s-k)"
+
+
 from functools import wraps
 from typing import Optional, Any, List, Tuple, Iterable, Callable, Union
 

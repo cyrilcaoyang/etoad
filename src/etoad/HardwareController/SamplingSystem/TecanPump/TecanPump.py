@@ -1,3 +1,6 @@
+__author__ = "Tony C. Wu (@verysure), Felix Strieth-Kalthoff (@felix-s-k)"
+
+
 import time
 from typing import Optional, Tuple, Any
 import pyvisa as pv
@@ -25,7 +28,7 @@ CMD_RES_MAP = CmdNameMap([
 class TecanPump(SyringePump):
     """
     Driver Class for the TecanPumps (addressed via PyVisa), controlled from Python.
-    Uses the VisaInstrument and SyringePump parent classes.
+    Uses the SyringePump parent class.
     """
     def __init__(
             self,
@@ -144,8 +147,7 @@ class TecanPump(SyringePump):
     def _set_position(self, position):
         self.write('A{:.0f}'.format(round(position)))
 
-
-    # # ---- valve commands ----
+    # Valve commands
     def get_valve_numbers(self):
         num = self.get_valve_type()
         return num

@@ -1,3 +1,6 @@
+__author__ = "Tony C. Wu (@verysure), Felix Strieth-Kalthoff (@felix-s-k)"
+
+
 import time
 from abc import ABCMeta, abstractmethod
 from typing import Union, Optional
