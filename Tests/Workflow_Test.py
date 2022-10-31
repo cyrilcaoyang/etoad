@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from WorkflowManager import WorkflowManager
-from Utils import timestamp_datetime
+from src.Utils import timestamp_datetime
 
 
 PARENT_DIR = Path(__file__).parent
@@ -14,7 +14,6 @@ manager: WorkflowManager = WorkflowManager(
     data_path=Path(__file__).parent
 )
 
-
 # Executes the workflow specified in test_workflow.json for a test sample on the autosampler (position 1).
 # The workflow contains the following steps:
 #   - Sample transfer to the measurement cell
@@ -23,10 +22,7 @@ manager: WorkflowManager = WorkflowManager(
 #   - Data analysis, visualization and storage
 #   - Cell cleaning after the measurements
 
-manager.measure_sample(
-    sample_name="Test_Sample",
-    sample_location=1,
-    workflow_path=Path("test_workflow.json")
-)
-
-# TODO: provide a proper workflow json file here
+manager.submit_samples([
+    {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_routine.json")}
+])
+manager.start_system()
