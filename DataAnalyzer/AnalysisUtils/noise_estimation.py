@@ -19,5 +19,6 @@ def estimate_noise(
     noise_peaks: np.array = np.setdiff1d(all_peaks, signal_peaks)
 
     average_noise: float = np.mean(data[noise_peaks])
-
+    if np.isnan(average_noise):
+        return None
     return average_noise

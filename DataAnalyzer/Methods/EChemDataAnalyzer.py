@@ -112,11 +112,10 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
         """
 
         no_iterations: int = int(np.max(self._raw_data[:, -1]) + 1)
-        self._raw_data = {f"iteration_{iteration}": self._raw_data[self._raw_data[:, -1] == iteration] for iteration in range(no_iterations)}
+        self._raw_data = [self._raw_data[self._raw_data[:, -1] == iteration] for iteration in range(no_iterations)]
         # TODO: Same discussion as in the CV analyzer. Why is this a dictionary? (FSK, Sep 13)
-        for iteration in range(no_iterations):
-            self._analysis_results[f"iteration_{iteration}"] = {}
-
+        for no_iteration in range(no_iterations):
+            self._analysis_results[f"iteration_{no_iteration}"] = {}
 
     def run_analysis(
             self,

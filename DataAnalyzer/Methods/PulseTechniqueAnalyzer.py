@@ -69,7 +69,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         """
         self._analysis_methods = {
             "Peak Picking": self._peak_picking,
-            #"CV Parameters": self._get_cv_parameters,
+            "CV Parameters": self._get_cv_parameters,
             "Plot": self._plot,
             "Integration": self._integration
         }
@@ -92,8 +92,8 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
              min_height_baseline: Minimum height of a peak (relative to the baseline)
              rel_height: Relative height (from the top) to determine onset / offset and peak width.
         """
-        for iteration in self._raw_data.keys():
-            data_of_iteration = self._raw_data[iteration]
+        for no_iteration in range(len(self._raw_data)):
+            data_of_iteration = self._raw_data[no_iteration]
             redox_process = self._classify_oxidation_reduction(data_of_iteration)
 
             if redox_process == "reduction":
@@ -103,7 +103,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
             peak_selection_parms = {
                 "data_of_iteration": data_of_iteration,
-                "iteration": iteration,
+                "iteration": no_iteration,
                 "min_peak_width": min_peak_width,
                 "min_signal_noise": min_signal_noise,
                 "rel_height": rel_height,
@@ -114,7 +114,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
     def _pick_peaks(
             self,
             data_of_iteration: np.ndarray,
-            iteration: str,
+            iteration: int,
             min_peak_width: float,
             min_signal_noise: float,
             rel_height: float,
@@ -126,7 +126,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
         Args:
             data_of_iteration: One iteration from Multi-SWV raw data.
-            iteration: A string states which iteration the data is.
+            iteration: A integer states which iteration the data is.
             min_peak_width: Minimum width of a peak to be considered.
             min_height_baseline: Minimum height of a peak (relative to the baseline)
             rel_height: Relative height (from the top) to determine onset / offset and peak width.
@@ -137,7 +137,6 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             data_of_iteration[:, 2]
         )
         # ATTN: Rubberband baseline removal can now deal with both positive and negative peaks in any arbitrary order (FSK, Sep 13)
-
         noise: float = estimate_noise(
             data=currents_corrected,
             min_peak_width=min_peak_width
@@ -145,12 +144,12 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
         peaks_picked, peak_properties = find_peaks(
             currents_corrected,
-            height=min_signal_noise*noise,
+            height=(min_signal_noise*noise if noise else None),
             width=min_peak_width,
             rel_height=rel_height
         )
 
-        self._analysis_results[iteration]["Peak Picking"] = self._get_peak_data(data_of_iteration, peaks_picked, peak_properties, redox_process)
+        self._analysis_results[f"iteration_{iteration}"]["Peak Picking"] = self._get_peak_data(data_of_iteration, peaks_picked, peak_properties, redox_process)
 
     @staticmethod
     def _get_peak_data(
@@ -174,7 +173,11 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         if not peaks_picked.any():
             return peaks
 
-        max_shape_factor = max([peak_properties["peak_heights"][i] / peak_properties["widths"][i] for i in range(len(peaks_picked))])
+        if "peak_heights" in [peak_properties.keys()]:
+            max_shape_factor = max([peak_properties["peak_heights"][i] / peak_properties["widths"][i] for i in range(len(peaks_picked))])
+        else:
+            peak_properties["peak_heights"] = [np.nan]*peaks_picked.size
+            max_shape_factor = np.nan
 
         for i, peak_idx in enumerate(peaks_picked):
             onset_idx = int(peak_properties["left_ips"][i])
@@ -231,28 +234,32 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
              filters: List of filters (structure see filter_peaks documentation) for filtering the picked peaks.
              selection: Selection criterion (structure see select_peaks documentation).
              max_voltage: Maximum voltage allowed for CV measurements.
-             min_voltage: Minimum voltage allowed for CV measurements.
+             min_peak_onset: Minimum voltage allowed for CV measurements.
              additional_voltage: Voltage range beyond the peak onset/offset to be scanned.
         """
+#set up for multi iteration
+        cv_parameters = np.zeros((len(self._raw_data), 5))
+        for no_iteration in range(len(self._raw_data)):
+            min_peak_onset,max_peak_offset = min_voltage,max_voltage
+            try:
+                filtered_peaks: list = filter_peaks(self._analysis_results[f"iteration_{no_iteration}"]["Peak Picking"], filters)
+                selected_peak_idx, selected_peak = select_peaks(filtered_peaks, selection)
+            except (TypeError, ValueError):
+                continue
 
-        try:
-            filtered_peaks: list = filter_peaks(self._analysis_results["Peak Picking"], filters)
-            selected_peak_idx, selected_peak = select_peaks(filtered_peaks, selection)
-        except (TypeError, ValueError):
-            self._analysis_results["CV Parameters"] = "SKIP"
-            return
+            # determine onset and offset of previous / next peak to determine cv boundaries
+            for peak in self._analysis_results[f"iteration_{no_iteration}"]["Peak Picking"]:
+                if peak["peak"] < selected_peak["peak"]:
+                    min_peak_onset = peak["offset"]
+                elif peak["peak"] > selected_peak["peak"]:
+                    max_peak_offset = peak["onset"]
 
-        # determine onset and offset of previous / next peak to determine cv boundaries
-        for peak in self._analysis_results["Peak Picking"]:
-            if peak["peak"] < selected_peak["peak"]:
-                min_voltage = peak["offset"]
-            elif peak["peak"] > selected_peak["peak"]:
-                max_voltage = peak["onset"]
+            min_peak_onset = float(max(min_peak_onset, selected_peak["onset"] - additional_voltage))
+            max_peak_offset = float(min(max_peak_offset, selected_peak["offset"] + additional_voltage))
 
-        min_voltage = float(max(min_voltage, selected_peak["onset"] - additional_voltage))
-        max_voltage = float(min(max_voltage, selected_peak["offset"] + additional_voltage))
+            cv_parameters[no_iteration] = np.array([max_peak_offset, max_peak_offset, min_peak_onset, max_peak_offset, max_peak_offset])
 
-        self._analysis_results["CV Parameters"] = [max_voltage, max_voltage, min_voltage, max_voltage, max_voltage]
+        self._analysis_results["CV Parameters"] = cv_parameters
         # TODO: implement logging, warnings (e.g. for overlapping peaks), STOP and SKIP keywords
 
     def _plot(
@@ -267,8 +274,8 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             title: Title of the plot
         """
         data_all_iterations: list = []
-        for iteration in self._raw_data.keys():
-            data_all_iterations.append(self._raw_data[iteration])
+        for no_iteration in range(len(self._raw_data)):
+            data_all_iterations.append(self._raw_data[no_iteration])
         figure = DataVisualizer.plot_multiple_curves(
             data_to_plot=[(iteration[:, 1], iteration[:, 2]) for iteration in data_all_iterations],
             x_label="Voltage / V",
@@ -293,19 +300,19 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             plot: Whether to plot the iteration vs. integral plot.
         """
         integrals: list = []
-        for iteration in self._raw_data.keys():
-            data_iteration = self._raw_data[iteration]
+        for no_iteration in range(len(self._raw_data)):
+            data_iteration = self._raw_data[no_iteration]
             integral = np.trapz(data_iteration[:, 2], data_iteration[:, 1])
             integrals.append(integral)
-            self._analysis_results[iteration]["Integration"] = integrals
+        self._analysis_results["Integration"] = integrals
 
         relative_integrals = np.asarray(integrals) / max(integrals)
 
         if plot:
             figure = DataVisualizer.plot_single_curve(
-                x_values=list(range(1, len(list(self._raw_data.keys())) + 1)),
+                x_values=list(range(1, len(list(self._raw_data)) + 1)),
                 y_values=relative_integrals,
-                x_label=f"SWV_{iteration}",
+                x_label=f"SWV_Iteration_{no_iteration}",
                 y_label="Relative Integral",
                 title="SWV Integration",
                 yaxis_percent=True
