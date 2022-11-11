@@ -1,22 +1,25 @@
 from pathlib import Path
 
 from src.etoad.HardwareController import SamplingSystem
-from src.etoad.Utils import timestamp_datetime
+from src.etoad.Utils import timestamp_datetime, get_dropbox_path
 from src.etoad.Interface import GraphicalInterface
 
 
-PARENT_DIR = Path(__file__).parent
+PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 
 logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "test_settings" / "logger_settings_v2.json",
+    logging_config=PARENT_DIR / "logger_settings_v2.json",
     log_file=Path(f"Test_Sampling_System_{timestamp_datetime()}.log")
 )
 
 sampler = SamplingSystem(
-    config_file=PARENT_DIR / "test_settings" / "sampler_settings.json",
+    config_file=PARENT_DIR / "sampler_settings.json",
     logger=logger,
-    initial_wash=0
+    initial_wash=0,
+    cell_filled=True
 )
+
+sampler.dilute_cell(volume=5)
 
 sampler.disconnect()
 

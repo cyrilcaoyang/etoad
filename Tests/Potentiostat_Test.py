@@ -17,14 +17,14 @@ logger = GraphicalInterface(
 def do_measurement():
 
     potentiostat = EChemController(
-        config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
+        config_file=PARENT_DIR / "potentiostat_settings.json",
         logger=logger,
         simulation_mode=False
     )
 
     logger.sample_name = "K4[Fe(CN)6]"
 
-    potentiostat.load_technique(
+    _ = potentiostat.do_measurement(
         technique="CV",
         set_parameters={
             "IterationSettings": {
@@ -48,14 +48,15 @@ def do_measurement():
             }
         }
     )
-    results = potentiostat.do_measurement()
 
     potentiostat.disconnect()
-    # logger.stop_gui()
+    logger.stop_gui()
 
 
-threading.Thread(target=do_measurement).start()
+worker_thread = threading.Thread(target=do_measurement)
+worker_thread.start()
 logger.start_gui()
+worker_thread.join()
 
 """
 # Performs a Cyclic Voltammetry Measurement (5 Cycles between 0.5 and -0.5 V)

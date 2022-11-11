@@ -290,12 +290,11 @@ class WorkflowManager(object):
                 parameters=parameters,
                 previous_results=results)
 
-        self.potentiostat.load_technique(
+        raw_data: np.ndarray = self.potentiostat.do_measurement(
             technique=technique,
             set_parameters=parameters,
-            channel=channel)
-
-        raw_data: np.ndarray = self.potentiostat.do_measurement(channel)
+            channel=channel
+        )
 
         analysis_results: dict = self.analyzer.analyze_data(
             sample_name=sample_name,
@@ -357,6 +356,7 @@ class WorkflowManager(object):
         Raises:
             WorkflowException (according to keywords in self._exception_keywords) if skipping / cancelling is triggered.
         """
+        # TODO: Dobule-check how that method works with the new iterative measurement technique
         for param_to_update in update_settings:
             new_value: Any = previous_results[param_to_update["from measurement"]][param_to_update["key"]]
 

@@ -57,10 +57,10 @@ class EChemMethod(metaclass=ABCMeta):
         """
         return str(self.method)
 
-    def load_parameters(
+    def load_technique_parameters(
             self,
             set_parameters: dict
-    ) -> list:
+    ) -> List[List[tuple]]:
         """
         Takes a dictionary of set parameters (key-value pairs, where the keys can either be the variable description
         or the parameter name, as required for the DLL function) and generates the list of arguments for the DLL
@@ -70,7 +70,7 @@ class EChemMethod(metaclass=ABCMeta):
             set_parameters: Dictionary of parameters set by the user.
 
         Returns:
-            list_of_parameters_list: List of the list of parameters as arguments for the DLL function for setting parameter objects
+            list: List of lists of parameters per iteration
         """
         config: dict = self._get_config(set_parameters)
         technique_parameters: dict = config["TechniqueParameters"]
@@ -88,7 +88,7 @@ class EChemMethod(metaclass=ABCMeta):
             iteration_num: int
     ) -> List[tuple]:
         """
-        Parses the parameters (as given in the dictionary / json file) as a list of tuples (as required as args
+        Parses the parameters (as passed through the dictionary) as a list of tuples (as required as args
         for the DLL functions).
 
         Args:
@@ -337,7 +337,6 @@ class EChemMethod(metaclass=ABCMeta):
         Returns the unprocessed data, if not declared for a specific child class.
         """
         return extracted_data
-
 
     @staticmethod
     def _merge_data(
