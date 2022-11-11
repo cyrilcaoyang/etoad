@@ -1,2 +1,2 @@
 from .Potentiostat import EChemController
-#from .SamplingSystem import SamplingSystem
+from .SamplingSystem import SamplingSystem
