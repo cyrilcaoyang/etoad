@@ -21,5 +21,8 @@
   },
   "Plot": {
     "title": ""
+  },
+  "Integration": {
+    "plot": true
   }
 }

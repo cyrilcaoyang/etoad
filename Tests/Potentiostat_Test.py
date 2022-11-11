@@ -17,17 +17,35 @@ logger = GraphicalInterface(
 def do_measurement():
 
     potentiostat = EChemController(
-        config_file=PARENT_DIR / "potentiostat_settings.json",
-        logger=logger
+        config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
+        logger=logger,
+        simulation_mode=False
     )
 
     logger.sample_name = "K4[Fe(CN)6]"
 
     potentiostat.load_technique(
-        technique="SWV",
+        technique="CV",
         set_parameters={
-            "Initial Voltage": -0.5,
-            "Final Voltage": 0.8,
+            "IterationSettings": {
+                "no_iterations": 3
+            },
+            "TechniqueParameters": {
+                "Voltage Profile": {
+                    "value": [0.5, 0.5, 0, 0.5, 0.5]
+                },
+                "Scan Rate": {
+                    "changed_over_iterations": True,
+                    "value": [
+                        [0.01, 0.01, 0.01, 0.01, 0.01],
+                        [0.1, 0.1, 0.1, 0.1, 0.1],
+                        [1, 1, 1, 1, 1],
+                    ]
+                },
+                "Number of Cycles": {
+                    "value": 5
+                }
+            }
         }
     )
     results = potentiostat.do_measurement()

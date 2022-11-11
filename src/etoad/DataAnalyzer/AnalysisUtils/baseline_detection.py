@@ -15,8 +15,7 @@ def als_baseline_detection(
     (P.H.C. Eilers, Kwantitatieve Methoden 1987, 8, 45-64 // P. H. C Eilers, H. Boelens, 2005).
 
     Args:
-        values: 1D Numpy array of values to determine the baseline in.
-        smoothing: Smoothing parameter (the larger, the smoother the baseline)
+        values: 1D Numpy array of values to determine the baseline in.        smoothing: Smoothing parameter (the larger, the smoother the baseline)
         weighting: Weights of deviations (between 0 and 0.5, the smaller, the stronger peak suppression)
         iterations: Iterations for the solver (default: 10)
 
@@ -65,9 +64,13 @@ def als_baseline_removal(
 def rubberband_baseline_detection(
         x_values: np.ndarray,
         y_values: np.ndarray,
-):
+) -> np.array:
     """
     Performs rubberband fitting of a spectral baseline.
+
+    Since the rubberband fitting itself can only operate on data with positive peaks and ascending x values,
+    a series of checks and data transformations is applied initially.
+
     Identifies a convex hull around the spectrum by identifying the local minima of the data as the hull vertices.
     Rolls the hull vertices to start by the one with the minimum value, then takes them in ascending order.
     Generates the baseline as a linear interpolation of the hull vertices.
@@ -79,11 +82,34 @@ def rubberband_baseline_detection(
     Returns:
         Numpy ndarray of the baseline.r
     """
+    ascending: bool = True
+    positive_peaks: bool = True
+
+    # Checks if x values are in ascending order (required for interpolation), converts data otherwise
+    if x_values[1] < x_values[0]:
+        ascending = False
+        x_values = np.flip(x_values)
+        y_values = np.flip(y_values)
+
+    # Checks if peaks are in the positive direction (max deviation from median), converts data otherwise
+    max_peak_idx = abs(y_values - np.median(y_values)).argmax()
+    if y_values[max_peak_idx] < np.median(y_values):
+        positive_peaks = False
+        y_values = -y_values
+
+    # Performs rubberband baseline fitting
     hull_vertex_indices: np.ndarray = ConvexHull(np.column_stack((x_values, y_values))).vertices
     indices_rolled: np.ndarray = np.roll(hull_vertex_indices, -hull_vertex_indices.argmin())
     indices_final = indices_rolled[:indices_rolled.argmax()]
+    baseline: np.array = np.interp(x_values, x_values[indices_final], y_values[indices_final])
 
-    return np.interp(x_values, x_values[indices_final], y_values[indices_final])
+    # Performs re-transformation of the data, if applicable.
+    if not ascending:
+        baseline = np.flip(baseline)
+    if not positive_peaks:
+        baseline = -baseline
+
+    return baseline
 
 
 def rubberband_baseline_removal(

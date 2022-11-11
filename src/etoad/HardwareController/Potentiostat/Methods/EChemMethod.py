@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Optional, Callable, Tuple, Union
+from typing import Optional, Callable, Tuple, Union, List
 import numpy as np
 from ..BioLogic import TECH_ID, PROG_STATE, CurrentValues, DataInfo, DataBuffer
 from etoad.Utils import ConfigLoader
@@ -70,45 +70,83 @@ class EChemMethod(metaclass=ABCMeta):
             set_parameters: Dictionary of parameters set by the user.
 
         Returns:
-            parameters_list: List of parameters as arguments for the DLL function for setting parameter objects
+            list_of_parameters_list: List of the list of parameters as arguments for the DLL function for setting parameter objects
         """
         config: dict = self._get_config(set_parameters)
-        parameters_list: list = self._parse_parameters(config)
+        technique_parameters: dict = config["TechniqueParameters"]
+        iteration_settings: dict = config["IterationSettings"]
 
-        return parameters_list
+        parameters_per_iteration: list = list()
+        for iteration_num in range(iteration_settings["no_iterations"]):
+            parameters_per_iteration.append(self._parse_parameters(technique_parameters, iteration_num))
+
+        return parameters_per_iteration
 
     def _parse_parameters(
             self,
-            config: dict
-    ) -> list:
+            technique_parameters: dict,
+            iteration_num: int
+    ) -> List[tuple]:
         """
         Parses the parameters (as given in the dictionary / json file) as a list of tuples (as required as args
         for the DLL functions).
 
         Args:
-            config: Dictionary of parameter names and specifications (as given in the json file).
+            technique_parameters: Dictionary of parameter names and specifications (as given in the json file).
+            iteration_num: Index of the iteration.
+        Returns:
+            all_parameters: List of parameters, each one parsed as a tuple (as required for the DLL function).
+        """
+        all_parameters: list = []
+
+        for parameter_details in technique_parameters.values():
+            if parameter_details["changed_over_iterations"] is True:
+                all_parameters.extend(self._parse_single_parameter(parameter_details["value"][iteration_num], parameter_details))
+            else:
+                all_parameters.extend(self._parse_single_parameter(parameter_details["value"], parameter_details))
+
+        return all_parameters
+
+    def _parse_single_parameter(
+            self,
+            value: Union[list, str, bool, float, int],
+            parameter_details: dict
+    ) -> List[tuple]:
+        """
+        Parses a single parameter by validating its parameter values and details.
+        If the parameter is passed as a list (i.e. multiple values for a single measurement), each value is parsed
+        individually.
+
+        Args:
+            value: Value of the parameter to be parsed.
+            parameter_details: Dictionary of parameter details, as read in from the config.
 
         Returns:
-            parameters_list: List of tuples of arguments for the DLL function.
+            list: List of tuple(s), each value parsed as a tuple for the DLL function to be read in.
         """
-        parameters_list: list = []
+        parsed_parameter: list = list()
 
-        for parameter_details in config.values():
-            if type(parameter_details["value"]) is list:
-                for i, value in enumerate(parameter_details["value"]):
-                    args: tuple = self._validate_parameter(
-                        name=parameter_details["name"],
-                        variable_type=parameter_details["variable_type"],
-                        value=value,
-                        constraints=parameter_details["constraints"],
-                        index=i
-                    )
-                    parameters_list.append(args)
-            else:
-                args: tuple = self._validate_parameter(**parameter_details)
-                parameters_list.append(args)
+        if type(value) is list:
+            for i, single_value in enumerate(value):
+                args: tuple = self._validate_parameter(
+                    name=parameter_details["name"],
+                    variable_type=parameter_details["variable_type"],
+                    value=single_value,
+                    constraints=parameter_details["constraints"],
+                    index=i
+                )
+                parsed_parameter.append(args)
 
-        return parameters_list
+        else:
+            args: tuple = self._validate_parameter(
+                name=parameter_details["name"],
+                variable_type=parameter_details["variable_type"],
+                value=value,
+                constraints=parameter_details["constraints"]
+            )
+            parsed_parameter.append(args)
+
+        return parsed_parameter
 
     @staticmethod
     def _validate_parameter(
@@ -173,15 +211,25 @@ class EChemMethod(metaclass=ABCMeta):
         """
         parameters: dict = self._load_default_config()
 
-        for key in set_parameters:
+        if "TechniqueParameters" not in set_parameters:
+            return parameters
+
+        if "IterationSettings" in set_parameters:
+            parameters["IterationSettings"] = set_parameters["IterationSettings"]
+
+        # ATTN: This is a bit lengthy – maybe there is a good way around that here, where we still allow for
+        #       setting parameters both by dictionary key and by parameter name
+        for key in set_parameters["TechniqueParameters"]:
             key_found: bool = False
-            if key in parameters:
-                parameters[key]["value"] = set_parameters[key]
+            if key in parameters["TechniqueParameters"]:
+                parameters["TechniqueParameters"][key]["value"] = set_parameters["TechniqueParameters"][key]["value"]
+                parameters["TechniqueParameters"][key]["changed_over_iterations"] = False if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key] else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                 key_found = True
             else:
-                for param in parameters:
-                    if key == parameters[param]["name"]:
-                        parameters[param]["value"] = set_parameters[key]
+                for param in parameters["TechniqueParameters"]:
+                    if key == parameters["TechniqueParameters"][param]["name"]:
+                        parameters["TechniqueParameters"][param]["value"] = set_parameters["TechniqueParameters"][key]["value"]
+                        parameters["TechniqueParameters"][param]["changed_over_iterations"] = False if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key] else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                         key_found = True
 
             if not key_found:
@@ -289,6 +337,7 @@ class EChemMethod(metaclass=ABCMeta):
         Returns the unprocessed data, if not declared for a specific child class.
         """
         return extracted_data
+
 
     @staticmethod
     def _merge_data(

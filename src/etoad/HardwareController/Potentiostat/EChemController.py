@@ -39,6 +39,7 @@ class EChemController(object):
             self,
             config_file: Path,
             logger: GraphicalInterface,
+            simulation_mode: bool = False
     ):
         """
         Instantiates an API-type interface to the Bio-Logic Potentiostats.
@@ -51,10 +52,12 @@ class EChemController(object):
             self.technique: Class describing the experimental technique (inherited from EChemMethod).
         """
         self.binary_path: Path = BINARY_PATH
-        self._dll_functions: EClibDLLInterface = EClibDLLInterface(self.binary_path)
+        self._dll_functions: EClibDLLInterface = EClibDLLInterface(self.binary_path, logger, simulation_mode)
 
         self.config: dict = ConfigLoader.load_config(config_file, self.required_settings)
         self.logger: GraphicalInterface = logger
+
+        self._simulation: bool = simulation_mode
 
         self.default_channel: int = self.config["default_channel_id"]
         self.device_id: int = self._connect()
@@ -108,8 +111,9 @@ class EChemController(object):
             self._dll_functions("BL_GetChannelInfos", device_id.value, channel, channel_info)
             self.logger.debug(channel_info)
 
-            if not channel_info.is_kernel_loaded:
-                self.logger.error(f"Channel {channel+1} was not successfully loaded. No measurement can be performed.")
+            if not channel_info.is_kernel_loaded and not self._simulation:
+                self.logger.error(
+                    f"Channel {channel + 1} was not successfully loaded. No measurement can be performed.")
                 raise ConnectionError("The connection to the instrument could not be established.")
 
         self.logger.info(f"Connection to the Potentiostat on {port} successfully established.")
@@ -128,11 +132,9 @@ class EChemController(object):
     #################################################################
     # METHODS RELATED TO LOADING TECHNIQUES AND DEFINING PARAMETERS #
     #################################################################
-
-    def load_technique(
+    def _load_technique(
             self,
-            technique: str,
-            set_parameters: dict,
+            parameters_list: dict,
             channel: Union[int, None] = None
     ) -> None:
         """
@@ -140,19 +142,10 @@ class EChemController(object):
         Sets the passed experimental technique to be used, loads and parses all experimental parameters.
 
         Args:
-            technique: String definition of the measurement technique to be used. Must match the class name.
-            set_parameters: Dictionary of method parameters set/specified by the user
-                            (Keys can be either parameter descriptions or parameter names)
+            parameters_list: list of parameters as arguments for the DLL function for setting parameter objects
             channel: ID of the channel that the technique should be loaded to.
         """
-        if not channel:
-            channel = self.default_channel
-        else:
-            channel = channel - 1
-
-        self.technique = self._get_technique(technique)
-
-        parameters_processed: KBIO.EccParams = self._load_parameters(set_parameters)
+        parameters_processed: KBIO.EccParams = self._load_parameters(parameters_list)
 
         self._dll_functions(
             "BL_LoadTechnique",
@@ -165,7 +158,7 @@ class EChemController(object):
             False  # Checks whether a Tkinter window pops up for parameter confirmation - optional / verbosity?
         )
 
-        self.logger.info(f"Method {self.technique} was successfully loaded to channel {channel+1}.")
+        self.logger.info(f"Method {self.technique} was successfully loaded to channel {channel + 1}.")
 
     def _get_technique(
             self,
@@ -184,7 +177,7 @@ class EChemController(object):
 
     def _load_parameters(
             self,
-            set_parameters: dict
+            parameters_list: list,
     ) -> KBIO.EccParams:
         """
         Processes the parameters set by the user (passed as a dictionary of key–value pairs, where keys can be either
@@ -193,12 +186,11 @@ class EChemController(object):
         Generates and returns a single KBIO.EccParams object required for loading the method via the DLL.
 
         Args:
-            set_parameters: Dictionary of all human-set parameters
+            parameters_list: list of parameters as arguments for the DLL function for setting parameter objects
 
         Returns:
             KBIO.EccParms object of all parameters.
         """
-        parameters_list = self.technique.load_parameters(set_parameters)
         parameter_objects = [self._dll_functions.define_parameter(*specification) for specification in parameters_list]
 
         no_params = len(parameter_objects)
@@ -214,6 +206,45 @@ class EChemController(object):
     ########################################################
 
     def do_measurement(
+            self,
+            technique: str,
+            set_parameters: dict,
+            channel: Union[int, None] = None
+    ) -> np.ndarray:
+        """
+        Method that loop through load technique and do measurement for iteration of measurements
+
+
+        Args:
+            technique: String definition of the measurement technique to be used. Must match the class name.
+            set_parameters: Dictionary of method parameters set/specified by the user
+                            (Keys can be either parameter descriptions or parameter names)
+            channel: ID of the channel that the technique should be loaded to.
+
+        Returns:
+            results: 2D Numpy array of the results data
+        """
+        if not channel:
+            channel = self.default_channel
+        else:
+            channel = channel - 1
+
+        self.technique = self._get_technique(technique)
+
+        parameters_per_iteration = self.technique.load_parameters(set_parameters)
+
+        results: np.ndarray = np.array([])
+
+        for iteration_num in range(len(parameters_per_iteration)):
+            parameters_list = parameters_per_iteration[iteration_num]
+            self._load_technique(parameters_list, channel)
+            iteration_results: np.ndarray = self._run_measurement_iteration(channel)
+            iteration_results = np.hstack((iteration_results, np.full((iteration_results.shape[0], 1), iteration_num, dtype=int)))
+            results = self._merge_data(results, iteration_results)
+
+        return results
+
+    def _run_measurement_iteration(
             self,
             channel: Union[int, None] = None
     ) -> np.ndarray:
@@ -233,58 +264,35 @@ class EChemController(object):
         if not self.technique:
             raise ModuleNotFoundError("No Method has been loaded.")
 
+        results: np.ndarray = np.array([])
+
+        # ATTN: Check if this section is still necessary...
         if not channel:
             channel = self.default_channel
         else:
             channel = channel - 1
 
         with self._open_channel(channel):
+            while True:
+                try:
+                    data: tuple = self._get_data(channel)
+                    data_decoded, metadata = self.technique.extract_data(data, self._decode_numeric_to_single)
+                    results = self._merge_data(results, data_decoded)
 
-            self.logger.start_plotting(
-                self.technique.method_name,
-                self.technique.data_structure[1],
-                self.technique.data_structure[2]
-            )
-            # ATTN: This is currently hard-coded, assuming that the column structure is always the same
-
-            results = self._run_channel(channel)
-
-        return results
-
-    def _run_channel(self, channel: int) -> np.ndarray:
-        """
-        Private method to continuously run the actual measurement on a channel. Requires a technique to be loaded to
-        the channel before.
-        Should be executed on a single thread to not block the main thread during measurement.
-
-        Args:
-            channel: Number of the channel
-
-        Returns:
-            np.ndarray: Data acquired from the channel and preprocessed by the technique specifications.
-        """
-        results: np.ndarray = np.array([])
-
-        while True:
-            try:
-                data: tuple = self._get_data(channel)
-                data_decoded, metadata = self.technique.extract_data(data, self._decode_numeric_to_single)
-                results = self._merge_data(results, data_decoded)
-
-                if np.any(results):
-                    preprocessed_data = self.technique.process_data(results)
-                    self.logger.update_plot(preprocessed_data[:, 1], preprocessed_data[:, 2])
-                    # ATTN: This is currently hard-coded, assuming that the column structure is always the same
+                    if np.any(results):
+                        preprocessed_data = self.technique.process_data(results)
+                        self.logger.update_plot(preprocessed_data[:, 1], preprocessed_data[:, 2])
+                        # ATTN: This is currently hard-coded, assuming that the column structure is always the same
 
             except StopIteration:
                 if metadata["status"] == "STOP":
                     break
                 continue
 
-            # Breaks the while loop upon keyboard interrupt - closes channel connection via context manager
-            except KeyboardInterrupt:
-                self.logger.error("Measurement was interrupted through keyboard interrupt.")
-                break
+                # Breaks the while loop upon keyboard interrupt - closes channel connection via context manager
+                except KeyboardInterrupt:
+                    self.logger.error("Measurement was interrupted through keyboard interrupt.")
+                    break
 
         return self.technique.process_data(results)
 
@@ -311,7 +319,7 @@ class EChemController(object):
 
         rows: int = data_info.NbRows
         columns: int = data_info.NbCols
-        data_buffer = array('L', data_buffer[:rows*columns])
+        data_buffer = array('L', data_buffer[:rows * columns])
 
         return current_values, data_info, data_buffer
 
@@ -353,7 +361,7 @@ class EChemController(object):
             channel: ID of the channel to start.
         """
         self._dll_functions("BL_StartChannel", self.device_id, channel)
-        self.logger.info(f"Measurement of Technique {self.technique} started on channel {channel+1}")
+        self.logger.info(f"Measurement of Technique {self.technique} started on channel {channel + 1}")
 
     def stop_channel(
             self,
@@ -366,7 +374,7 @@ class EChemController(object):
             channel: ID of the channel to be stopped
         """
         self._dll_functions("BL_StopChannel", self.device_id, channel)
-        self.logger.info(f"Connection to Channel {channel+1} closed.")
+        self.logger.info(f"Connection to Channel {channel + 1} closed.")
 
     @contextmanager
     def _open_channel(
@@ -398,3 +406,8 @@ class EChemController(object):
         result = c_float()
         self._dll_functions("BL_ConvertNumericIntoSingle", raw_numeric, result)
         return result.value
+
+    ##############################################################################
+    # METHODS RELATED TO PERFORMING MEASUREMENT OF MULTIPLE SEQUENTIAL TECHNIQUE #
+    ##############################################################################
+

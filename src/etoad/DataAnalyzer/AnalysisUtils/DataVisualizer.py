@@ -140,6 +140,70 @@ class DataVisualizer(object):
         return figure
 
     @classmethod
+    @suppress_warnings
+    def plot_multiple_points(
+            cls,
+            data_to_plot: Union[list, np.ndarray],
+            x_label: str = "",
+            y_label: str = "",
+            title: str = "",
+            colors: Union[tuple, list] = ((4/255, 129/255, 69/255), (207/255, 254/255, 232/255)),
+            legend: Union[None, list] = None,
+    ) -> matplotlib.figure.Figure:
+        """
+        Plots multiple curves (given as a list or ndarray) into a single diagram.
+
+        Args:
+            data_to_plot: List or ndarray of all data to be plotted ([[x1, y1], [x2, y2], ...]).
+            x_label: Label of the x axis.
+            y_label: Label of the y axis
+            title: Title of the plot.
+            colors: Tuple or list of colors.
+                    - length = 1 -> all curves will be plotted in this single color
+                    - length = 2 -> curves will be plotted as a gradient between these two colors
+                    - length = len(data_to_plot) -> curves will be plotted in the given colors
+            legend: List of legend entries for each curve to be plotted.
+
+        Returns:
+            matplotlib.figure.Figure object of the plot.
+
+        Raises:
+            IndexError if the color array does not have a length of 1, 2 or len(data_to_plot)
+        """
+        figure: matplotlib.figure.Figure = plt.figure()
+        ax = figure.add_subplot(1, 1, 1)
+
+        # sets colors
+        if len(colors) == 1:
+            colors = [colors[0]] * len(data_to_plot)
+        elif len(colors) == 2:
+            colors = cls._color_gradient(*colors, data_points=len(data_to_plot))
+        elif len(colors) != len(data_to_plot):
+            raise IndexError("The length of the color series could not be interpreted.")
+
+        # plots the data
+        for idx, curve in enumerate(data_to_plot):
+            ax.plot(curve[0], curve[1], "o",color=colors[idx], zorder=-idx)
+
+        # sets labels and titles
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        ax.set_title(title)
+
+        # modifies the legend to show maximum 10 entries (if applicable), sets the legend
+        if legend:
+            if len(legend) <= 10:
+                ax.legend(legend)
+            else:
+                skip_every: int = int(len(legend) / 10) + 1
+                for idx in range(len(legend)):
+                    if (idx + 1) % skip_every != 0:
+                        legend[idx] = "_" + legend[idx]
+            ax.legend(legend)
+
+        return figure
+
+    @classmethod
     def _color_gradient(
             cls,
             init_color: tuple,

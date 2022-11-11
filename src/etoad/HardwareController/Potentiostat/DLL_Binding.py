@@ -3,6 +3,7 @@ __author__ = 'Felix Strieth-Kalthoff'
 
 import ctypes
 from pathlib import Path
+from logging import Logger
 from typing import Any, Union, Callable
 
 from etoad.Utils import get_bit_mode
@@ -63,11 +64,16 @@ class EClibDLLInterface(object):
 
     def __init__(
             self,
-            binary_path: Path
+            binary_path: Path,
+            logger: Logger,
+            simulation_mode: bool = False
     ):
         self._binary_path: Path = binary_path
         self._dll_path: Path = self._get_dll_file(binary_path)
         self._callable_functions: dict = self._bind_dll_functions(self._dll_path)
+
+        self.logger = logger
+        self._simulation = simulation_mode
 
     def __call__(
             self,
@@ -88,6 +94,10 @@ class EClibDLLInterface(object):
         Raises:
             ConnectionError (if return value is not 0)
         """
+        if self._simulation:
+            self.logger.info(f"SIMULATION: Now executing DLL Method {function_name}.")
+            return
+
         check_value: int = self._callable_functions[function_name](*args)
 
         if not check_value == 0:
