@@ -17,7 +17,7 @@ from .TkErrorHandling import TkErrorCatcher
 
 tkinter.CallWrapper = TkErrorCatcher
 
-matplotlib.use("TkAgg")
+matplotlib.use("Agg")
 
 BACKGROUND = "#192B28"
 BACKGROUND_LIGHT = "#fff"

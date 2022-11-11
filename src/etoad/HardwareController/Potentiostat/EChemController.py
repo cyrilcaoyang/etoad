@@ -41,8 +41,7 @@ class EChemController(object):
             logger: GraphicalInterface,
     ):
         """
-        Instantiates a (absolutely minimalistic and preliminary) version of an API-type interface
-        to the Bio-Logic Potentiostats.
+        Instantiates an API-type interface to the Bio-Logic Potentiostats.
 
         Sets the following attributes:
             self.binary_path: Path to the directory where the binaries are located.

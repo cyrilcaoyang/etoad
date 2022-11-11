@@ -51,7 +51,7 @@ class SamplingSystem:
         Args:
             config_file: Path to the configuration file. Needs to contain the specified keys in self.required_settings.
             logger: Logger object
-            initial_wash: Number of initial washing steps. Default: 3
+            initial_wash: Number of initial washing steps. Default: 3  # TODO: Refactor to pump_wash or a similar name to not confuse it with cell_wash
         """
 
         self._config: dict = ConfigLoader.load_config(config_file, self.required_settings)

@@ -15,3 +15,18 @@ cd python-echem
 
 pip install .
 ```
+
+### Usage (Potentiostat Only)
+```
+from etoad import EChemController, GraphicalInterface
+
+gui = GraphicalInterface(
+    logging_config=test_dir / "logger_settings.json",
+    logfile=Path.cwd() / "Test.log"
+)
+
+potentiostat = EChemController(
+    config_file=test_dir / "potentiostat_settings.json",
+    logger=gui
+)
+```

@@ -6,5 +6,4 @@ with open("requirements.txt", "r") as req_file:
 if __name__ == "__main__":
     setup(
         install_requires=requirements
-        # requires=requirements
     )

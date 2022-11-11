@@ -369,14 +369,16 @@ class WorkflowManager(object):
         return parameters
 
     def shutdown_system(
-            self
+            self,
+            fill_cell: bool = True
     ) -> None:
         """
         Transfers 5 mL solvent to the sample cell for keeping the electrode surfaces wet.
         Shuts the system down by disconnecting from the potentiostat and the sampling system.
         Sends the stop command to the GUI and liberates the main thread.
         """
-        self._dilute_cell("shutdown", "shutdown", volume=5.0, results={})
+        if fill_cell:
+            self._dilute_cell("shutdown", "shutdown", volume=5.0, results={})
         self.potentiostat.disconnect()
         self.sampling_system.disconnect()
         self.logger.stop_gui()
