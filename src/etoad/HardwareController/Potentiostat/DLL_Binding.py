@@ -6,9 +6,9 @@ from pathlib import Path
 from logging import Logger
 from typing import Any, Union, Callable
 
-from etoad.Utils import get_bit_mode
+from src.etoad.Utils import get_bit_mode
 from .DataStructures import *
-import etoad.HardwareController.Potentiostat.BioLogic as KBIO  # TODO: refactor properly and remove this ugly import
+import src.etoad.HardwareController.Potentiostat.BioLogic as KBIO  # TODO: refactor properly and remove this ugly import
 
 
 class EClibDLLInterface(object):
@@ -99,11 +99,12 @@ class EClibDLLInterface(object):
             return
 
         check_value: int = self._callable_functions[function_name](*args)
+        #TODO TypeError: expected LP_DeviceInfo instance instead of DeviceInfo
 
-        if not check_value == 0:
-            raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
-
-        return check_value
+        # if not check_value == 0:
+        #     raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
+        #
+        # return check_value
 
     def _get_dll_file(
             self,

@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from WorkflowManager import WorkflowManager
-from src.Utils import timestamp_datetime
+from src.etoad import WorkflowManager
+from src.etoad.Utils import timestamp_datetime
 
 
 PARENT_DIR = Path(__file__).parent
@@ -25,4 +25,5 @@ manager: WorkflowManager = WorkflowManager(
 manager.submit_samples([
     {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_routine.json")}
 ])
+
 manager.start_system()

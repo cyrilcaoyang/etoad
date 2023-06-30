@@ -9,3 +9,4 @@ PyVISA==1.11.3
 scipy==1.9.0
 setuptools==65.3.0
 slackclient==2.9.4
+ftdi-serial==0.1.12

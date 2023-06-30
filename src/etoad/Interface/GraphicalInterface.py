@@ -9,7 +9,7 @@ import matplotlib
 from matplotlib.figure import Figure
 import matplotlib.animation as animation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from etoad.Utils import ConfigLoader
+from src.etoad.Utils import ConfigLoader
 from PIL import Image, ImageTk
 from .GenericHandler import GenericHandler
 from .SlackBotHandler import SlackBotHandler

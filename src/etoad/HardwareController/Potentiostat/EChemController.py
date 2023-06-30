@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Union, List
 import numpy as np
 
-from etoad.Utils import ConfigLoader
-from etoad.Interface import GraphicalInterface
+from src.etoad.Utils import ConfigLoader
+from src.etoad.Interface import GraphicalInterface
 from .Binaries import BINARY_PATH
 from ..Potentiostat import BioLogic as KBIO
 from .DataStructures import *

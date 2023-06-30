@@ -5,8 +5,7 @@ from logging import Logger
 
 from .TecanPump import TecanPump
 from .AtmosphereHandler import AtmosphereHandler
-from etoad.Utils import ConfigLoader
-
+from src.etoad.Utils import ConfigLoader
 
 class SamplingSystem:
     """
@@ -44,13 +43,16 @@ class SamplingSystem:
         "waste_port"
     }
 
-    def __init__(self, config_file: Path, logger: Logger, initial_wash: int = 1, cell_filled: bool = True):
+    def __init__(self, config_file: Path, logger: Logger,
+#                 hotplate: Hotplate,
+                 initial_wash: int = 1, cell_filled: bool = True):
         """
         Creates an instance of the SamplingSystem class.
 
         Args:
             config_file: Path to the configuration file. Needs to contain the specified keys in self.required_settings.
             logger: Logger object
+            hotplate: Hotplate object
             initial_wash: Number of initial washing steps. Default: 3  # TODO: Refactor to pump_wash or a similar name to not confuse it with cell_wash
         """
 
@@ -204,6 +206,27 @@ class SamplingSystem:
         self._pump.manager.close()
         self._logger.info("Connection to the sampling system was successfully closed.")
 
-
-
-
+    # def connect_hotplate(self) -> None:
+    #     """
+    #     YANG CAO TESTING Connect to the hotplate
+    #     """
+    #     Hotplate.connect()
+    #     hotplate_name = Hotplate.read_device_name()
+    #     print(hotplate_name)
+    #     self._logger.info("Connected to the hotplate "+hotplate_name+" successfully!")
+    #
+    # def disconnect_hotplate(self) -> None:
+    #     """
+    #     YANG CAO TESTING Disconnect from the hotplate
+    #     """
+    #     Hotplate.disconnect()
+    #     self._logger.info("Hotplate disconnected.")
+    #
+    # def set_stir_rate_temperature(self, hot_plate_spin, hot_plate_temp) -> None:
+    #     """
+    #     YANG CAO TESTING Set 'simple' parameters of the hotplate
+    #     """
+    #     Hotplate.set_target_stir_rate(hot_plate_spin)
+    #     Hotplate.set_temperature_value(hot_plate_temp)
+    #     self._logger.info("set spin rate to "+hot_plate_spin+" and temperature of "+hot_plate_temp+"")
+    #
