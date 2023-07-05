@@ -118,7 +118,7 @@ def rangemethod(
     Args:
          min_value: Minimum value of the argument.
          max_value: Maximum value of the argument.
-         dtype: Production type of the argument data.
+         dtype: Data type of the argument data.
 
     Raises:
         TypeError: If the data type of the variable and the specified dtype are incompatible.

@@ -11,7 +11,7 @@ from .Methods import CVAnalyzer, PulseTechniqueAnalyzer, EChemDataAnalyzer
 
 class DataAnalyzer:
     """
-    Minimum viable version of a DataAnalyzer for Electrochemical Production
+    Minimum viable version of a DataAnalyzer for Electrochemical Data
     """
 
     _technique_analyzers: dict = {

@@ -18,7 +18,7 @@ manager: WorkflowManager = WorkflowManager(
 #   - Sample transfer to the measurement cell
 #   - Square Wave Voltammetry measurement
 #   - Cyclic Voltammetry measurement based on parameters inferred from the SWV measurement
-#   - Production analysis, visualization and storage
+#   - Data analysis, visualization and storage
 #   - Cell cleaning after the measurements
 
 manager.submit_samples([
