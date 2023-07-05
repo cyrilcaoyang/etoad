@@ -10,7 +10,7 @@ manager: WorkflowManager = WorkflowManager(
     logfile=Path(PARENT_DIR / "log_files" / f"Test_Workflow_Manager_{timestamp_datetime()}.log"),
     potentiostat_settings=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
     sampler_settings=PARENT_DIR / "test_settings" / "sampler_settings.json",
-    data_path=PARENT_DIR / "test_results"
+    data_path=Path(r"C:\Users\Potentiostat_SP-300\Desktop\AutoEChem_Data")
 )
 
 # Executes the workflow specified in test_workflow.json for a test sample on the autosampler (position 1).
