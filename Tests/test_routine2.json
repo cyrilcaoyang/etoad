@@ -1,0 +1,64 @@
+{
+  "Protocol Name": "Potentials and Stability",
+  "Steps": {
+    "SWV": {
+      "task": "measure",
+      "technique": "SWV",
+      "parameters": {
+        "Initial Voltage": 1.0,
+        "Final Voltage": 0
+      },
+      "update_parameters": [],
+      "analysis_settings": {
+        "Plot": {
+          "title": "Square Wave Voltammetry"
+        },
+        "Peak Picking": {},
+        "CV Parameters": {
+          "filters": [
+            {
+              "key": "peak",
+              "operation": "x > 0.0"
+            },
+            {
+              "key": "rel_shape_factor",
+              "operation": "x > 0.1"
+            }
+          ],
+          "selection": {
+            "key": "peak",
+            "operation": "max(x)"
+          }
+        }
+      }
+    },
+    "CV": {
+      "task": "measure",
+      "technique": "CV",
+      "parameters": {
+        "Voltage Profile": [0.5, 0.5, 0, 0.5, 0.5],
+        "Number of Cycles": 50
+      },
+      "update_parameters": [
+        {
+          "parameter": "Voltage Profile",
+          "from measurement": "SWV",
+          "key": "CV Parameters"
+        }
+      ],
+      "analysis_settings": {
+        "Plot": {},
+        "Peak Picking": {},
+        "Integration": {}
+      }
+    }
+  },
+  "Sample Volume": 1.0,
+  "Total Volume": 5.0,
+  "Discard Sample": false,
+  "Purge": 30,
+  "Wash": {
+    "wash_volume": 5.0,
+    "washing_cycles": 1
+  }
+}

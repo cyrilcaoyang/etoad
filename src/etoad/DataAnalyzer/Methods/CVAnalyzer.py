@@ -101,7 +101,7 @@ class CVAnalyzer(EChemDataAnalyzer):
         Acquire the scan rate of this cycle in the unit of V/s.
 
         Args:
-            data_of_one_cycle: Data of a full cycle in CV data
+            data_of_one_cycle: Production of a full cycle in CV data
 
         Returns:
             scan_rate: The scan rate of this cycle in V/s

@@ -543,7 +543,7 @@ class ERROR(Enum):
     TECH_INCOMPATIBLEECC = -401  # "ECC file not compatible with the channel firmware"
     TECH_ECCFILECORRUPTED = -402  # "ECC file corrupted"
     TECH_LOADTECHNIQUEFAILED = -403  # "Cannot load the ECC file"
-    TECH_DATACORRUPTED = -404  # "Data returned by the instrument are corrupted"
+    TECH_DATACORRUPTED = -404  # "Production returned by the instrument are corrupted"
     TECH_MEMFULL = -405  # "Cannot load techniques: full memory"
     OPT_CHANGE = 1  # "Number of options changed"
     OPT_OPEN_IN = 2  # "Open-in signal was asserted"

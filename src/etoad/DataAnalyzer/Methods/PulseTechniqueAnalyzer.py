@@ -182,7 +182,10 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         for i, peak_idx in enumerate(peaks_picked):
             onset_idx = int(peak_properties["left_ips"][i])
             offset_idx = int(peak_properties["right_ips"][i])
-            height = -peak_properties["peak_heights"][i] if redox_process == "reduction" else peak_properties["peak_heights"][i]
+            if redox_process == "reduction":
+                height = -peak_properties["peak_heights"][i]
+            else:
+                height = peak_properties["peak_heights"][i]
 
             peaks.append(
                 {
