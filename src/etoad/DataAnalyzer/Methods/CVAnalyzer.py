@@ -31,14 +31,16 @@ class CVAnalyzer(EChemDataAnalyzer):
         Each ndarray represents one CV cycle.
         Overrides self._raw_data.
         """
+        skip_cycles: int = 2  # TODO: _figure out a more flexible way to include this
+
         for no_iteration in range(len(self._raw_data)):
             iteration_data = self._raw_data[no_iteration]
-            skip_cycles: int = 2  # TODO: figure out a more flexible way to include this
-            no_cycles: int = int(np.max(iteration_data[:, 3]) + 1)
-            self._raw_data[no_iteration] = [iteration_data[iteration_data[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
-        skip_cycles: int = 2  # TODO: _figure out a more flexible way to include this
-        no_cycles: int = int(np.max(self._raw_data[:, 3]))
-        self._raw_data = [self._raw_data[self._raw_data[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
+            print(iteration_data) # TODO remove after testing
+            no_cycles: int = int(np.max(iteration_data[3]) + 1)
+            self._raw_data[no_iteration] = [iteration_data[iteration_data[3] == cycle] for cycle in range(skip_cycles, no_cycles)]
+        print(self._raw_data)
+        # no_cycles: int = int(np.max(self._raw_data[3]))
+        # self._raw_data = [self._raw_data[self._raw_data[3] == cycle] for cycle in range(skip_cycles, no_cycles)]
 
     def _set_methods(
             self

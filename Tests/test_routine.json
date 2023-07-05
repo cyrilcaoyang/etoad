@@ -5,18 +5,23 @@
       "task": "measure",
       "technique": "CV",
       "parameters": {
-        "Voltage Profile": [0.5, 0.5, 0, 0.5, 0.5],
-        "Number of Cycles": 50
+            "IterationSettings": {
+                "no_iterations": 1
+            },
+            "TechniqueParameters": {
+                "Voltage Profile": {
+                    "value": [0.5, 0.5, 0, 0.5, 0.5]
+                },
+                "Number of Cycles": {
+                    "value": 5
+                }
+            }
       },
-      "update_parameters": [
-        {
-          "parameter": "Voltage Profile",
-          "from measurement": "SWV",
-          "key": "CV Parameters"
-        }
-      ],
+      "update_parameters": [],
       "analysis_settings": {
-        "Plot": {},
+        "Plot": {
+          "title": "Cyclic Voltammetry"
+        },
         "Peak Picking": {},
         "Integration": {}
       }
