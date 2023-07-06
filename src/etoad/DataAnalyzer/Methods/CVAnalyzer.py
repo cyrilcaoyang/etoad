@@ -35,10 +35,11 @@ class CVAnalyzer(EChemDataAnalyzer):
 
         for no_iteration in range(len(self._raw_data)):
             iteration_data = self._raw_data[no_iteration]
-            print(iteration_data) # TODO remove after testing
-            no_cycles: int = int(np.max(iteration_data[3]) + 1)
-            self._raw_data[no_iteration] = [iteration_data[iteration_data[3] == cycle] for cycle in range(skip_cycles, no_cycles)]
-        print(self._raw_data)
+            np.save("raw_data.npy", iteration_data) # TODO remove after testing
+            no_cycles: int = int(np.max(iteration_data[:,3]) + 1)
+            self._raw_data[no_iteration] = [iteration_data[iteration_data[:,3] == cycle] for cycle in range(skip_cycles, no_cycles)]
+            np.save("raw_data_list.npy", iteration_data)  # TODO remove after testing
+        print(self._raw_data[no_iteration])
         # no_cycles: int = int(np.max(self._raw_data[3]))
         # self._raw_data = [self._raw_data[self._raw_data[3] == cycle] for cycle in range(skip_cycles, no_cycles)]
 
