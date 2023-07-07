@@ -22,7 +22,7 @@ manager: WorkflowManager = WorkflowManager(
 #   - Cell cleaning after the measurements
 
 manager.submit_samples([
-    {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_routine.json")}
+    {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_stability_routine.json")}
 ])
 
 manager.start_system()

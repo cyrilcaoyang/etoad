@@ -148,7 +148,6 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             width=min_peak_width,
             rel_height=rel_height
         )
-
         self._analysis_results[f"iteration_{iteration}"]["Peak Picking"] = self._get_peak_data(data_of_iteration, peaks_picked, peak_properties, redox_process)
 
     @staticmethod
@@ -173,7 +172,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         if not peaks_picked.any():
             return peaks
 
-        if "peak_heights" in [peak_properties.keys()]:
+        if "peak_heights" in peak_properties.keys():
             max_shape_factor = max([peak_properties["peak_heights"][i] / peak_properties["widths"][i] for i in range(len(peaks_picked))])
         else:
             peak_properties["peak_heights"] = [np.nan]*peaks_picked.size
@@ -184,6 +183,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             offset_idx = int(peak_properties["right_ips"][i])
             if redox_process == "reduction":
                 height = -peak_properties["peak_heights"][i]
+                print("Picked reduction peak, with a height:", height)  # TODO remove Yang 2023
             else:
                 height = peak_properties["peak_heights"][i]
 
@@ -240,9 +240,9 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
              min_peak_onset: Minimum voltage allowed for CV measurements.
              additional_voltage: Voltage range beyond the peak onset/offset to be scanned.
         """
-        cv_parameters = np.zeros((len(self._raw_data), 5))
+        cv_parameters = np.zeros((len(self._raw_data), 5))      # TODO: ndarray is not JSON serializable to JSON
         for no_iteration in range(len(self._raw_data)):
-            min_peak_onset,max_peak_offset = min_voltage,max_voltage
+            min_peak_onset, max_peak_offset = min_voltage, max_voltage
             try:
                 filtered_peaks: list = filter_peaks(self._analysis_results[f"iteration_{no_iteration}"]["Peak Picking"], filters)
                 selected_peak_idx, selected_peak = select_peaks(filtered_peaks, selection)
@@ -259,9 +259,10 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             min_peak_onset = float(max(min_peak_onset, selected_peak["onset"] - additional_voltage))
             max_peak_offset = float(min(max_peak_offset, selected_peak["offset"] + additional_voltage))
 
-            cv_parameters[no_iteration] = np.array([max_peak_offset, max_peak_offset, min_peak_onset, max_peak_offset, max_peak_offset])
+            cv_parameters[no_iteration] = [max_peak_offset, max_peak_offset, min_peak_onset, max_peak_offset, max_peak_offset]
 
-        self._analysis_results["CV Parameters"] = cv_parameters
+        print(f"{cv_parameters=}")
+        self._analysis_results["CV Parameters"] = cv_parameters[0].tolist()   # TODO: Yang's temporary fix
         # TODO: implement logging, warnings (e.g. for overlapping peaks), STOP and SKIP keywords
 
     def _plot(
@@ -287,7 +288,6 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         )
 
         self._figures[self.analysis_method_name] = figure
-
 
     def _integration(
         self,

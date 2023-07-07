@@ -35,10 +35,8 @@ class CVAnalyzer(EChemDataAnalyzer):
 
         for no_iteration in range(len(self._raw_data)):
             iteration_data = self._raw_data[no_iteration]
-            np.save("raw_data.npy", iteration_data) # TODO remove after testing
-            no_cycles: int = int(np.max(iteration_data[:,3]) + 1)
-            self._raw_data[no_iteration] = [iteration_data[iteration_data[:,3] == cycle] for cycle in range(skip_cycles, no_cycles)]
-            np.save("raw_data_list.npy", iteration_data)  # TODO remove after testing
+            no_cycles: int = int(np.max(iteration_data[:, 3]) + 1)
+            self._raw_data[no_iteration] = [iteration_data[iteration_data[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
         print(self._raw_data[no_iteration])
         # no_cycles: int = int(np.max(self._raw_data[3]))
         # self._raw_data = [self._raw_data[self._raw_data[3] == cycle] for cycle in range(skip_cycles, no_cycles)]
@@ -109,8 +107,8 @@ class CVAnalyzer(EChemDataAnalyzer):
         Returns:
             scan_rate: The scan rate of this cycle in V/s
         """
-        time_series = data_of_one_cycle[:,0]
-        voltage_series = data_of_one_cycle[:,1]
+        time_series = data_of_one_cycle[:, 0]
+        voltage_series = data_of_one_cycle[:, 1]
         scan_rate = (np.max(voltage_series)-np.min(voltage_series))*2/(np.max(time_series)-np.min(time_series))
         return scan_rate
 
@@ -175,7 +173,6 @@ class CVAnalyzer(EChemDataAnalyzer):
                 oxidation_integral = np.trapz(oxidation[:, 2], oxidation[:, 1])
                 integrals_per_iteration.append(oxidation_integral - reduction_integral)
             self._analysis_results[f"iteration_{no_iteration}"]["Integration"] = integrals_per_iteration
-
 
             relative_integrals = np.asarray(integrals_per_iteration) / max(integrals_per_iteration)
             all_relative_integrals.append((list(range(1, len(self._raw_data[no_iteration]) + 1)),relative_integrals))

@@ -61,7 +61,7 @@ class DataAnalyzer:
 
         analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](analysis_settings, raw_data)
         analysis_results, figures = analyzer.run_analysis()
-        self._logger.info(f"Production Analysis Completed: {analysis_results}")
+        self._logger.info(f"Data Analysis Completed: {analysis_results}")
 
         self._save_data(raw_data, analysis_results, figures, sample_dir, basename)
 

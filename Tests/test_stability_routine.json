@@ -5,8 +5,14 @@
       "task": "measure",
       "technique": "SWV",
       "parameters": {
-        "Initial Voltage": 1.0,
-        "Final Voltage": 0
+        "TechniqueParameters": {
+          "Initial Voltage": {
+            "value": 1.1
+          },
+          "Final Voltage": {
+            "value": 0
+          }
+        }
       },
       "update_parameters": [],
       "analysis_settings": {
@@ -36,29 +42,37 @@
       "task": "measure",
       "technique": "CV",
       "parameters": {
-        "Voltage Profile": [0.5, 0.5, 0, 0.5, 0.5],
-        "Number of Cycles": 50
+        "TechniqueParameters": {
+          "Voltage Profile": {
+            "value": [0.5, 0.5, 0, 0.5, 0.5]
+          },
+          "Number of Cycles": {
+            "value": 100
+          }
+        }
       },
       "update_parameters": [
         {
-          "parameter": "Voltage Profile",
+          "parameter" : "Voltage Profile",
           "from measurement": "SWV",
           "key": "CV Parameters"
         }
       ],
       "analysis_settings": {
-        "Plot": {},
+        "Plot": {
+          "title": "Cyclic Voltammetry"
+        },
         "Peak Picking": {},
         "Integration": {}
       }
     }
   },
-  "Sample Volume": 1.0,
+  "Sample Volume": 0.5,
   "Total Volume": 5.0,
   "Discard Sample": false,
   "Purge": 30,
   "Wash": {
     "wash_volume": 5.0,
-    "washing_cycles": 1
+    "washing_cycles": 0
   }
 }

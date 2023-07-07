@@ -1,5 +1,5 @@
 {
-  "Protocol Name": "Potentials and Stability",
+  "Protocol Name": "CV Iterations",
   "Steps": {
     "CV": {
       "task": "measure",
@@ -13,7 +13,7 @@
                     "value": [0.5, 0.5, 0, 0.5, 0.5]
                 },
                 "Number of Cycles": {
-                    "value": 5
+                    "value": 100
                 }
             }
       },

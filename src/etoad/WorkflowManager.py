@@ -356,7 +356,8 @@ class WorkflowManager(object):
         Raises:
             WorkflowException (according to keywords in self._exception_keywords) if skipping / cancelling is triggered.
         """
-        # TODO: Dobule-check how that method works with the new iterative measurement technique
+        # TODO: Double-check how that method works with the new iterative measurement technique # Yang: 2023 not good...
+
         for param_to_update in update_settings:
             new_value: Any = previous_results[param_to_update["from measurement"]][param_to_update["key"]]
 
@@ -364,7 +365,9 @@ class WorkflowManager(object):
                 if new_value in self._exception_keywords:
                     raise self._exception_keywords[new_value]
 
-            parameters[param_to_update["parameter"]] = new_value
+            para = param_to_update["parameter"]
+            print(parameters)
+            parameters["TechniqueParameters"][para]['value'] = new_value
 
         return parameters
 
