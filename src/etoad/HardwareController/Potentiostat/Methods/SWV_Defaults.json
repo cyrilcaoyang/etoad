@@ -29,7 +29,7 @@
       "variable_type": "float",
       "changed_over_iterations": false,
       "value": -0.5,
-      "constraints": "-1.3 <= x <= 1.2"
+      "constraints": "-2 <= x <= 1.5"
     },
     "Final Voltage vs OCV": {
       "name": "OCf",
