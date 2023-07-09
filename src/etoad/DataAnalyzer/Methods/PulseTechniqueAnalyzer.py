@@ -149,6 +149,9 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             rel_height=rel_height
         )
         self._analysis_results[f"iteration_{iteration}"]["Peak Picking"] = self._get_peak_data(data_of_iteration, peaks_picked, peak_properties, redox_process)
+        print(f"{peaks_picked=}")
+        print(f"{peak_properties=}")
+        print(f"{redox_process=}")
 
     @staticmethod
     def _get_peak_data(
@@ -177,13 +180,13 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         else:
             peak_properties["peak_heights"] = [np.nan]*peaks_picked.size
             max_shape_factor = np.nan
+            print('shit')   # TODO
 
         for i, peak_idx in enumerate(peaks_picked):
             onset_idx = int(peak_properties["left_ips"][i])
             offset_idx = int(peak_properties["right_ips"][i])
             if redox_process == "reduction":
                 height = -peak_properties["peak_heights"][i]
-                print("Picked reduction peak, with a height:", height)  # TODO remove Yang 2023
             else:
                 height = peak_properties["peak_heights"][i]
 
@@ -240,7 +243,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
              min_peak_onset: Minimum voltage allowed for CV measurements.
              additional_voltage: Voltage range beyond the peak onset/offset to be scanned.
         """
-        cv_parameters = np.zeros((len(self._raw_data), 5))      # TODO: ndarray is not JSON serializable to JSON
+        cv_parameters = np.zeros((len(self._raw_data), 5))      # TODO: Yang 2023 ndarray is not JSON serializable
         for no_iteration in range(len(self._raw_data)):
             min_peak_onset, max_peak_offset = min_voltage, max_voltage
             try:
@@ -261,7 +264,6 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
             cv_parameters[no_iteration] = [max_peak_offset, max_peak_offset, min_peak_onset, max_peak_offset, max_peak_offset]
 
-        print(f"{cv_parameters=}")
         self._analysis_results["CV Parameters"] = cv_parameters[0].tolist()   # TODO: Yang's temporary fix
         # TODO: implement logging, warnings (e.g. for overlapping peaks), STOP and SKIP keywords
 

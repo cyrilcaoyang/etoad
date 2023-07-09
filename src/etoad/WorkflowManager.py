@@ -366,7 +366,6 @@ class WorkflowManager(object):
                     raise self._exception_keywords[new_value]
 
             para = param_to_update["parameter"]
-            print(parameters)
             parameters["TechniqueParameters"][para]['value'] = new_value
 
         return parameters

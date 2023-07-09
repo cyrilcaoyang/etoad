@@ -1,5 +1,5 @@
 {
-  "Protocol Name": "Potentials and Stability",
+  "Protocol Name": "Potentials and Stability Diquats",
   "Steps": {
     "SWV": {
       "task": "measure",
@@ -7,10 +7,10 @@
       "parameters": {
         "TechniqueParameters": {
           "Initial Voltage": {
-            "value": 1.1
+            "value": 0
           },
           "Final Voltage": {
-            "value": 0
+            "value": -1.2
           }
         }
       },
@@ -24,11 +24,11 @@
           "filters": [
             {
               "key": "peak",
-              "operation": "x > 0.0"
+              "operation": "x < -0.2"
             },
             {
               "key": "rel_shape_factor",
-              "operation": "x > 0.1"
+              "operation": "x > 0.2"
             }
           ],
           "selection": {
@@ -70,12 +70,12 @@
       }
     }
   },
-  "Sample Volume": 0.5,
+  "Sample Volume": 1.0,
   "Total Volume": 5.0,
   "Discard Sample": false,
   "Purge": 30,
   "Wash": {
     "wash_volume": 5.0,
-    "washing_cycles": 0
+    "washing_cycles": 1
   }
 }
