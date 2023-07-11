@@ -180,7 +180,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         else:
             peak_properties["peak_heights"] = [np.nan]*peaks_picked.size
             max_shape_factor = np.nan
-            print('shit')   # TODO
+            print("No peak selected!")
 
         for i, peak_idx in enumerate(peaks_picked):
             onset_idx = int(peak_properties["left_ips"][i])

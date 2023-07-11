@@ -7,7 +7,7 @@
       "parameters": {
         "TechniqueParameters": {
           "Initial Voltage": {
-            "value": 1.1
+            "value": 1.2
           },
           "Final Voltage": {
             "value": 0
@@ -70,7 +70,7 @@
       }
     }
   },
-  "Sample Volume": 0.5,
+  "Sample Volume": 2.0,
   "Total Volume": 5.0,
   "Discard Sample": false,
   "Purge": 30,

@@ -22,14 +22,16 @@ manager: WorkflowManager = WorkflowManager(
 #   - Cell cleaning after the measurements
 
 manager.submit_samples([
-    # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_stability_routine.json")},
+    {"sample_name": "diquat-44Me-C2Br2", "sample_location": 5, "workflow_path": Path("test_stability_negative.json")},
     # {"sample_name": "Fe-bpy-5COOH", "sample_location": 1, "workflow_path": Path("test_stability_routine.json")},
-    # {"sample_name": "Fe-bpy-4Me4COOH", "sample_location": 2, "workflow_path": Path("test_stability_routine.json")},
-    # {"sample_name": "Fe-bpy-44CH2OH", "sample_location": 3, "workflow_path": Path("test_stability_routine.json")},
+    {"sample_name": "Fe-bpy-44CH2OH", "sample_location": 3, "workflow_path": Path("test_stability_routine.json")},
+    {"sample_name": "Fe-bpy-4Me4COOH", "sample_location": 2, "workflow_path": Path("test_stability_routine.json")},
     # {"sample_name": "Fe-bpy-44OMe", "sample_location": 4, "workflow_path": Path("test_stability_routine.json")},
-    # {"sample_name": "VP4+", "sample_location": 5, "workflow_path": Path("test_stability_negative.json")},
+    # {"sample_name": "transquat-C2OTf2", "sample_location": 6, "workflow_path": Path("test_cyclic_neg2.json")},
     # {"sample_name": "diquat-C2C2Br2", "sample_location": 7, "workflow_path": Path("test_cyclic_neg2.json")},
-    {"sample_name": "transquat-C2OTf2", "sample_location": 6, "workflow_path": Path("test_cyclic_neg2.json")}
+    {"sample_name": "diquat-44Me-C2Br2", "sample_location": 5, "workflow_path": Path("test_stability_negative.json")},
+    {"sample_name": "Fe-bpy-44COOH", "sample_location": 8, "workflow_path": Path("test_stability_routine.json")},
+    {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_stability_routine.json")}
 ])
 
 manager.start_system()
