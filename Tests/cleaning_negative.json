@@ -1,5 +1,5 @@
 {
-  "Protocol Name": "Potentials and Stability",
+  "Protocol Name": "Potentials and Stability Diquats",
   "Steps": {
     "SWV": {
       "task": "measure",
@@ -7,35 +7,18 @@
       "parameters": {
         "TechniqueParameters": {
           "Initial Voltage": {
-            "value": 1.2
+            "value": 1.0
           },
           "Final Voltage": {
-            "value": 0
+            "value": -1.2
           }
         }
       },
       "update_parameters": [],
       "analysis_settings": {
-        "Plot": {
-          "title": "Square Wave Voltammetry"
-        },
+        "Plot": {"title": "Square Wave Voltammetry"},
         "Peak Picking": {},
-        "CV Parameters": {
-          "filters": [
-            {
-              "key": "peak",
-              "operation": "x > 0.0"
-            },
-            {
-              "key": "rel_shape_factor",
-              "operation": "x > 0.1"
-            }
-          ],
-          "selection": {
-            "key": "peak",
-            "operation": "max(x)"
-          }
-        }
+        "CV Parameters": {}
       }
     },
     "CV": {
@@ -44,23 +27,17 @@
       "parameters": {
         "TechniqueParameters": {
           "Voltage Profile": {
-            "value": [0.5, 0.5, 0, 0.5, 0.5]
+            "value": [0, 0, -1.3, 0, 0]
           },
           "Number of Cycles": {
             "value": 50
           },
           "Scan Rate": {
-            "value": [0.05, 0.05, 0.05, 0.05, 0.05]
+            "value": [0.50, 0.50, 0.50, 0.50, 0.50]
           }
         }
       },
-      "update_parameters": [
-        {
-          "parameter" : "Voltage Profile",
-          "from measurement": "SWV",
-          "key": "CV Parameters"
-        }
-      ],
+      "update_parameters": [],
       "analysis_settings": {
         "Plot": {
           "title": "Cyclic Voltammetry"
@@ -70,12 +47,12 @@
       }
     }
   },
-  "Sample Volume": 1.0,
+  "Sample Volume": 0.0,
   "Total Volume": 5.0,
   "Discard Sample": false,
   "Purge": 30,
   "Wash": {
     "wash_volume": 5.0,
-    "washing_cycles": 0
+    "washing_cycles": 1
   }
 }

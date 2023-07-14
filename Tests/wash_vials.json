@@ -1,0 +1,12 @@
+{
+  "Protocol Name": "Potentials and Stability",
+  "Steps": {},
+  "Sample Volume": 1.0,
+  "Total Volume": 5.0,
+  "Discard Sample": true,
+  "Purge": 30,
+  "Wash": {
+    "wash_volume": 5.0,
+    "washing_cycles": 0
+  }
+}
