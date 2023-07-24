@@ -22,14 +22,14 @@ manager: WorkflowManager = WorkflowManager(
 #   - Cell cleaning after the measurements
 
 manager.submit_samples([
-    # {"sample_name": "Fe-bpy-55COOH", "sample_location": 1, "workflow_path": Path("test_stability_routine.json")},
-    # {"sample_name": "diquatC1C3Br2", "sample_location": 2, "workflow_path": Path("test_stability_negative.json")},
-    # {"sample_name": "wash", "sample_location": 3, "workflow_path": Path("wash_vials.json")},
-    # {"sample_name": "Fe-bpy-44OMe", "sample_location": 4, "workflow_path": Path("test_stability_routine.json")},
-    # {"sample_name": "diquat-44Me-C2Br2", "sample_location": 5, "workflow_path": Path("test_stability_negative.json")},
-    # {"sample_name": "diquat-55NMePh-C2Br2", "sample_location": 6, "workflow_path": Path('')},
-    {"sample_name": "wash", "sample_location": 7, "workflow_path": Path("wash_vials.json")}
-    # {"sample_name": "Fe-bpy-55COOH-old", "sample_location": 8, "workflow_path": Path("test_stability_routine.json")}
+    # {"sample_name": "transquat-C2Cl2", "sample_location": 2, "workflow_path": Path("test_stability_negative.json")},
+    # {"sample_name": "diquat-C2C2Br2", "sample_location": 1, "workflow_path": Path("test_stability_negative.json")}
+    # {"sample_name": "CYR-181", "sample_location": 3, "workflow_path": Path("test_stability_negative.json")},
+    # {"sample_name": "wash", "sample_location": 4, "workflow_path": Path("wash_vials.json")},
+    # {"sample_name": "diquat-44Me-C2Br2", "sample_location": 5, "workflow_path": Path("test_stability_negative.json")}
+    {"sample_name": "wash", "sample_location": 6, "workflow_path": Path('wash_vials.json')}
+    # {"sample_name": "wash", "sample_location": 7, "workflow_path": Path("wash_vials.json")},
+    # {"sample_name": "wash", "sample_location": 8, "workflow_path": Path("wash_vials.json")}
     # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_stability_routine.json")}
 ])
 
@@ -38,3 +38,5 @@ manager.start_system()
 # TODO: Yang is there a way to skip current run and go to the next experiment/job
 # TODO: Yang implement a way to find the dominant peak (integration) and ignor peaks less than 10% of the height
 # TODO: After negative square wave, time.sleep for 30 sec so that voltage can recover
+# initial wash always added vial to reaction although v=0 m/l???
+# initial port always to WASTE

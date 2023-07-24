@@ -1,10 +1,10 @@
 {
-  "Protocol Name": "Potentials and Stability",
+  "Protocol Name": "Washing the sample vial",
   "Steps": {},
   "Sample Volume": 0.0,
-  "Total Volume": 5.0,
+  "Total Volume": 0.0,
   "Discard Sample": true,
-  "Purge": 30,
+  "Purge": 10,
   "Wash": {
     "wash_volume": 5.0,
     "washing_cycles": 0
