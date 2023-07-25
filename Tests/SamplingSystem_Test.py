@@ -5,7 +5,7 @@ from src.etoad.Utils import timestamp_datetime, get_dropbox_path
 from src.etoad.Interface import GraphicalInterface
 
 
-PARENT_DIR = get_dropbox_path() / "Lab Manager Aspuru-Guzik" /"PythonScript" / "EChem" / "Settings"
+PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "logger_settings_v2.json",
@@ -23,18 +23,18 @@ sampler.dilute_cell(volume=5)
 
 sampler.disconnect()
 
-# Transfers 1.0 mL from the autosampler position 6 to the cell
+# Transfers 0.5 mL from the autosampler position 9 to the cell
 
 sampler.transfer_to_cell(
-    source_port=6,
-    volume=1.0,
+    source_port=9,
+    volume=0.5,
     wash_line=True
 )
-
-
-# Washes the cell with 3 x 5 mL washing solvent
-
-sampler.wash_cell(
-    wash_volume=5.0,
-    cycles=1
-)
+#
+#
+# # Washes the cell with 3 x 5 mL washing solvent
+#
+# sampler.wash_cell(
+#     wash_volume=5.0,
+#     cycles=1
+# )
