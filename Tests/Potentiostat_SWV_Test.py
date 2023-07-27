@@ -24,7 +24,7 @@ def do_measurement():
     )
 
     # logger.sample_name = "K4[Fe(CN)6]"
-    logger.sample_name = "Fe-bpy4Me4COONa"
+    logger.sample_name = "Fe-bpy-4COOH"
 
     results = potentiostat.do_measurement(
         technique="SWV",
@@ -33,9 +33,9 @@ def do_measurement():
                 "no_iterations": 1
             },
             "TechniqueParameters": {
-                "Initial Voltage": {"value": 1.0},
+                "Initial Voltage": {"value":0},
                 "Rest Time": {"value": 10},
-                "Final Voltage": {"value": 0},
+                "Final Voltage": {"value": 1.2},
             }
         }
     )
@@ -44,7 +44,7 @@ def do_measurement():
     filename = PARENT_DIR.parent / "Data" / f"SWV_test_{logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
     potentiostat.disconnect()
-    logger.stop_gui()
+    # logger.stop_gui()
 
 
 worker_thread = threading.Thread(target=do_measurement)

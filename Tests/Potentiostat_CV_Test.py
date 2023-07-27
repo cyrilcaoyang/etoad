@@ -23,8 +23,8 @@ def do_measurement():
         simulation_mode=False,
     )
 
-    # logger.sample_name = "K4[Fe(CN)6]"
-    logger.sample_name = "Fe-bpy4Me4COONa"
+    logger.sample_name = "K4[Fe(CN)6]"
+    # logger.sample_name = "Fe-bpy-5COOH"
 
     results = potentiostat.do_measurement(
         technique="CV",
@@ -34,13 +34,13 @@ def do_measurement():
             },
             "TechniqueParameters": {
                 "Voltage Profile": {
-                    "value": [0.6, 0.6, 0.90, 0.6, 0.6]
+                    "value": [0, 0, 0.5, 0, 0]
                 },
                 "Scan Rate": {
                     "value": [0.10, 0.10, 0.10, 0.10, 0.10]
                 },
                 "Number of Cycles": {
-                    "value": 5
+                    "value": 50
                 }
             }
         }
@@ -50,7 +50,7 @@ def do_measurement():
     filename = PARENT_DIR.parent / "Data" / f"CV_test_{logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
     potentiostat.disconnect()
-    logger.stop_gui()
+    # logger.stop_gui()
 
 
 worker_thread = threading.Thread(target=do_measurement)

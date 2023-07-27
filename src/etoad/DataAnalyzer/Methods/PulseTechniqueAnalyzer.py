@@ -149,9 +149,9 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             rel_height=rel_height
         )
         self._analysis_results[f"iteration_{iteration}"]["Peak Picking"] = self._get_peak_data(data_of_iteration, peaks_picked, peak_properties, redox_process)
-        print(f"{peaks_picked=}")
-        print(f"{peak_properties=}")
-        print(f"{redox_process=}")
+    #    print(f"{peaks_picked=}")
+    #    print(f"{peak_properties=}")
+    #    print(f"{redox_process=}")
 
     @staticmethod
     def _get_peak_data(

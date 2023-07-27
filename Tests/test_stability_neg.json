@@ -70,8 +70,8 @@
       }
     }
   },
-  "Sample Volume": 0.5,
-  "Total Volume": 5.0,
+  "Sample Volume": 1.0,
+  "Total Volume":5.0,
   "Discard Sample": false,
   "Purge": 30,
   "Wash": {
