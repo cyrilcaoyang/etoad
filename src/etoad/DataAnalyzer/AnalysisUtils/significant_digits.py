@@ -12,5 +12,5 @@ def significant_digits(number: Union[int, float, np.float64], no_digits: int = 3
         no_digits: Number of significant figures.
     """
     no_decimal_places = -int(floor(log10(abs(number)))) + no_digits - 1
-    round_number = float(round(number, no_decimal_places))
-    return round_number
+    return float(round(number, no_decimal_places))
+    
