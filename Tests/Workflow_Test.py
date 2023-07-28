@@ -35,8 +35,7 @@ manager.submit_samples([
 
 manager.start_system()
 
-# TODO: Yang is there a way to skip current run and go to the next experiment/job
-# TODO: Yang implement a way to find the dominant peak (integration) and ignor peaks less than 10% of the height
-# TODO: After negative square wave, time.sleep for 30 sec so that voltage can recover
-# initial wash always added vial to reaction although v=0 m/l???
-# initial port always to WASTE
+# TODO: come up with a way to skip current run and go to the next experiment/job
+# TODO: after negative square wave, time.sleep for 30 sec so that voltage can recover/or start CV from OCV
+# TODO: option to turn off GUI
+# TODO: change initial port to WASTE

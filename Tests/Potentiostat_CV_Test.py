@@ -1,6 +1,4 @@
 import threading
-from pathlib import Path
-
 import numpy
 
 from src.etoad.HardwareController.Potentiostat.EChemController import EChemController
@@ -50,7 +48,7 @@ def do_measurement():
     filename = PARENT_DIR.parent / "Data" / f"CV_test_{logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
     potentiostat.disconnect()
-    # logger.stop_gui()
+    logger.stop_gui()
 
 
 worker_thread = threading.Thread(target=do_measurement)
