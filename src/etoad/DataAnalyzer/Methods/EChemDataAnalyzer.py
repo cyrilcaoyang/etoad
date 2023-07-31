@@ -4,7 +4,7 @@ from typing import Tuple
 
 import numpy as np
 
-from src.etoad.Utils import ConfigLoader
+from ...Utils import ConfigLoader
 
 
 class EChemDataAnalyzer(metaclass=ABCMeta):

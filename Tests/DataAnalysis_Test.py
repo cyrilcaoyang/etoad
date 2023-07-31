@@ -1,7 +1,8 @@
 import numpy as np
-from src.etoad.DataAnalyzer import DataAnalyzer
-from src.etoad.Interface import GraphicalInterface
-from src.etoad.Utils import timestamp_datetime, get_dropbox_path
+
+from etoad.DataAnalyzer import DataAnalyzer
+from etoad.Interface import GraphicalInterface
+from etoad.Utils import timestamp_datetime, get_dropbox_path
 import pickle
 from pathlib import Path
 

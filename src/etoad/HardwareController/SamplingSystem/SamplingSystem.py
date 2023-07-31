@@ -5,7 +5,7 @@ from logging import Logger
 
 from .TecanPump import TecanPump
 from .AtmosphereHandler import AtmosphereHandler
-from src.etoad.Utils import ConfigLoader
+from ...Utils import ConfigLoader
 
 class SamplingSystem:
     """
