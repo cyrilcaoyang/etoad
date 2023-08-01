@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 from scipy.signal import find_peaks
 
-from .EChemDataAnalyzer import EChemDataAnalyzer
+from ..Methods import EChemDataAnalyzer
 from ..AnalysisUtils import rubberband_baseline_removal, estimate_noise, filter_peaks, select_peaks
 from ..AnalysisUtils import DataVisualizer
 from ..AnalysisUtils import significant_digits
@@ -149,9 +149,9 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             rel_height=rel_height
         )
         self._analysis_results[f"iteration_{iteration}"]["Peak Picking"] = self._get_peak_data(data_of_iteration, peaks_picked, peak_properties, redox_process)
-    #    print(f"{peaks_picked=}")
-    #    print(f"{peak_properties=}")
-    #    print(f"{redox_process=}")
+        # print(f"iteration_{iteration}_{peaks_picked=}") # TODO use logging
+        # print(f"iteration_{iteration}_{peak_properties=}")
+        # print(f"iteration_{iteration}_{redox_process=}")
 
     @staticmethod
     def _get_peak_data(
@@ -174,13 +174,14 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
         if not peaks_picked.any():
             return peaks
-
+        print(f"{peaks_picked}")
         if "peak_heights" in peak_properties.keys():
             max_shape_factor = max([peak_properties["peak_heights"][i] / peak_properties["widths"][i] for i in range(len(peaks_picked))])
         else:
             peak_properties["peak_heights"] = [np.nan]*peaks_picked.size
             max_shape_factor = np.nan
-            print("No peak selected!")
+            print("No peak selected!")  # TODO use logging
+            return peaks
 
         for i, peak_idx in enumerate(peaks_picked):
             onset_idx = int(peak_properties["left_ips"][i])

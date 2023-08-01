@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from src.etoad import WorkflowManager
-from src.etoad.Utils import timestamp_datetime
+from etoad import WorkflowManager
+from etoad.Utils import timestamp_datetime
 
 PARENT_DIR = Path(__file__).parent
 

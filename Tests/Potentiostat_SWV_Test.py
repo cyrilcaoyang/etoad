@@ -1,9 +1,9 @@
 import threading
 import numpy
 
-from src.etoad.HardwareController.Potentiostat.EChemController import EChemController
-from src.etoad.Interface import GraphicalInterface
-from src.etoad.Utils import timestamp_datetime, get_dropbox_path
+from etoad.HardwareController.Potentiostat.EChemController import EChemController
+from etoad.Interface import GraphicalInterface
+from etoad.Utils import timestamp_datetime, get_dropbox_path
 
 PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 

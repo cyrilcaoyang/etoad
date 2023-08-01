@@ -101,10 +101,10 @@ class EClibDLLInterface(object):
         check_value: int = self._callable_functions[function_name](*args)
         #TODO TypeError: expected LP_DeviceInfo instance instead of DeviceInfo
 
-        # if not check_value == 0:
-        #     raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
-        #
-        # return check_value
+        if not check_value == 0:
+            raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
+
+        return check_value
 
     def _get_dll_file(
             self,

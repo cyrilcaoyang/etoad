@@ -28,16 +28,16 @@ logger = GraphicalInterface(
 #     raw_data=np.load(r"C:\Users\Lenovo\Desktop\The Matter Lab\python_echem\Test_Multi_CV.pkl", allow_pickle=True)
 # )
 
-data_analyzer: DataAnalyzer = DataAnalyzer(Path(r"C:\Users\Potentiostat_SP-300\Desktop\The Matter Lab\Test_Data"),logger=logger)
+data_analyzer: DataAnalyzer = DataAnalyzer(Path(__file__).parent / "test_files", logger=logger)
 data_analyzer.analyze_data(
-    sample_name="test2",
+    sample_name="analysis_SWV_scans",
     experiment_name="test",
     technique="SWV",
     analysis_settings={
         "Plot": {"title": "Test Multi-SWV Measurement"},
         "Peak Picking": {},
-        "CV Parameters":{},
+        "CV Parameters": {},
         "Integration": {}
     },
-    raw_data=np.load(r"C:\Users\Lenovo\Desktop\The Matter Lab\python_echem\Test_Cyclic_SWV.pkl", allow_pickle=True)
+    raw_data=np.load(Path(__file__).parent/ "test_files" /"Test_Cyclic_SWV.pkl", allow_pickle=True)
 )
