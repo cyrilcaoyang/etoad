@@ -16,7 +16,7 @@
       "operation": "max(x)"
     },
     "min_voltage": -1.3,
-    "max_voltage": 0.8,
+    "max_voltage": 1.2,
     "additional_voltage": 0.1
   },
   "Plot": {

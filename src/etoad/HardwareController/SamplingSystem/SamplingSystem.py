@@ -5,8 +5,7 @@ from logging import Logger
 
 from .TecanPump import TecanPump
 from .AtmosphereHandler import AtmosphereHandler
-from etoad.Utils import ConfigLoader
-
+from ...Utils import ConfigLoader
 
 class SamplingSystem:
     """
@@ -44,13 +43,16 @@ class SamplingSystem:
         "waste_port"
     }
 
-    def __init__(self, config_file: Path, logger: Logger, initial_wash: int = 1, cell_filled: bool = True):
+    def __init__(self, config_file: Path, logger: Logger,
+#                 hotplate: Hotplate,
+                 initial_wash: int = 1, cell_filled: bool = True):
         """
         Creates an instance of the SamplingSystem class.
 
         Args:
             config_file: Path to the configuration file. Needs to contain the specified keys in self.required_settings.
             logger: Logger object
+            hotplate: Hotplate object
             initial_wash: Number of initial washing steps. Default: 3  # TODO: Refactor to pump_wash or a similar name to not confuse it with cell_wash
         """
 
@@ -203,7 +205,4 @@ class SamplingSystem:
         """
         self._pump.manager.close()
         self._logger.info("Connection to the sampling system was successfully closed.")
-
-
-
 

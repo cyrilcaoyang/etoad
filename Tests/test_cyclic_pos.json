@@ -1,0 +1,38 @@
+{
+  "Protocol Name": "CV Iterations",
+  "Steps": {
+    "CV": {
+      "task": "measure",
+      "technique": "CV",
+      "parameters": {
+            "IterationSettings": {
+                "no_iterations": 1
+            },
+            "TechniqueParameters": {
+                "Voltage Profile": {
+                    "value": [0.5, 0.5, 1.2, 0.5, 0.5]
+                },
+                "Number of Cycles": {
+                    "value": 100
+                }
+            }
+      },
+      "update_parameters": [],
+      "analysis_settings": {
+        "Plot": {
+          "title": "Cyclic Voltammetry"
+        },
+        "Peak Picking": {},
+        "Integration": {}
+      }
+    }
+  },
+  "Sample Volume": 0.5,
+  "Total Volume": 5.0,
+  "Discard Sample": false,
+  "Purge": 30,
+  "Wash": {
+    "wash_volume": 5.0,
+    "washing_cycles": 1
+  }
+}

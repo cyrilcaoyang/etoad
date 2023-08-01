@@ -23,20 +23,18 @@ sampler.dilute_cell(volume=5)
 
 sampler.disconnect()
 
-"""
-# Transfers 1.0 mL from autosampler position 1 to the cell
+# Transfers 0.5 mL from the autosampler position 9 to the cell
 
 sampler.transfer_to_cell(
-    source_port=1,
-    volume=1.0,
+    source_port=9,
+    volume=0.5,
     wash_line=True
 )
-
-
-# Washes the cell with 3 x 5 mL washing solvent
-
-sampler.wash_cell(
-    wash_volume=5.0,
-    cycles=1
-)
-"""
+#
+#
+# # Washes the cell with 3 x 5 mL washing solvent
+#
+# sampler.wash_cell(
+#     wash_volume=5.0,
+#     cycles=1
+# )
