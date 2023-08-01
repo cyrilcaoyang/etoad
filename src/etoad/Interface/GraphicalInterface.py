@@ -32,7 +32,13 @@ class GraphicalInterface(Logger):
     light_color = "#fff"
     highlight_color = "#048145"
 
-    def __init__(self, logging_config: Path, log_file: Optional[Path] = None, refresh_rate: float = 5):
+    def __init__(
+            self,
+            logging_config: Path,
+            log_file: Optional[Path] = None,
+            refresh_rate: float = 5,
+            disable_gui: bool = False
+    ):
         """
         Constructor of the GraphicalInterface (combined logger and tkinter GUI).
 
@@ -49,20 +55,23 @@ class GraphicalInterface(Logger):
             logging_config: Path to the json file that contains the logging configuration.
             log_file: Path to the log file (optional).
             refresh_rate: Refresh rate for the plots (in Hz)
+            disable_gui: Boolean to disable the GUI.
         """
         Logger.__init__(self, "EChem", "DEBUG")
 
         self._measurement_details: dict = {"sample": "Initialization", "experiment": "Establishing Connections"}
         self._refresh_time = int(1000 / refresh_rate)
         self._terminate = False
-
-        self._gui: tk.Tk = tk.Tk()
-        self._gui_details: dict = dict()
-        self._setup_gui()
+        self._disable_gui = disable_gui
 
         self._figure = Figure()
         self._figure_details: dict = dict()
-        self._setup_plot()
+
+        if not disable_gui:
+            self._gui: tk.Tk = tk.Tk()
+            self._gui_details: dict = dict()
+            self._setup_gui()
+            self._setup_plot()
 
         self._setup_logging(logging_config, log_file)
 
@@ -100,7 +109,11 @@ class GraphicalInterface(Logger):
         self._gui_details["log_record"].pack(in_=self._gui_details["log_window"], expand=True, fill="both", side="left")
         self._gui_details["log_window"].pack(side="bottom", fill="both", padx=20, pady=10)
 
-    def _setup_logging(self, config_file: Path, log_file: Optional[Path] = None) -> None:
+    def _setup_logging(
+            self,
+            config_file: Path,
+            log_file: Optional[Path] = None,
+    ) -> None:
         """
         Private method to set up all formatters and handlers for the logging machinery.
         Parses the logging config dictionary (format standards as required by the logging module).
@@ -122,6 +135,8 @@ class GraphicalInterface(Logger):
 
             # Specific treatment for GenericHandler (logging via GUI) and FileHandler (optional setting of logfile).
             if handler_type == "GenericHandler":
+                if self._disable_gui:
+                    continue
                 settings["logging_function"] = self._log_message
             if handler_type == "logging.FileHandler" and log_file:
                 settings["filename"] = str(log_file)
@@ -213,6 +228,9 @@ class GraphicalInterface(Logger):
         Public method to open the GUI window.
         Blocks the main thread – after execution of this function, it can only be terminated from other threads.
         """
+        if self._disable_gui:
+            return
+
         _ = animation.FuncAnimation(self._figure, lambda x: None, interval=self._refresh_time)
         self._check_for_termination()
         self._gui.mainloop()
@@ -264,6 +282,9 @@ class GraphicalInterface(Logger):
             x_values: 1D Numpy array of x values to plot
             y_values: 1D Numpy array of y values to plot
         """
+        if self._disable_gui:
+            return
+
         try:
             self._figure_details["plot"].clear()
             self._figure_details["plot"].set_xlabel(self._figure_details["x_axis_title"], fontname="Arial", fontweight="bold")

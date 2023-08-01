@@ -48,7 +48,8 @@ class WorkflowManager(object):
             potentiostat_settings: Path,
             sampler_settings: Path,
             data_path: Path,
-            logfile: Optional[Path] = None
+            logfile: Optional[Path] = None,
+            disable_gui: bool = False
     ):
         """
         Instantiates the workflow manager object by instantiating the individual modules:
@@ -63,9 +64,10 @@ class WorkflowManager(object):
             sampler_settings: Path to the json file containing the sampler settings
             data_path: Path to the folder where data should be stored.
             logfile: Optional - name of the logfile used.
+            disable_gui: Optional - if True, the GUI will not be started.
         """
         # TODO: Refactor to hide private attributes
-        self.logger: GraphicalInterface = GraphicalInterface(logger_settings, log_file=logfile)
+        self.logger: GraphicalInterface = GraphicalInterface(logger_settings, log_file=logfile, disable_gui=disable_gui)
         self.potentiostat_settings = potentiostat_settings
         self.sampler_settings = sampler_settings
         self.data_path = data_path

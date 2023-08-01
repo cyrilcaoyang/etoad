@@ -19,7 +19,7 @@ class TkErrorCatcher:
             return self.func(*args)
         except SystemExit as msg:
             raise SystemExit(msg)
-        except IndexError:
+        except (IndexError, AttributeError):
             return
         except Exception as err:
             raise err

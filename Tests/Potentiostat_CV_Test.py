@@ -9,7 +9,9 @@ PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "logger_settings_v2.json",
-    log_file=PARENT_DIR / "logs" / f"Test_Potentiostat_{timestamp_datetime()}.log"
+    log_file=PARENT_DIR / "logs" / f"Test_Potentiostat_{timestamp_datetime()}.log",
+    disable_gui=True  # ATTN: Just an example of how to use the disable_gui argument
+
 )
 
 
