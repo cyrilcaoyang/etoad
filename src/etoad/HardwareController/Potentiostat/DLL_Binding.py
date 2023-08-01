@@ -2,6 +2,7 @@
 __author__ = 'Felix Strieth-Kalthoff'
 
 import ctypes
+import time
 from pathlib import Path
 from logging import Logger
 from typing import Any, Union, Callable
@@ -98,13 +99,19 @@ class EClibDLLInterface(object):
             self.logger.info(f"SIMULATION: Now executing DLL Method {function_name}.")
             return
 
-        check_value: int = self._callable_functions[function_name](*args)
-        #TODO TypeError: expected LP_DeviceInfo instance instead of DeviceInfo
+        for _ in range(3):
 
-        if not check_value == 0:
-            raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
+            check_value: int = self._callable_functions[function_name](*args)
 
-        return check_value
+            if check_value == 0:
+                return check_value
+
+            time.sleep(1)
+        # if not check_value == 0:
+        #     raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
+
+        raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
+
 
     def _get_dll_file(
             self,
