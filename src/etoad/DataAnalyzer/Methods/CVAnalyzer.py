@@ -37,9 +37,6 @@ class CVAnalyzer(EChemDataAnalyzer):
             iteration_data = self._raw_data[no_iteration]
             no_cycles: int = int(np.max(iteration_data[:, 3]) + 1)
             self._raw_data[no_iteration] = [iteration_data[iteration_data[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
-        # print(self._raw_data[no_iteration])
-        # no_cycles: int = int(np.max(self._raw_data[3]))       # TODO: Yang 2023 not sure why these codes are here
-        # self._raw_data = [self._raw_data[self._raw_data[3] == cycle] for cycle in range(skip_cycles, no_cycles)]
 
     def _set_methods(
             self
