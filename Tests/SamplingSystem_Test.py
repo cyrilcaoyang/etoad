@@ -9,7 +9,7 @@ PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "logger_settings_v2.json",
-    log_file=Path(f"Test_Sampling_System_{timestamp_datetime()}.log")
+    log_file=PARENT_DIR / "logs" / f"Test_Sampling_System_{timestamp_datetime()}.log"
 )
 
 sampler = SamplingSystem(
