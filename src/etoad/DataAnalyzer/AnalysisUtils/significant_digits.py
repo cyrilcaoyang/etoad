@@ -11,7 +11,6 @@ def significant_digits(number: Union[int, float, np.float64], no_digits: int = 3
         number: Value to be rounded
         no_digits: Number of significant figures.
     """
-    print(number)
     no_decimal_places = -int(floor(log10(abs(number)))) + no_digits - 1
     return float(round(number, no_decimal_places))
     
