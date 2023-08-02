@@ -59,7 +59,7 @@ class DataAnalyzer:
         """
         sample_dir, basename = self._get_target_folder(sample_name, experiment_name)
 
-        analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](analysis_settings, raw_data)
+        analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](analysis_settings, raw_data, self._logger)
         analysis_results, figures = analyzer.run_analysis()
         self._logger.info(f"Data Analysis Completed: {analysis_results}")
 

@@ -20,8 +20,8 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
     """
     analysis_method_name: str = "PulsedTechniques"
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._separate_iterations()
 
     @staticmethod
@@ -48,7 +48,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
     @staticmethod
     def _classify_oxidation_reduction(
             data_of_iteration: np.ndarray
-    ) -> dict:
+    ) -> str:
         """
         Classify each iteration of Multi_SWV data as oxidation/reduction.
         Change ndarry to dictionary of ndarry. Key is oxidation/reduction.
@@ -56,6 +56,9 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
         Args:
             data_of_iteration: One iteration from Multi-SWV raw data.
+
+        Returns:
+            "oxidation" or "reduction"
         """
         if data_of_iteration[:, 1][0] < data_of_iteration[:, 1][-1]:
             return "oxidation"
@@ -223,9 +226,9 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             min_voltage: float,
             max_voltage: float,
             additional_voltage: float,
+            from_iteration: int,
             **kwargs
     ) -> None:
-        #TODO: ReImplement this function to match the new data structure of the _raw_data
         """
         Selects the desired peak from the peak picking results for CV analysis.
         Filters the peaks (applying filter operations), then selects the specified peak from the filtered peak list.
@@ -238,30 +241,35 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
              max_voltage: Maximum voltage allowed for CV measurements.
              min_peak_onset: Minimum voltage allowed for CV measurements.
              additional_voltage: Voltage range beyond the peak onset/offset to be scanned.
+             from_iteration: Index of the pulsed technique iteration from which to infer the CV parameters.
         """
-        cv_parameters = np.zeros((len(self._raw_data), 5))      # TODO: Yang 2023 ndarray is not JSON serializable
-        for no_iteration in range(len(self._raw_data)):
-            min_peak_onset, max_peak_offset = min_voltage, max_voltage
-            try:
-                filtered_peaks: list = filter_peaks(self._analysis_results[f"iteration_{no_iteration}"]["Peak Picking"], filters)
-                selected_peak_idx, selected_peak = select_peaks(filtered_peaks, selection)
-            except (TypeError, ValueError):
-                continue
+        min_peak_onset, max_peak_offset = min_voltage, max_voltage
 
-            # determine onset and offset of previous / next peak to determine cv boundaries
-            for peak in self._analysis_results[f"iteration_{no_iteration}"]["Peak Picking"]:
+        try:
+            filtered_peaks: list = filter_peaks(self._analysis_results[f"iteration_{from_iteration}"]["Peak Picking"], filters)
+            selected_peak_idx, selected_peak = select_peaks(filtered_peaks, selection)
+
+            # determine onset and offset of previous / next peak to make sure that CV is not measured over multiple
+            # peaks
+            for peak in self._analysis_results[f"iteration_{from_iteration}"]["Peak Picking"]:
                 if peak["peak"] < selected_peak["peak"]:
                     min_peak_onset = peak["offset"]
                 elif peak["peak"] > selected_peak["peak"]:
                     max_peak_offset = peak["onset"]
 
-            min_peak_onset = float(max(min_peak_onset, selected_peak["onset"] - additional_voltage))
-            max_peak_offset = float(min(max_peak_offset, selected_peak["offset"] + additional_voltage))
+            cv_onset = float(max(min_peak_onset, selected_peak["onset"] - additional_voltage))
+            cv_offset = float(min(max_peak_offset, selected_peak["offset"] + additional_voltage))
 
-            cv_parameters[no_iteration] = [max_peak_offset, max_peak_offset, min_peak_onset, max_peak_offset, max_peak_offset]
+            if cv_onset > selected_peak["onset"] or cv_offset < selected_peak["offset"]:
+                self._logger.warning("Peak overlap on the pulsed technique measurement. CV parameters must be treated"
+                                     "with caution. ")
 
-        self._analysis_results["CV Parameters"] = cv_parameters[0].tolist()   # TODO: Yang's temporary fix
-        # TODO: implement logging, warnings (e.g. for overlapping peaks), STOP and SKIP keywords
+            cv_parameters = [cv_offset, cv_offset, cv_onset, cv_offset, cv_offset]
+
+        except (TypeError, ValueError):
+            cv_parameters = "SKIP"
+
+        self._analysis_results["CV Parameters"] = cv_parameters
 
     def _plot(
             self,

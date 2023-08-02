@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Tuple
+from logging import Logger
 
 import numpy as np
 
@@ -27,7 +28,8 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
     def __init__(
             self,
             analysis_settings: dict,
-            raw_data: np.ndarray
+            raw_data: np.ndarray,
+            logger: Logger
     ):
         """
         Instantiates the EChemDataAnalyzer.
@@ -36,6 +38,7 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
             analysis_settings: Dictionary of all possible analysis steps as keys and the respective specifications.
                                Provided settings override the default configs given in $analysis_method_name$.json
             raw_data: Numpy ndarray of the raw experimental data.
+            logger: Logger object
 
         Sets the following attributes:
             self._analysis_steps: Specifications for each analysis step (from default and passed configs)
@@ -44,6 +47,8 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
             self._analysis_results: Dictionary of all analysis results per analysis step.
             self._figures: Dictionary of all generated Figure objects.
         """
+        self._logger: Logger = logger
+
         self._analysis_steps: dict = self._get_config(analysis_settings)
 
         self._analysis_methods: dict = {}
@@ -52,8 +57,6 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
         self._raw_data: np.ndarray = raw_data
         self._analysis_results: dict = dict()
         self._figures: dict = dict()
-
-
 
     @abstractmethod
     def _set_methods(
