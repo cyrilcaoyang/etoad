@@ -67,7 +67,7 @@ class GraphicalInterface(Logger):
         self._figure = Figure()
         self._figure_details: dict = dict()
 
-        if not disable_gui:
+        if disable_gui is False:
             self._gui: tk.Tk = tk.Tk()
             self._gui_details: dict = dict()
             self._setup_gui()
@@ -190,7 +190,9 @@ class GraphicalInterface(Logger):
             sample_name: New sample name to be set.
         """
         self._measurement_details["sample"] = sample_name
-        self._gui_details["title_label"]["text"] = self.title
+
+        if not self._disable_gui:
+            self._gui_details["title_label"]["text"] = self.title
 
     @property
     def experiment_name(self) -> str:
@@ -211,7 +213,9 @@ class GraphicalInterface(Logger):
             experiment_name: Name of the experiment
         """
         self._measurement_details["experiment"] = experiment_name
-        self._gui_details["title_label"]["text"] = self.title
+
+        if not self._disable_gui:
+            self._gui_details["title_label"]["text"] = self.title
 
     @property
     def title(self) -> str:

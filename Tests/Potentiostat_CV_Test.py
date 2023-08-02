@@ -34,7 +34,7 @@ def do_measurement():
             },
             "TechniqueParameters": {
                 "Voltage Profile": {
-                    "value": [0, 0, 0.5, 0, 0]
+                    "value": [0, 0, 1, 0, 0]
                 },
                 "Scan Rate": {
                     "value": [0.10, 0.10, 0.10, 0.10, 0.10]
