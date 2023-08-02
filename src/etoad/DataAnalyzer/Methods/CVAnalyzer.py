@@ -207,6 +207,9 @@ class CVAnalyzer(EChemDataAnalyzer):
         # ATTN: Do we always want to generate one plot per iteration, or do we want the option to get all data
         #       in one plot? (FSK, Sep 13)
 
+        if len(self._raw_data) == 0:
+            return
+
         for no_iteration in range(len(self._raw_data)):
             figure = DataVisualizer.plot_multiple_curves(
                 data_to_plot=[(cycle[:, 1], cycle[:, 2]) for cycle in self._raw_data[no_iteration]],
@@ -217,8 +220,9 @@ class CVAnalyzer(EChemDataAnalyzer):
             )
 
             self._figures[f"CV_iteration_{no_iteration}"] = figure
+
         figure = DataVisualizer.plot_multiple_curves(
-            data_to_plot=[(np.vstack(iteration)[:,1], np.vstack(iteration)[:, 2]) for iteration in self._raw_data],
+            data_to_plot=[(np.vstack(iteration)[:, 1], np.vstack(iteration)[:, 2]) for iteration in self._raw_data],
             x_label="Voltage / V",
             y_label="Current / A",
             title="CV_plot",
