@@ -91,7 +91,7 @@ class SamplingSystem:
         )
 
         self._pump.set_velocity(self._config["default_velocity"])
-
+        self._logger.info(f"Pump initialization started.")
         self._wash_pump(initial_wash)
 
     def _set_ports(self) -> None:
@@ -100,6 +100,7 @@ class SamplingSystem:
         """
         for port in self.defined_ports:
             setattr(self, port, self._config[port])
+        self._logger.debug(f"Pump default ports configured.")
 
     def transfer_to_cell(self, source_port: int, volume: float, wash_line: bool = False) -> None:
         """
@@ -113,9 +114,11 @@ class SamplingSystem:
         if wash_line:
             self._pump.draw_and_dispense(source_port, self.waste_port, self._config["dead_volume"], wait=1)
             self._wash_pump(1)
+            self._logger.debug(f"Line from port {source_port} washed once.")
 
         self._pump.draw_and_dispense(source_port, self.cell_port, volume + self._config["dead_volume"], wait=2)
         self._update_cell_volume(volume)
+        self._logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
 
     def dilute_cell(self, volume: float = 0, factor: float = 1) -> None:
         """
@@ -127,8 +130,11 @@ class SamplingSystem:
         """
         if volume == 0:
             volume = self._cell_volume * (factor - 1)
+            if factor > 1:
+                self._logger.info(f"The Measurement Cell was diluted by a factor of {factor}.")
 
         self.transfer_to_cell(self.wash_port, volume)
+        self._logger.debug(f"The cell was diluted by {volume} mL of wash solution.")
 
     def purge_cell(self, purge_time: float = 10) -> None:
         """
@@ -149,6 +155,8 @@ class SamplingSystem:
         for _ in range(cycles):
             self._pump.draw_and_dispense(self.wash_port, self.waste_port, self._config["pump_volume"], wait=1)
 
+        self._logger.info(f"Pump washed {cycles} times.")
+
     def wash_autosampler_position(self, sampler_position: int, no_cycles: int = 3) -> None:
         """
         Discards a sample in the autosampler and washes the vial.
@@ -162,16 +170,18 @@ class SamplingSystem:
         for _ in range(no_cycles):
             self._pump.draw_and_dispense(self.wash_port, sampler_position, 5)
             self._pump.draw_and_dispense(sampler_position, self.waste_port, 6)
+        self._logger.info(f"Sample position {sampler_position} was washed {no_cycles} times.")
 
     def wash_cell(self, wash_volume: float, cycles=3) -> None:
         """
         Washes the cell for n times:
-            - first time: 15 mL of wash solution to wash off also the sides of the measurement cell
+            - first time: 18 mL of wash solution to wash off also the sides of the measurement cell
             - other n-1 times: given volume of the wash solution.
         """
+        self._logger.debug(f"Measurement Cell will be washed {cycles} times.")
         self._empty_cell()
 
-        self.transfer_to_cell(self.wash_port, 15)
+        self.transfer_to_cell(self.wash_port, 18)
         time.sleep(5)
         self._empty_cell()
 
@@ -180,15 +190,18 @@ class SamplingSystem:
             time.sleep(5)
             self._empty_cell()
 
-        self._logger.debug("Measurement Cell was successfully emptied and washed.")
+        self._logger.info(f"Measurement Cell was washed {cycles} times and emptied.")
 
     def _empty_cell(self):
         """
         Removes the entire amount of liquid from the cell.
         """
+        self._logger.debug(f"Measurement Cell to be emptied.")
+
         with self._atmosphere_handler.open_atmosphere():
             self._pump.draw_and_dispense(self.cell_port, self.waste_port, self._cell_volume + 2, wait=1)
             self._update_cell_volume(-self._cell_volume)
+            self._logger.debug(f"All liquid in Measurement Cell moved to waste.")
 
     def _update_cell_volume(self, volume: float) -> None:
         """
@@ -198,6 +211,7 @@ class SamplingSystem:
             volume: Volume added to (positive) / removed from (negative) the cell.
         """
         self._cell_volume += volume
+        self._logger.debug(f"The amount of liquid in the Measurement Cell is {self._cell_volume} mL.")
 
     def disconnect(self) -> None:
         """

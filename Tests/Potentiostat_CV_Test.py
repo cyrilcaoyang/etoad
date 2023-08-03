@@ -10,7 +10,7 @@ PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "logger_settings_v2.json",
     log_file=PARENT_DIR / "logs" / f"Test_Potentiostat_{timestamp_datetime()}.log",
-    disable_gui=True  # ATTN: Just an example of how to use the disable_gui argument
+    disable_gui=False  # ATTN: Just an example of how to use the disable_gui argument
 
 )
 
@@ -23,8 +23,8 @@ def do_measurement():
         simulation_mode=False,
     )
 
-    logger.sample_name = "K4[Fe(CN)6]"
-    # logger.sample_name = "Fe-bpy-5COOH"
+    # logger.sample_name = "K4[Fe(CN)6]"
+    logger.sample_name = "Fe-Ligand184"
 
     results = potentiostat.do_measurement(
         technique="CV",
@@ -34,10 +34,10 @@ def do_measurement():
             },
             "TechniqueParameters": {
                 "Voltage Profile": {
-                    "value": [0, 0, 1, 0, 0]
+                    "value": [0.8, 0.8, 1.3, 0.8, 0.8]
                 },
                 "Scan Rate": {
-                    "value": [0.10, 0.10, 0.10, 0.10, 0.10]
+                    "value": [0.05, 0.05, 0.05, 0.05, 0.05]
                 },
                 "Number of Cycles": {
                     "value": 50

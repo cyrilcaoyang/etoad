@@ -328,6 +328,7 @@ class WorkflowManager(object):
         """
         self.sampling_system.dilute_cell(**kwargs)
         results["dilution"] = True
+        self.logger.debug(f"Sample {sample_name} was diluted.")
 
         return results
 

@@ -22,7 +22,7 @@ def do_measurement():
     )
 
     # logger.sample_name = "K4[Fe(CN)6]"
-    logger.sample_name = "Fe-bpy-4COOH"
+    logger.sample_name = "Fe-Ligand184"
 
     results = potentiostat.do_measurement(
         technique="SWV",
@@ -31,9 +31,9 @@ def do_measurement():
                 "no_iterations": 1
             },
             "TechniqueParameters": {
-                "Initial Voltage": {"value":0},
+                "Initial Voltage": {"value": 1.3},
                 "Rest Time": {"value": 10},
-                "Final Voltage": {"value": 1.2},
+                "Final Voltage": {"value": 0},
             }
         }
     )
