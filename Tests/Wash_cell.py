@@ -19,3 +19,4 @@ sampler = SamplingSystem(
 )
 
 sampler.wash_cell(3)
+sampler.transfer_to_cell(source_port=12,volume=5, wash_line=True)

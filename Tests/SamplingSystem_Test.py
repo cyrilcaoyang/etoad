@@ -30,11 +30,11 @@ sampler.transfer_to_cell(
     volume=0.5,
     wash_line=True
 )
-#
-#
-# # Washes the cell with 3 x 5 mL washing solvent
-#
-# sampler.wash_cell(
-#     wash_volume=5.0,
-#     cycles=1
-# )
+
+# Washes the cell with 3 x 5 mL washing solvent
+
+sampler.wash_cell(
+    wash_volume=5.0,
+    cycles=1
+)
+

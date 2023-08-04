@@ -4,6 +4,7 @@ from typing import Optional, Callable, Tuple, Union, List
 import numpy as np
 from ..BioLogic import TECH_ID, PROG_STATE, CurrentValues, DataInfo, DataBuffer
 from ....Utils import ConfigLoader
+from logging import Logger
 
 
 class EChemMethod(metaclass=ABCMeta):
@@ -37,9 +38,11 @@ class EChemMethod(metaclass=ABCMeta):
 
     def __init__(
             self,
+            logger: Logger,
             path_to_binaries: Path
     ):
         self.method = path_to_binaries / self.method_file_name
+        self.logger: Logger = logger
 
     def __str__(
             self
@@ -148,8 +151,8 @@ class EChemMethod(metaclass=ABCMeta):
 
         return parsed_parameter
 
-    @staticmethod
     def _validate_parameter(
+            self,
             name: str,
             variable_type: str,
             value: Union[int, float, bool],
@@ -185,7 +188,8 @@ class EChemMethod(metaclass=ABCMeta):
 
         if constraints:
             if not eval(constraints, {"range": range}, {"x": value}):
-                raise ValueError(f"The value {value} violates the constraint {constraints} for the parameter {name}.")
+                self.logger.error(f"The value {value} violates the constraint {constraints} for the parameter {name}.")
+                raise ValueError(f"The value {value} violates the constraint for the parameter {name}.")
 
         if not index:
             return name, parameter_type, value
@@ -225,7 +229,8 @@ class EChemMethod(metaclass=ABCMeta):
                 parameters["TechniqueParameters"][key]["value"] = set_parameters["TechniqueParameters"][key]["value"]
                 if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key]:
                     parameters["TechniqueParameters"][key]["changed_over_iterations"] = False
-                else: set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
+                else:
+                    set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                 key_found = True
             else:
                 for param in parameters["TechniqueParameters"]:
@@ -233,11 +238,14 @@ class EChemMethod(metaclass=ABCMeta):
                         parameters["TechniqueParameters"][param]["value"] = set_parameters["TechniqueParameters"][key]["value"]
                         if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key]:
                             parameters["TechniqueParameters"][param]["changed_over_iterations"] = False
-                        else: set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
+                        else:
+                            set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                         key_found = True
 
             if not key_found:
-                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}.") # TODO: log this KeyError
+                self.logger.error(f"{key} was not found in the default settings for {self.method_name_short}.")
+                # TODO: make the logging a high-level public function.
+                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}.")
 
         return parameters
 
