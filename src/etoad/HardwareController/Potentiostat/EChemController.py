@@ -229,8 +229,10 @@ class EChemController(object):
             np.ndarray: 2D Numpy array (n_data_points, 4) of the results data
         """
         if not channel:
+            self.logger.debug(f"Loading default channel.")
             channel = self.default_channel
         else:
+            self.logger.debug(f"Loading channel {channel}.")
             channel = channel - 1
 
         self.technique = self._get_technique(technique)
@@ -248,6 +250,7 @@ class EChemController(object):
             iteration_results: np.ndarray = self._run_single_measurement(channel)
             iteration_results = np.hstack((iteration_results, np.full((iteration_results.shape[0], 1), iteration_num, dtype=int)))
             results = self._merge_data(results, iteration_results)
+            self.logger.info(f"Result of Iteration {iteration_num} recorded.")
 
         return results
 
@@ -270,6 +273,7 @@ class EChemController(object):
         """
         # Check for technique and channel information
         if not self.technique:
+            self.logger.info("No Method has been loaded.")
             raise ModuleNotFoundError("No Method has been loaded.")
 
         # Do the actual measurement
@@ -288,6 +292,7 @@ class EChemController(object):
 
                 except StopIteration:
                     if metadata["status"] == "STOP":
+                        self.logger.info(f"Measurement Stopped.")
                         break
                     continue
 

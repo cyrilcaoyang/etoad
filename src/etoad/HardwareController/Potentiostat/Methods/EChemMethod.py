@@ -223,17 +223,21 @@ class EChemMethod(metaclass=ABCMeta):
             key_found: bool = False
             if key in parameters["TechniqueParameters"]:
                 parameters["TechniqueParameters"][key]["value"] = set_parameters["TechniqueParameters"][key]["value"]
-                parameters["TechniqueParameters"][key]["changed_over_iterations"] = False if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key] else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
+                if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key]:
+                    parameters["TechniqueParameters"][key]["changed_over_iterations"] = False
+                else: set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                 key_found = True
             else:
                 for param in parameters["TechniqueParameters"]:
                     if key == parameters["TechniqueParameters"][param]["name"]:
                         parameters["TechniqueParameters"][param]["value"] = set_parameters["TechniqueParameters"][key]["value"]
-                        parameters["TechniqueParameters"][param]["changed_over_iterations"] = False if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key] else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
+                        if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key]:
+                            parameters["TechniqueParameters"][param]["changed_over_iterations"] = False
+                        else: set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                         key_found = True
 
             if not key_found:
-                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}.")
+                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}.") # TODO: log this KeyError
 
         return parameters
 
