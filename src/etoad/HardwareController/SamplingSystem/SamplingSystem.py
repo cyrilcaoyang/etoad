@@ -44,7 +44,6 @@ class SamplingSystem:
     }
 
     def __init__(self, config_file: Path, logger: Logger,
-#                 hotplate: Hotplate,
                  initial_wash: int = 1, cell_filled: bool = True):
         """
         Creates an instance of the SamplingSystem class.
@@ -58,9 +57,9 @@ class SamplingSystem:
 
         self._config: dict = ConfigLoader.load_config(config_file, self.required_settings)
 
-        self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(**self._config["relay_settings"])
-
         self._logger: Logger = logger
+
+        self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(**self._config["relay_settings"])
 
         self._pump: Union[XCPump, None] = None
         self.cell_port: Union[int, None] = None
@@ -72,12 +71,14 @@ class SamplingSystem:
         self._initialize_pump(initial_wash)
 
         if cell_filled:
+            self._logger.debug(f"Measurement Cell was NOT empty.")
             self._cell_volume: float = 5.0
             self._empty_cell()
         else:
+            self._logger.debug(f"Measurement Cell was empty.")
             self._cell_volume: float = 0
 
-        self._logger.info("Autosampler and inert gas handling were successfully initialized. ")
+        self._logger.info("Autosampler and Inert Gas Handling initialized. ")
 
     def _initialize_pump(self, initial_wash: int = 3) -> None:
         """
@@ -143,10 +144,12 @@ class SamplingSystem:
         Args:
             purge_time: Purge time (in seconds).
         """
+        self._logger.debug("N2 purging will be turned ON.")
         with self._atmosphere_handler.open_atmosphere():
             time.sleep(purge_time)
 
-        self._logger.debug(f"Cell was purged with Nitrogen gas for {purge_time} sec.")
+        self._logger.debug("N2 purging was turned OFF.")
+        self._logger.info(f"Cell was purged with Nitrogen gas for {purge_time} sec.")
 
     def _wash_pump(self, cycles=3):
         """

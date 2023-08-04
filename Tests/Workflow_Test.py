@@ -23,12 +23,12 @@ manager: WorkflowManager = WorkflowManager(
 #   - Cell cleaning after the measurements
 
 manager.submit_samples([
-    # {"sample_name": "wash", "sample_location": 1, "workflow_path": Path("wash_vials.json")},
-    # {"sample_name": "wash", "sample_location": 2, "workflow_path": Path("wash_vials.json")},
+    {"sample_name": "Fe-ligand184-1", "sample_location": 1, "workflow_path": Path("test_stability_pos.json")},
+    {"sample_name": "Fe-ligand184-2", "sample_location": 2, "workflow_path": Path("test_stability_pos.json")}
     # {"sample_name": "CYR-181", "sample_location": 3, "workflow_path": Path("test_stability_neg.json")},
     # {"sample_name": "wash", "sample_location": 4, "workflow_path": Path("wash_vials.json")},
     # {"sample_name": "diquat-44Me-C2Br2", "sample_location": 5, "workflow_path": Path("test_stability_neg.json")},
-    {"sample_name": "wash", "sample_location": 6, "workflow_path": Path('wash_vials.json')}
+    # {"sample_name": "wash", "sample_location": 6, "workflow_path": Path('wash_vials.json')}
     # {"sample_name": "wash", "sample_location": 7, "workflow_path": Path("wash_vials.json")},
     # {"sample_name": "Fe-bpy-44CH2TMABr", "sample_location": 8, "workflow_path": Path("test_stability_pos.json")}
     # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_stability_pos.json")}

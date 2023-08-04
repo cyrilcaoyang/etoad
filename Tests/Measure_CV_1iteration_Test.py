@@ -10,8 +10,7 @@ PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "logger_settings_v2.json",
     log_file=PARENT_DIR / "logs" / f"Test_Potentiostat_{timestamp_datetime()}.log",
-    disable_gui=False  # ATTN: Just an example of how to use the disable_gui argument
-
+    disable_gui=False
 )
 
 
@@ -23,8 +22,8 @@ def do_measurement():
         simulation_mode=False,
     )
 
-    # logger.sample_name = "K4[Fe(CN)6]"
-    logger.sample_name = "Fe-Ligand184"
+    logger.sample_name = "K4[Fe(CN)6]"
+    # logger.sample_name = "Fe-Ligand184"
 
     results = potentiostat.do_measurement(
         technique="CV",
@@ -34,7 +33,7 @@ def do_measurement():
             },
             "TechniqueParameters": {
                 "Voltage Profile": {
-                    "value": [0.8, 0.8, 1.3, 0.8, 0.8]
+                    "value": [0.0, 0.0, 0.5, 0.0, 0.0]
                 },
                 "Scan Rate": {
                     "value": [0.05, 0.05, 0.05, 0.05, 0.05]
@@ -49,11 +48,13 @@ def do_measurement():
     # saving the data before disconnection
     filename = PARENT_DIR.parent / "Data" / f"CV_test_{logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
+    logger.info(f"Result of CV scans of {logger.sample_name} is saved.")
     potentiostat.disconnect()
     logger.stop_gui()
 
 
 worker_thread = threading.Thread(target=do_measurement)
+logger.info(f"Starting CV scans of {logger.sample_name}.")
 worker_thread.start()
 logger.start_gui()
 worker_thread.join()

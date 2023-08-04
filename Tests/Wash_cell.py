@@ -18,4 +18,4 @@ sampler = SamplingSystem(
     cell_filled=True
 )
 
-sampler.wash_cell(2)
+sampler.wash_cell(3)

@@ -84,7 +84,7 @@ class EChemController(object):
         timeout: int = self.config["timeout"]
         device_id, device_info = c_int32(), KBIO.DeviceInfo()
         self._dll_functions("BL_Connect", port.encode(), timeout, device_id, device_info)
-        self.logger.debug(device_info)
+        self.logger.debug(f"{device_info=}")
 
         # Load Firmware to all channels specified in the config (BL_LoadFirmware)
         # ATTN: Had problems with this before -> copying the original xlx and bin files to the binaries folder helped...
@@ -109,7 +109,7 @@ class EChemController(object):
 
             channel_info = KBIO.ChannelInfo()
             self._dll_functions("BL_GetChannelInfos", device_id.value, channel, channel_info)
-            self.logger.debug(channel_info)
+            self.logger.debug(f"{channel_info=}")
 
             if not channel_info.is_kernel_loaded and not self._simulation:
                 self.logger.error(
@@ -198,6 +198,7 @@ class EChemController(object):
         for i, param_obj in enumerate(parameter_objects):
             parameter_array[i] = param_obj
 
+        self.logger.debug(f"EChem Measurement Parameters Parsed.")
         return KBIO.EccParams(no_params, parameter_array)
 
     ########################################################
