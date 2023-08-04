@@ -101,7 +101,7 @@ class SamplingSystem:
         """
         for port in self.defined_ports:
             setattr(self, port, self._config[port])
-        self._logger.debug(f"Pump default ports configured.")
+            self._logger.info(f"Pump {port} configured as {self._config[port]}.")
 
     def transfer_to_cell(self, source_port: int, volume: float, wash_line: bool = False) -> None:
         """
