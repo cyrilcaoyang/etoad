@@ -84,7 +84,7 @@ class EChemController(object):
         timeout: int = self.config["timeout"]
         device_id, device_info = c_int32(), KBIO.DeviceInfo()
         self._dll_functions("BL_Connect", port.encode(), timeout, device_id, device_info)
-        self.logger.debug(f">>> {device_info}")
+        self.logger.debug(f"*** {device_info}")
 
         # Load Firmware to all channels specified in the config (BL_LoadFirmware)
         # ATTN: Had problems with this before -> copying the original xlx and bin files to the binaries folder helped...
@@ -109,7 +109,7 @@ class EChemController(object):
 
             channel_info = KBIO.ChannelInfo()
             self._dll_functions("BL_GetChannelInfos", device_id.value, channel, channel_info)
-            self.logger.debug(f">>> {channel_info}")
+            self.logger.debug(f"*** {channel_info}")
 
             if not channel_info.is_kernel_loaded and not self._simulation:
                 self.logger.error(
@@ -229,10 +229,10 @@ class EChemController(object):
             np.ndarray: 2D Numpy array (n_data_points, 4) of the results data
         """
         if not channel:
-            self.logger.debug(f"Loading default channel.")
+            self.logger.debug(f">>> Loading default channel.")
             channel = self.default_channel
         else:
-            self.logger.debug(f"Loading channel {channel}.")
+            self.logger.debug(f">>> Loading channel {channel}.")
             channel = channel - 1
 
         self.technique = self._get_technique(technique)
@@ -250,7 +250,7 @@ class EChemController(object):
             iteration_results: np.ndarray = self._run_single_measurement(channel)
             iteration_results = np.hstack((iteration_results, np.full((iteration_results.shape[0], 1), iteration_num, dtype=int)))
             results = self._merge_data(results, iteration_results)
-            self.logger.info(f"Result of Iteration {iteration_num} recorded.")
+            self.logger.info(f"Result of Iteration {iteration_num + 1} recorded.")
 
         return results
 
@@ -273,7 +273,7 @@ class EChemController(object):
         """
         # Check for technique and channel information
         if not self.technique:
-            self.logger.info("No Method has been loaded.")
+            self.logger.info("No Method has been loaded.")  # TODO: replace with a context manager
             raise ModuleNotFoundError("No Method has been loaded.")
 
         # Do the actual measurement
@@ -289,6 +289,7 @@ class EChemController(object):
                         preprocessed_data = self.technique.process_data(results)
                         self.logger.update_plot(preprocessed_data[:, 1], preprocessed_data[:, 2])
                         # ATTN: This is currently hard-coded, assuming that the column structure is always the same
+                        # [:, 0] -> time, [:, 1] -> voltage (V), [:, 2] -> current (A)
 
                 except StopIteration:
                     if metadata["status"] == "STOP":
@@ -298,7 +299,7 @@ class EChemController(object):
 
                 # Breaks the while loop upon keyboard interrupt - closes channel connection via context manager
                 except KeyboardInterrupt:
-                    self.logger.error("Measurement was interrupted through keyboard interrupt.")
+                    self.logger.error("Measurement was interrupted through keyboard interrupt.")  # TODO: log this
                     break
 
         return self.technique.process_data(results)

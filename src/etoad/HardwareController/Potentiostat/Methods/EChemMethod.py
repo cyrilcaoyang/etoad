@@ -39,10 +39,8 @@ class EChemMethod(metaclass=ABCMeta):
     def __init__(
             self,
             path_to_binaries: Path,
-            logger: Logger
     ):
         self.method = path_to_binaries / self.method_file_name
-        self.logger: Logger = logger
 
     def __str__(
             self
