@@ -38,13 +38,21 @@ class EChemMethod(metaclass=ABCMeta):
 
     def __init__(
             self,
+            logger: Logger,
             path_to_binaries: Path,
     ):
         self.method = path_to_binaries / self.method_file_name
+        self._logger: Logger = logger
 
     def __str__(
             self
     ) -> str:
+        """
+        Provides a string representation of the class instance.
+
+        Returns:
+        A string that includes the method_name and method_name_short instance variables
+        """
         return f"{self.method_name} ({self.method_name_short})"
 
     def method_file(
@@ -186,7 +194,7 @@ class EChemMethod(metaclass=ABCMeta):
 
         if constraints:
             if not eval(constraints, {"range": range}, {"x": value}):
-                self.logger.error(f"The value {value} violates the constraint {constraints} for the parameter {name}.")
+                self._logger.error(f"The value {value} violates the constraint {constraints} for the parameter {name}.")
                 raise ValueError(f"The value {value} violates the constraint for the parameter {name}.")
 
         if not index:
@@ -225,25 +233,23 @@ class EChemMethod(metaclass=ABCMeta):
             key_found: bool = False
             if key in parameters["TechniqueParameters"]:
                 parameters["TechniqueParameters"][key]["value"] = set_parameters["TechniqueParameters"][key]["value"]
-                if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key]:
-                    parameters["TechniqueParameters"][key]["changed_over_iterations"] = False
-                else:
-                    set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
+                parameters["TechniqueParameters"][key]["changed_over_iterations"] = False \
+                    if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key] \
+                    else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                 key_found = True
             else:
                 for param in parameters["TechniqueParameters"]:
                     if key == parameters["TechniqueParameters"][param]["name"]:
                         parameters["TechniqueParameters"][param]["value"] = set_parameters["TechniqueParameters"][key]["value"]
-                        if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key]:
-                            parameters["TechniqueParameters"][param]["changed_over_iterations"] = False
-                        else:
-                            set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
+                        parameters["TechniqueParameters"][param]["changed_over_iterations"] = False \
+                            if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key] \
+                            else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                         key_found = True
 
+            # TODO: make the error logging a high-level public function.
             if not key_found:
-                self.logger.error(f"{key} was not found in the default settings for {self.method_name_short}.")
-                # TODO: make the logging a high-level public function.
-                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}.")
+                self._logger.error(f"{key} was not found in the default settings for {self.method_name_short}.")
+                raise KeyError
 
         return parameters
 
@@ -257,8 +263,11 @@ class EChemMethod(metaclass=ABCMeta):
         Returns:
             Dictionary of default settings.
         """
+        self._logger.debug(f">>> Loading default settings of {self.method_name_short} method.")
         default_file: Path = Path(__file__).parent / f"{self.method_name_short}_Defaults.json"
-        return ConfigLoader.load_config(default_file)
+        config = ConfigLoader.load_config(default_file)
+        self._logger.debug(f">>> Loaded default settings from {default_file}.")
+        return config
 
     def extract_data(
             self,

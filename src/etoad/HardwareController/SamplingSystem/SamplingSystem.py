@@ -51,7 +51,6 @@ class SamplingSystem:
         Args:
             config_file: Path to the configuration file. Needs to contain the specified keys in self.required_settings.
             logger: Logger object
-            hotplate: Hotplate object
             initial_wash: Number of initial washing steps. Default: 3  # TODO: Refactor to pump_wash or a similar name to not confuse it with cell_wash
         """
 
@@ -59,7 +58,7 @@ class SamplingSystem:
 
         self._logger: Logger = logger
 
-        self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(**self._config["relay_settings"])
+        self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(self._logger, **self._config["relay_settings"])
 
         self._pump: Union[XCPump, None] = None
         self.cell_port: Union[int, None] = None
@@ -78,21 +77,20 @@ class SamplingSystem:
             self._logger.debug(f"Measurement Cell was empty.")
             self._cell_volume: float = 0
 
-        self._logger.info("Autosampler and Inert Gas Handling initialized. ")
+        self._logger.info("Sampling System Initialized. ")
 
     def _initialize_pump(self, initial_wash: int = 3) -> None:
         """
         Creates an instance of the XCPump, sets the velocity and primes the pump.
         """
+        self._logger.info(f"Pump initialization started.")
         self._pump: TecanPump = TecanPump(
             visa_address=self._config["visa_address"],
             device_address=self._config["device_address"],
             init_valve=self._config["initial_valve"],
             syringe_volume=self._config["pump_volume"],
         )
-
         self._pump.set_velocity(self._config["default_velocity"])
-        self._logger.info(f"Pump initialization started.")
         self._wash_pump(initial_wash)
 
     def _set_ports(self) -> None:
@@ -101,7 +99,7 @@ class SamplingSystem:
         """
         for port in self.defined_ports:
             setattr(self, port, self._config[port])
-            self._logger.info(f"Pump {port} configured as {self._config[port]}.")
+            self._logger.info(f">>> Pump {port} configured as {self._config[port]}.")
 
     def transfer_to_cell(self, source_port: int, volume: float, wash_line: bool = False) -> None:
         """

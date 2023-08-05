@@ -79,12 +79,14 @@ class EChemController(object):
         Raises:
             ConnectionError (if connection to the channels could not be established)
         """
+        self.logger.debug(f"Trying to connect to the Potentiostat.")
+
         # Establish connection to the device (-> BL_Connect)
         port: str = self.config["port"]
         timeout: int = self.config["timeout"]
         device_id, device_info = c_int32(), KBIO.DeviceInfo()
         self._dll_functions("BL_Connect", port.encode(), timeout, device_id, device_info)
-        self.logger.debug(f"*** {device_info}")
+        self.logger.debug(f">>> {device_info}")
 
         # Load Firmware to all channels specified in the config (BL_LoadFirmware)
         # ATTN: Had problems with this before -> copying the original xlx and bin files to the binaries folder helped...
@@ -109,7 +111,7 @@ class EChemController(object):
 
             channel_info = KBIO.ChannelInfo()
             self._dll_functions("BL_GetChannelInfos", device_id.value, channel, channel_info)
-            self.logger.debug(f"*** {channel_info}")
+            self.logger.debug(f">>> {channel_info}")
 
             if not channel_info.is_kernel_loaded and not self._simulation:
                 self.logger.error(
@@ -174,7 +176,7 @@ class EChemController(object):
         Returns:
             the specific measurement type object (EChemMethod class).
         """
-        return eval(technique)(self.binary_path)
+        return eval(technique)(self.logger, self.binary_path)
 
     def _parse_measurement_parameters(
             self,
@@ -250,7 +252,7 @@ class EChemController(object):
             iteration_results: np.ndarray = self._run_single_measurement(channel)
             iteration_results = np.hstack((iteration_results, np.full((iteration_results.shape[0], 1), iteration_num, dtype=int)))
             results = self._merge_data(results, iteration_results)
-            self.logger.info(f"Result of Iteration {iteration_num + 1} recorded.")
+            self.logger.info(f"<<< Result of Iteration {iteration_num + 1} recorded.")
 
         return results
 

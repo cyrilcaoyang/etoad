@@ -1,16 +1,17 @@
 from pathlib import Path
 
 from etoad import WorkflowManager
-from etoad.Utils import timestamp_datetime
+from etoad.Utils import timestamp_datetime, get_dropbox_path
 
 PARENT_DIR = Path(__file__).parent
+DROPBOX_DIR = get_dropbox_path() / "PythonScript" / "EChem"
 
 manager: WorkflowManager = WorkflowManager(
     logger_settings=PARENT_DIR / "test_settings" / "logger_settings.json",
-    logfile=Path(PARENT_DIR / "log_files" / f"Test_Workflow_Manager_{timestamp_datetime()}.log"),
+    logfile=Path(DROPBOX_DIR / "Logs" / f"Test_Workflow_Manager_{timestamp_datetime()}.log"),
     potentiostat_settings=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
     sampler_settings=PARENT_DIR / "test_settings" / "sampler_settings.json",
-    data_path=Path(r"C:\Users\Potentiostat_SP-300\Desktop\AutoEChem_Data"),
+    data_path=Path(DROPBOX_DIR / "AutoEChem_Data"),
     disable_gui=False
 )
 

@@ -25,6 +25,8 @@ def do_measurement():
     logger.sample_name = "K4[Fe(CN)6]"
     # logger.sample_name = "Fe-Ligand184"
 
+    logger.info(f"*** Starting Experiment: CV Scans of {logger.sample_name}.")
+
     results = potentiostat.do_measurement(
         technique="CV",
         set_parameters={
@@ -39,7 +41,7 @@ def do_measurement():
                     "value": [0.05, 0.05, 0.05, 0.05, 0.05]
                 },
                 "Number of Cycles": {
-                    "value": 5
+                    "value": 1
                 }
             }
         }
@@ -48,13 +50,12 @@ def do_measurement():
     # saving the data before disconnection
     filename = PARENT_DIR.parent / "Data" / f"CV_test_{logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
-    logger.info(f"Result of CV scans of {logger.sample_name} is saved.")
+    logger.info(f"<<< Result of CV scans of {logger.sample_name} is saved as {filename}.")
     potentiostat.disconnect()
     logger.stop_gui()
 
 
 worker_thread = threading.Thread(target=do_measurement)
-logger.info(f"Starting CV scans of {logger.sample_name}.")
 worker_thread.start()
 logger.start_gui()
 worker_thread.join()
