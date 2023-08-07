@@ -49,13 +49,13 @@ class SWV(EChemMethod):
         if not pulse_high.shape[0] == no_data_points:
             pulse_high = pulse_high[:no_data_points]
 
-        differential_current: np.array = pulse_high - pulse_low
+        delta_current: np.array = pulse_high - pulse_low
 
         processed_data: np.ndarray = np.vstack(
             (
                 extracted_data[:, 0][0::2][:no_data_points],  # Time from Column 0
                 extracted_data[:, 1][0::2][:no_data_points],  # Voltage from Column 1
-                differential_current                          # Differential Current from Column 2
+                delta_current                          # Differential Current from Column 2
             )
         )
 

@@ -302,7 +302,8 @@ class EChemController(object):
                 # Breaks the while loop upon keyboard interrupt - closes channel connection via context manager
                 except KeyboardInterrupt:
                     self.logger.error("Measurement was interrupted through keyboard interrupt.")  # TODO: log this
-                    break
+                    raise KeyboardInterrupt
+                    # break
 
         return self.technique.process_data(results)
 

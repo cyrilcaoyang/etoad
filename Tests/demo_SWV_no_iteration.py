@@ -5,24 +5,37 @@ from etoad.HardwareController.Potentiostat.EChemController import EChemControlle
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime, get_dropbox_path
 
-PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
+# ========== Sample Settings Below ========== #
+
+Sample_Name = "K4[Fe(CN)6]"
+V_init = 1.4            # Unit: Initial Voltage in V
+V_fin = 0               # Unit: Final Voltage in V
+T_rest = 10             # The Resting Time Before the Scan
+
+Disable_GUI: bool = False
+Simulation: bool = False
+
+# ========== Sample Settings Above ========== #
+
+PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem"
 
 logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "logger_settings_v2.json",
-    log_file=PARENT_DIR / "logs" / f"Test_Potentiostat_{timestamp_datetime()}.log"
+    logging_config=PARENT_DIR / "Settings" / "logger_settings.json",
+    log_file=PARENT_DIR / "Logs" / f"{timestamp_datetime()}_simple_SWV.log",
+    disable_gui=Disable_GUI
 )
 
 
 def do_measurement():
 
     potentiostat = EChemController(
-        config_file=PARENT_DIR / "potentiostat_settings.json",
+        config_file=PARENT_DIR / "Settings" / "potentiostat_settings.json",
         logger=logger,
-        simulation_mode=False,
+        simulation_mode=Simulation,
     )
 
-    # logger.sample_name = "K4[Fe(CN)6]"
-    logger.sample_name = "Fe-Ligand184"
+    logger.sample_name = Sample_Name
+    logger.info(f"*** Starting Experiment: SWV Scan of {logger.sample_name}.")
 
     results = potentiostat.do_measurement(
         technique="SWV",
@@ -31,9 +44,9 @@ def do_measurement():
                 "no_iterations": 1
             },
             "TechniqueParameters": {
-                "Initial Voltage": {"value": 1.3},
-                "Rest Time": {"value": 10},
-                "Final Voltage": {"value": 0},
+                "Initial Voltage": {"value": V_init},
+                "Rest Time": {"value": T_rest},
+                "Final Voltage": {"value": V_fin},
             }
         }
     )

@@ -7,8 +7,8 @@ from etoad.Utils import timestamp_datetime, get_dropbox_path
 PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem" / "Settings"
 
 logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "logger_settings_v2.json",
-    log_file=PARENT_DIR / "logs" / f"Wash_Cell_{timestamp_datetime()}.log"
+    logging_config=PARENT_DIR / "logger_settings.json",
+    log_file=PARENT_DIR / "logs" / f"{timestamp_datetime()}_wash_echem_cell.log"
 )
 
 sampler = SamplingSystem(

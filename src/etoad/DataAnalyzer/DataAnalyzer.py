@@ -1,3 +1,4 @@
+import pprint
 from pathlib import Path
 from typing import Tuple, Dict
 from logging import Logger
@@ -61,7 +62,7 @@ class DataAnalyzer:
 
         analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](analysis_settings, raw_data)
         analysis_results, figures = analyzer.run_analysis()
-        self._logger.info(f"Data Analysis Completed: {analysis_results}")
+        self._logger.info(f"Data Analysis Completed:\n {pprint.pformat(analysis_results)}")  # pprint is prettier :)
 
         self._save_data(raw_data, analysis_results, figures, sample_dir, basename)
 
