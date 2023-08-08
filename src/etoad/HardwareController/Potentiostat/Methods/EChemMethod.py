@@ -12,19 +12,18 @@ class EChemMethod(metaclass=ABCMeta):
     Abstract base class for electrochemical methods to be run on the Bio-Logic Instrument using the Python Interface.
 
     Public methods:
-        __str__()
         method_file() -> str: Returns the path to the ecc file for the specific method.
         load_parameters(set_parameters: dict) -> list: Merges user-defined parameters into default configuration
         extract_data(data: tuple, numeric_to_single: Callable) -> tuple: Extracts results from the raw loaded data.
         process_data(extracted_data: np.ndarray) -> np.ndarray: Processes the full measurement dataset.
 
-    Abstract attributes (need to be defined in "child" classes):
+    Abstract attributes (need to be defined in child classes):
         method_name (str): Name of the experimental method
         method_name_short (str): Short form of the method name
         method_file_name (str): Name of the ecc file.
         data_structure (tuple): Tuple of column headers of the final data structure.
 
-    Abstract methods (need to be defined in "child" classes):
+    Abstract methods (need to be defined in child classes):
         _decode_row(row: tuple, timebase: float, numeric_to_single: Callable) -> np.array: Decoder for raw data points.
         [OPTIONAL] process_data(extracted_data: np.ndarray) -> np.ndarray: Processes the full measurement dataset
 
@@ -47,12 +46,6 @@ class EChemMethod(metaclass=ABCMeta):
     def __str__(
             self
     ) -> str:
-        """
-        Provides a string representation of the class instance.
-
-        Returns:
-        A string that includes the method_name and method_name_short instance variables
-        """
         return f"{self.method_name} ({self.method_name_short})"
 
     def method_file(
@@ -194,7 +187,6 @@ class EChemMethod(metaclass=ABCMeta):
 
         if constraints:
             if not eval(constraints, {"range": range}, {"x": value}):
-                self._logger.error(f"The value {value} violates the constraint {constraints} for the parameter {name}.")
                 raise ValueError(f"The value {value} violates the constraint for the parameter {name}.")
 
         if not index:
@@ -246,10 +238,8 @@ class EChemMethod(metaclass=ABCMeta):
                             else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                         key_found = True
 
-            # TODO: make the error logging a high-level public function.
             if not key_found:
-                self._logger.error(f"{key} was not found in the default settings for {self.method_name_short}.")
-                raise KeyError
+                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}."")
 
         return parameters
 
@@ -263,10 +253,10 @@ class EChemMethod(metaclass=ABCMeta):
         Returns:
             Dictionary of default settings.
         """
-        self._logger.debug(f">>> Loading default settings of {self.method_name_short} method.")
+        self._logger.debug(f"Loading default settings of {self.method_name_short} method.")
         default_file: Path = Path(__file__).parent / f"{self.method_name_short}_Defaults.json"
         config = ConfigLoader.load_config(default_file)
-        self._logger.debug(f">>> Loaded default settings from {default_file}.")
+        self._logger.debug(f"Loaded default settings from {default_file}.")
         return config
 
     def extract_data(
