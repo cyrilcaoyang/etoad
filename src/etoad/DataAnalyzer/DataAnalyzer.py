@@ -7,6 +7,7 @@ import numpy as np
 
 from ..Utils import timestamp_datetime
 from ..Utils import save_as_csv, save_as_json
+from ..Utils import log_exceptions
 from .Methods import CVAnalyzer, PulseTechniqueAnalyzer, EChemDataAnalyzer
 
 
@@ -36,6 +37,7 @@ class DataAnalyzer:
         self._data_path: Path = data_path
         self.logger: Logger = logger
 
+    @log_exceptions
     def analyze_data(
             self,
             sample_name: str,
@@ -96,6 +98,7 @@ class DataAnalyzer:
 
         return sample_dir, file_basename
 
+    @log_exceptions
     def _save_data(
             self,
             raw_data: np.ndarray,

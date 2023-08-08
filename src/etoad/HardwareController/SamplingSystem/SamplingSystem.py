@@ -6,6 +6,8 @@ from logging import Logger
 from .TecanPump import TecanPump
 from .AtmosphereHandler import AtmosphereHandler
 from ...Utils import ConfigLoader
+from ...Utils import log_exceptions
+
 
 class SamplingSystem:
     """
@@ -60,7 +62,7 @@ class SamplingSystem:
 
         self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(self.logger, **self._config["relay_settings"])
 
-        self._pump: Union[XCPump, None] = None
+        self._pump: Union[TecanPump, None] = None
         self.cell_port: Union[int, None] = None
 
         self.wash_port: Union[int, None] = None
@@ -79,6 +81,7 @@ class SamplingSystem:
 
         self.logger.info("Sampling System Initialized. ")
 
+    @log_exceptions
     def _initialize_pump(self, initial_wash: int = 3) -> None:
         """
         Creates an instance of the XCPump, sets the velocity and primes the pump.
@@ -101,6 +104,7 @@ class SamplingSystem:
             setattr(self, port, self._config[port])
             self.logger.info(f"Pump {port} configured as {self._config[port]}.")
 
+    @log_exceptions
     def transfer_to_cell(self, source_port: int, volume: float, wash_line: bool = False) -> None:
         """
         Transfers a given amount of liquid to the measurement cell.
@@ -119,6 +123,7 @@ class SamplingSystem:
         self._update_cell_volume(volume)
         self.logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
 
+    @log_exceptions
     def dilute_cell(self, volume: float = 0, factor: float = 1) -> None:
         """
         Dilutes the solution in the cell based on either a fixed volume or a dilution factor.
@@ -135,6 +140,7 @@ class SamplingSystem:
         self.transfer_to_cell(self.wash_port, volume)
         self.logger.debug(f"The cell was diluted by {volume} mL of wash solution.")
 
+    @log_exceptions
     def purge_cell(self, purge_time: float = 10) -> None:
         """
         Purges the cell with inert gas.
@@ -149,6 +155,7 @@ class SamplingSystem:
         self.logger.debug("N2 purging was turned OFF.")
         self.logger.info(f"Cell was purged with Nitrogen gas for {purge_time} sec.")
 
+    @log_exceptions
     def _wash_pump(self, cycles=3):
         """
         Washes the syringe pump for three times with its volume of wash liquid.
@@ -158,6 +165,7 @@ class SamplingSystem:
 
         self.logger.info(f"Pump washed {cycles} times.")
 
+    @log_exceptions
     def wash_autosampler_position(self, sampler_position: int, no_cycles: int = 3) -> None:
         """
         Discards a sample in the autosampler and washes the vial.
@@ -173,6 +181,7 @@ class SamplingSystem:
             self._pump.draw_and_dispense(sampler_position, self.waste_port, 6)
         self.logger.info(f"Sample position {sampler_position} was washed {no_cycles} times.")
 
+    @log_exceptions
     def wash_cell(self, wash_volume: float, cycles=3) -> None:
         """
         Washes the cell for n times:

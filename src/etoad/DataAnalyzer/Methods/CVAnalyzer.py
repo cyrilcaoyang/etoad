@@ -1,10 +1,11 @@
 from typing import List, Tuple
 import numpy as np
 import pandas as pd
+import itertools
 from .EChemDataAnalyzer import EChemDataAnalyzer
 from ..AnalysisUtils import DataVisualizer
-import itertools
 from ..AnalysisUtils import significant_digits
+from ...Utils import log_exceptions
 
 
 class CVAnalyzer(EChemDataAnalyzer):
@@ -78,6 +79,7 @@ class CVAnalyzer(EChemDataAnalyzer):
 
         return reduction, oxidation
 
+    @log_exceptions
     def _peak_picking(
             self,
             **kwargs
@@ -151,6 +153,7 @@ class CVAnalyzer(EChemDataAnalyzer):
 
         return peaks
 
+    @log_exceptions
     def _integration(
         self,
         plot: bool,
@@ -200,6 +203,7 @@ class CVAnalyzer(EChemDataAnalyzer):
             )
             self._figures[f"CV_Integral"] = figure
 
+    @log_exceptions
     def _plot(
             self,
             title: str,
@@ -234,6 +238,7 @@ class CVAnalyzer(EChemDataAnalyzer):
         )
         self._figures["CV"] = figure
 
+    @log_exceptions
     def _plot_peaks_scan_rate(self):
         """
         Generates a plot of peak voltage vs. scan rate.

@@ -3,6 +3,7 @@ from modbus_tk.modbus_rtu import RtuMaster
 import modbus_tk.defines as cst
 from serial import Serial
 from logging import Logger
+from ...Utils import log_exceptions
 
 
 class AtmosphereHandler(object):
@@ -42,6 +43,7 @@ class AtmosphereHandler(object):
         finally:
             self._set_atmosphere(False)
 
+    @log_exceptions
     def _set_atmosphere(self, open_nitrogen: bool = False) -> None:
         """
         Sets the relay either to open (True) or closed (False)

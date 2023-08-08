@@ -7,7 +7,7 @@ from pathlib import Path
 from logging import Logger
 from typing import Any, Union, Callable
 
-from ...Utils import get_bit_mode
+from ...Utils import get_bit_mode, log_exceptions
 from .DataStructures import *
 import etoad.HardwareController.Potentiostat.BioLogic as KBIO  # TODO: refactor properly and remove this ugly import
 
@@ -76,6 +76,7 @@ class EClibDLLInterface(object):
         self.logger = logger
         self._simulation = simulation_mode
 
+    @log_exceptions
     def __call__(
             self,
             function_name: str,

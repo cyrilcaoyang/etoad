@@ -6,6 +6,7 @@ from ..Methods import EChemDataAnalyzer
 from ..AnalysisUtils import rubberband_baseline_removal, estimate_noise, filter_peaks, select_peaks
 from ..AnalysisUtils import DataVisualizer
 from ..AnalysisUtils import significant_digits
+from ...Utils import log_exceptions
 
 
 class PulseTechniqueAnalyzer(EChemDataAnalyzer):
@@ -75,6 +76,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             "Integration": self._integration
         }
 
+    @log_exceptions
     def _peak_picking(
             self,
             min_peak_width: float,
@@ -107,6 +109,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
                 is_reduction=is_reduction
             )
 
+    @log_exceptions
     def _pick_peaks(
             self,
             raw_data: np.ndarray,
@@ -217,6 +220,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
         return peaks
 
+    @log_exceptions
     def _get_cv_parameters(
             self,
             filters: List[dict],
@@ -270,6 +274,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
         self._analysis_results[f"Iteration {from_iteration}"]["CV Parameters"] = cv_parameters
 
+    @log_exceptions
     def _plot(
             self,
             title: str,
@@ -291,6 +296,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
         self._figures[self.analysis_method_name] = figure
 
+    @log_exceptions
     def _integration(
         self,
         plot: bool,
