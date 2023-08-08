@@ -99,7 +99,7 @@ class EClibDLLInterface(object):
             self.logger.info(f"SIMULATION: Now executing DLL Method {function_name}.")
             return
 
-        for _ in range(5):
+        for _ in range(3):
 
             check_value: int = self._callable_functions[function_name](*args)
 
