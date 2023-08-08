@@ -247,12 +247,6 @@ class WorkflowManager(object):
         try:
             yield
 
-        # TODO: Put an exception handling here to log possible exception tracebacks before the finally block is reached
-        #       Requires knowing the types of exception, or catching the parent class of exception, which might be
-        #       dangerous
-        #       Alternative: Catch Exception as sth, log the traceback, and then raise sth again
-        #                    That definitely requires some trying before...I have never done that before
-
         finally:
             self.logger.info(f"Measurements for sample completed.")
             self.logger.experiment_name = "Emptying Cell"
@@ -369,7 +363,7 @@ class WorkflowManager(object):
                     raise self._exception_keywords[new_value]
 
             para = param_to_update["parameter"]
-            parameters["TechniqueParameters"][para]['value'] = new_value
+            parameters["TechniqueParameters"][para]["value"] = new_value
 
         return parameters
 

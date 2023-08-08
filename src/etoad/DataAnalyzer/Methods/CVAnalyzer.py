@@ -20,23 +20,29 @@ class CVAnalyzer(EChemDataAnalyzer):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self._separate_iterations()
-        self._separate_cycles()
+        self._raw_data = self._split_cycles(self._raw_data)
 
-    def _separate_cycles(
-            self
-    ) -> None:
+    @staticmethod
+    def _split_cycles(
+            data: List[np.ndarray]
+    ) -> List[List[np.ndarray]]:
         """
-        Separates the dictionary of np.ndarrys into a dictionary of lists of np.ndarrays.
-        Each ndarray represents one CV cycle.
-        Overrides self._raw_data.
-        """
-        skip_cycles: int = 2  # TODO: _figure out a more flexible way to include this
+        Splits the raw data for each iteration into the individual CV cycles.
 
-        for no_iteration in range(len(self._raw_data)):
-            iteration_data = self._raw_data[no_iteration]
-            no_cycles: int = int(np.max(iteration_data[:, 3]) + 1)
-            self._raw_data[no_iteration] = [iteration_data[iteration_data[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
+        Args:
+            data: List of numpy ndarrays of the raw data for each iteration.
+
+        Returns:
+            List[List[np.ndarray]]: List of lists of numpy ndarrays of the raw data for each CV cycle.
+        """
+        skip_cycles: int = 2  # TODO: figure out a more flexible way to include this
+
+        data_separated: List[List[np.ndarray]] = []
+        for idx, iteration in enumerate(data):
+            no_cycles: int = int(np.max(iteration[:, 3]) + 1)
+            data_separated.append([iteration[iteration[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)])
+
+        return data_separated
 
     def _set_methods(
             self
@@ -48,7 +54,7 @@ class CVAnalyzer(EChemDataAnalyzer):
         self._analysis_methods = {
             "Peak Picking": self._peak_picking,
             "Integration": self._integration,
-            "Peaks Scanrate": self._plot_peaks_scanrate,
+            "Peaks Scanrate": self._plot_peaks_scan_rate,
             "Plot": self._plot
         }
 
@@ -74,39 +80,36 @@ class CVAnalyzer(EChemDataAnalyzer):
 
     def _peak_picking(
             self,
-            plot: bool,
             **kwargs
     ) -> None:
         """
         Performs peak picking for the raw CV data.
         Divides each CV cycle into oxidation and reduction half, and determines the maxima and minima, respectively.
         Stores all data in self._analysis_results.
-
-        Args:
-            plot: Whether to plot the diagram peak position vs iteration
         """
-        for no_iteration in range(len(self._raw_data)):
+        for idx, iteration in enumerate(self._raw_data):
             peaks_per_iteration: list = []
-            for cycle in self._raw_data[no_iteration]:
+            for cycle in iteration:
                 reduction, oxidation = self._get_half_cycles(cycle)
                 peaks: list = self._pick_peaks(reduction, maxima=False) + self._pick_peaks(oxidation, maxima=True)
                 peaks_per_iteration.append(peaks)
-            self._analysis_results[f"iteration_{no_iteration}"]["Peak Picking"] = peaks_per_iteration
+            self._analysis_results[f"Iteration {idx}"]["Peak Picking"] = peaks_per_iteration
 
     @staticmethod
-    def _get_scan_rate(data_of_one_cycle: np.ndarray) -> float:
+    def _get_scan_rate(raw_data: List[np.ndarray]) -> float:
         """
-        Acquire the scan rate of this cycle in the unit of V/s.
-
+        Extracts the scan rate of a CV cycle from the raw data (takes the first cycle by default).
+        # ATTN: This is a helper method -- in principle, we should be able to directly take the scan rate from the
+                measurement parameters.
         Args:
-            data_of_one_cycle: Data of a full cycle in CV data
+            raw_data: Data of a CV measurement (list of one np.ndarray per CV cycle).
 
         Returns:
             scan_rate: The scan rate of this cycle in V/s
         """
-        time_series = data_of_one_cycle[:, 0]
-        voltage_series = data_of_one_cycle[:, 1]
-        scan_rate = (np.max(voltage_series)-np.min(voltage_series))*2/(np.max(time_series)-np.min(time_series))
+        times = raw_data[0][:, 0]
+        voltages = raw_data[0][:, 1]
+        scan_rate = 2 * (np.max(voltages) - np.min(voltages)) / (np.max(times) - np.min(times))
         return scan_rate
 
     @staticmethod
@@ -162,34 +165,38 @@ class CVAnalyzer(EChemDataAnalyzer):
             plot: Whether to plot the cycle vs. integral plot.
         """
         all_relative_integrals = []
-        for no_iteration in range(len(self._raw_data)):
+        for idx, iteration in enumerate(self._raw_data):
             integrals_per_iteration: list = []
-            for cycle in self._raw_data[no_iteration]:
+            for cycle in iteration:
                 reduction, oxidation = self._get_half_cycles(cycle)
                 reduction_integral = -np.trapz(reduction[:, 2], reduction[:, 1])
                 oxidation_integral = np.trapz(oxidation[:, 2], oxidation[:, 1])
                 integrals_per_iteration.append(oxidation_integral - reduction_integral)
-            self._analysis_results[f"iteration_{no_iteration}"]["Integration"] = integrals_per_iteration
+            self._analysis_results[f"Iteration {idx}"]["Integration"] = integrals_per_iteration
 
             relative_integrals = np.asarray(integrals_per_iteration) / max(integrals_per_iteration)
-            all_relative_integrals.append((list(range(1, len(self._raw_data[no_iteration]) + 1)),relative_integrals))
+            all_relative_integrals.append(relative_integrals)
+
+            # plot each iteration separately
             if plot:
                 figure = DataVisualizer.plot_single_curve(
-                    x_values=list(range(1, len(self._raw_data[no_iteration]) + 1)),
+                    x_values=np.arange(len(iteration)) + 1,
                     y_values=relative_integrals,
-                    x_label=f"CV Cycle_Iteration_{no_iteration}",
+                    x_label=f"CV Cycle",
                     y_label="Relative Integral",
                     title="CV Integration",
                     yaxis_percent=True
                 )
-                self._figures[f"CV_Integration_Iteration_{no_iteration}"] = figure
+                self._figures[f"CV_Integration_Iteration_{idx}"] = figure
+
+        # plot all iterations together
         if plot:
             figure = DataVisualizer.plot_multiple_curves(
-                data_to_plot=[(iteration[0],iteration[1]) for iteration in all_relative_integrals],
+                data_to_plot=[(np.arange(len(iteration)) + 1, iteration) for iteration in all_relative_integrals],
                 x_label="CV Cycle",
                 y_label="Relative Integral",
-                title="CV_plot",
-                legend=[f"iteration {i + 1}" for i in range(len(all_relative_integrals))]
+                title="CV Integration",
+                legend=[f"Iteration {i + 1}" for i in range(len(all_relative_integrals))]
             )
             self._figures[f"CV_Integral"] = figure
 
@@ -199,59 +206,52 @@ class CVAnalyzer(EChemDataAnalyzer):
             **kwargs
     ) -> None:
         """
-        Plots the raw data by creating a figure object, saves the figure object to self._figures.
+        Plots the raw data by creating a figure object, saves the figure object to self.figures.
 
         Args:
             title: Title of the plot
         """
-        # ATTN: Do we always want to generate one plot per iteration, or do we want the option to get all data
-        #       in one plot? (FSK, Sep 13)
-
         if len(self._raw_data) == 0:
             return
 
-        for no_iteration in range(len(self._raw_data)):
+        for idx, iteration in enumerate(self._raw_data):
             figure = DataVisualizer.plot_multiple_curves(
-                data_to_plot=[(cycle[:, 1], cycle[:, 2]) for cycle in self._raw_data[no_iteration]],
+                data_to_plot=[(cycle[:, 1], cycle[:, 2]) for cycle in iteration],
                 x_label="Voltage / V",
                 y_label="Current / A",
-                title=title+f"_{no_iteration}",
-                legend=[f"Cycle {i}" for i in range(1, len(self._raw_data[no_iteration]) + 1)]
+                title=f"{title} (Iteration {idx + 1})",
+                legend=[f"Cycle {i + 1}" for i in range(len(iteration))]
             )
 
-            self._figures[f"CV_iteration_{no_iteration}"] = figure
+            self._figures[f"CV_Iteration_{idx}"] = figure
 
         figure = DataVisualizer.plot_multiple_curves(
             data_to_plot=[(np.vstack(iteration)[:, 1], np.vstack(iteration)[:, 2]) for iteration in self._raw_data],
             x_label="Voltage / V",
             y_label="Current / A",
-            title="CV_plot",
+            title=title,
             legend=[f"iteration {i+1}" for i in range(len(self._raw_data))]
         )
-        self._figures[f"CV_plot"] = figure
+        self._figures["CV"] = figure
 
-    def _plot_peaks_scanrate(self):
+    def _plot_peaks_scan_rate(self):
         """
-        Plot Peaks_Voltage vs Scanrate and save the figure object in self.figures["CV_Peaks_Scanrate"]
+        Generates a plot of peak voltage vs. scan rate.
+        Saves the figure object to self.figures["CV_Peaks_Scanrate"].
         """
-
         all_peaks: list = []
-        for no_iteration in range(len(self._raw_data)):
-            peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[f"iteration_{no_iteration}"]["Peak Picking"]))
-            peaks_position: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
-            peaks_position["scan_rate"] = self._get_scan_rate(self._raw_data[no_iteration][0])
-            # ATTN: How much sense does it make to infer the scan rate from the raw data?
-            #       -> The scan rate is already pre-defined by the measurement parameters, and should be taken
-            #          from there
-            #          (not an urgent fix, but something to keep in mind, FSK, Sep 13)
-            all_peaks.append(np.array(peaks_position))
+        for idx, iteration in enumerate(self._raw_data):
+            peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[f"Iteration {idx}"]["Peak Picking"]))
+            peak_positions: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
+            peak_positions["scan_rate"] = self._get_scan_rate(iteration)
+            all_peaks.append(np.array(peak_positions))
 
         figure = DataVisualizer.plot_multiple_points(
-            data_to_plot=[(peaks_per_iteration[:, 2], peaks_per_iteration[:, 0]) for peaks_per_iteration in all_peaks],
-            x_label="Scan Rate / V*sec^-1",
-            y_label="Voltage / V",
-            title="Peaks vs Scanrate",
-            legend=[f"Iteration {i}" for i in range(1, len(all_peaks) + 1)]
+            data_to_plot=[(peaks[:, 2], peaks[:, 0]) for peaks in all_peaks],
+            x_label="Scan Rate [V s$^{-1}$",
+            y_label="Peak Voltage [V]",
+            title="Peak Positions as a Function of Scan Rate",
+            legend=[f"Iteration {i + 1}" for i in range(len(all_peaks))]
         )
 
         self._figures["CV_Peaks_Scanrate"] = figure

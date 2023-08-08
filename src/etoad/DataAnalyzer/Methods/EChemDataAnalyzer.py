@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Tuple
+from typing import Union, Tuple, List, Dict
+from logging import Logger
 
 import numpy as np
 
@@ -27,7 +28,8 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
     def __init__(
             self,
             analysis_settings: dict,
-            raw_data: np.ndarray
+            raw_data: np.ndarray,
+            logger: Logger
     ):
         """
         Instantiates the EChemDataAnalyzer.
@@ -36,6 +38,7 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
             analysis_settings: Dictionary of all possible analysis steps as keys and the respective specifications.
                                Provided settings override the default configs given in $analysis_method_name$.json
             raw_data: Numpy ndarray of the raw experimental data.
+            logger: Logger object
 
         Sets the following attributes:
             self._analysis_steps: Specifications for each analysis step (from default and passed configs)
@@ -44,16 +47,16 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
             self._analysis_results: Dictionary of all analysis results per analysis step.
             self._figures: Dictionary of all generated Figure objects.
         """
+        self._logger: Logger = logger
+
         self._analysis_steps: dict = self._get_config(analysis_settings)
 
         self._analysis_methods: dict = {}
         self._set_methods()
 
-        self._raw_data: np.ndarray = raw_data
-        self._analysis_results: dict = dict()
+        self._raw_data: List[np.ndarray] = self._split_iterations(raw_data)
+        self._analysis_results: Dict[str, Union[list, dict]] = {f"Iteration {i}": {} for i in range(len(self._raw_data))}
         self._figures: dict = dict()
-
-
 
     @abstractmethod
     def _set_methods(
@@ -102,20 +105,25 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
 
         return updated_steps
 
-    def _separate_iterations(
-            self
-    ) -> None:
+    @staticmethod
+    def _split_iterations(
+            raw_data: np.ndarray
+    ) -> List[np.ndarray]:
         """
-        Separates the raw CV data into a dictionary of np.ndarrays. Each key represents the iteration number.
-        Each ndarray represents one CV iteration.
-        Overrides self._raw_data.
-        """
+        Separates the raw data into a list of np.ndarrays, each containing the data for one iteration.
 
-        no_iterations: int = int(np.max(self._raw_data[:, -1]) + 1)
-        self._raw_data = [self._raw_data[self._raw_data[:, -1] == iteration] for iteration in range(no_iterations)]
-        # TODO: Same discussion as in the CV analyzer. Why is this a dictionary? (FSK, Sep 13)
-        for no_iteration in range(no_iterations):
-            self._analysis_results[f"iteration_{no_iteration}"] = {}
+        Args:
+            raw_data: Numpy ndarray of the raw experimental data. Last column contains the iteration number.
+
+        Returns:
+            separated_data: List of np.ndarrays, each containing the data for one iteration.
+
+            ATTN: A 3D numpy array would be the "cleaner" solution, but that requires padding for iterations with
+                  different lengths.
+        """
+        no_iterations: int = int(np.max(raw_data[:, -1]) + 1)
+        separated_data = [raw_data[raw_data[:, -1] == iteration] for iteration in range(no_iterations)]
+        return separated_data
 
     def run_analysis(
             self,
@@ -125,8 +133,8 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
         Performs all the data analysis steps specified in the analysis_methods dictionary.
 
         Returns:
-            self._analysis results: Dictionary of all analysis results.
-            self._figures: Dictionary of all _figure objects created upon analysis.
+            self._analysis results: List of dictionaries of all analysis results.
+            self._figures: Dictionary of all figure objects created upon analysis.
         """
         for step, step_config in zip(self._analysis_steps, self._analysis_steps.values()):
             self._analysis_methods[step](**step_config)
