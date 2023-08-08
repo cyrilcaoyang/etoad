@@ -252,7 +252,7 @@ class EChemController(object):
             iteration_results: np.ndarray = self._run_single_measurement(channel)
             iteration_results = np.hstack((iteration_results, np.full((iteration_results.shape[0], 1), iteration_num, dtype=int)))
             results = self._merge_data(results, iteration_results)
-            self.logger.info(f"<<< Result of Iteration {iteration_num + 1} recorded.")
+            self.logger.info(f"Result of Iteration {iteration_num + 1} recorded.")
 
         return results
 
@@ -275,7 +275,6 @@ class EChemController(object):
         """
         # Check for technique and channel information
         if not self.technique:
-            self.logger.info("No Method has been loaded.")  # TODO: replace with a context manager
             raise ModuleNotFoundError("No Method has been loaded.")
 
         # Do the actual measurement
@@ -299,11 +298,9 @@ class EChemController(object):
                         break
                     continue
 
-                # Breaks the while loop upon keyboard interrupt - closes channel connection via context manager
+                # Breaks the while loop upon keyboard interrupt 
                 except KeyboardInterrupt:
-                    self.logger.error("Measurement was interrupted through keyboard interrupt.")  # TODO: log this
-                    raise KeyboardInterrupt
-                    # break
+                    raise KeyboardInterrupt("Measurement was killed through keyboard interrupt")
 
         return self.technique.process_data(results)
 
