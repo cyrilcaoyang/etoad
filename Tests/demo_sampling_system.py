@@ -4,16 +4,20 @@ from src.etoad.HardwareController import SamplingSystem
 from src.etoad.Utils import timestamp_datetime
 from src.etoad.Interface import GraphicalInterface
 
-# ========== Sample Settings Below ========== #
+"""
+    This python script demonstrate the Sampling System.
+"""
+
+# ========== Test Settings Below ========== #
 
 Sample_Name = "K4[Fe(CN)6]"     # Name of the Chemical Solution
 Source_Port = 9                 # The Port from which the Sample will be added.
+Sample_Vol = 0.5                # The volume of sample in mL (< 5mL) to be diluted to 5 mL in the Cell.
 
-Clean_Up: bool = False          # Cleaning Up the EChem Reactor afterwards.
-
+Clean_Up: bool = False          # Cleaning Up the EChem Reactor by washing the cell with 3 x 5 mL Solvent.
 Disable_GUI: bool = True        # We are disabling GUI for simple liquid transfer.
 
-# ========== Sample Settings Above ========== #
+# ========== Test Settings Above ========== #
 
 PARENT_DIR = Path(__file__).parent
 with open(PARENT_DIR / "test_settings" / "file_settings") as file:
@@ -22,7 +26,7 @@ with open(PARENT_DIR / "test_settings" / "file_settings") as file:
 # We are not using GUI for simple liquid transfer
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_test_Sampling_System.log",
+    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_transfer_dilution.log",
     disable_gui=Disable_GUI
 )
 
@@ -37,13 +41,11 @@ sampler = SamplingSystem(
 # Transfers 0.5 mL from the sample position 9 to the cell
 sampler.transfer_to_cell(
     source_port=Source_Port,
-    volume=0.5,
+    volume=Sample_Vol,
     wash_line=True
 )
 
 sampler.dilute_cell(volume=5)
-
-# Washes the cell with 3 x 5 mL washing solvent
 
 if Clean_Up:
     sampler.wash_cell(

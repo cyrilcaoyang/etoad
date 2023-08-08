@@ -7,10 +7,9 @@ from etoad.Utils import timestamp_datetime
 from pathlib import Path
 
 """
-
-This python script test the DataAnalyzer Module.
-Two example pickle files are provided in the /analyzer_test folder.
-
+    This python script test the DataAnalyzer Module.
+    Two example are provided in the /analyzer_test folder.
+    The first one analyze a csv file, while the second one reads a pickle file.
 """
 
 PARENT_DIR = Path(__file__).parent

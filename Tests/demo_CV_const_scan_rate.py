@@ -6,6 +6,10 @@ from etoad.HardwareController.Potentiostat.EChemController import EChemControlle
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime
 
+"""
+    This python script demonstrate the CV scans with constant scan rates.
+"""
+
 # ========== Sample Settings Below ========== #
 
 Sample_Name = "K4[Fe(CN)6]"
@@ -14,10 +18,10 @@ V_max = 0.5                 # Unit: Highest Voltage in V
 V_min = 0                   # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
 Scan_Rate = 0.050           # Unit: Scan Rate in V/s
-Cycle_Numbers: int = 10    # The Numer of Cycles as an Integer
+Cycle_Numbers: int = 10     # The Numer of Cycles as an Integer
 
 Disable_GUI: bool = False
-Simulation: bool = False
+Simulation: bool = False    # This option can turn ON/OFF the Simulation Mode
 
 # ========== Sample Settings Above ========== #
 
@@ -27,7 +31,7 @@ with open(PARENT_DIR / "test_settings" / "file_settings") as file:
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_CV_const_scan_rate.log",
+    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_CV_const_scan_rate.log",
     disable_gui=Disable_GUI
 )
 

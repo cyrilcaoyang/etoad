@@ -6,6 +6,10 @@ from etoad.HardwareController.Potentiostat.EChemController import EChemControlle
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime, get_dropbox_path
 
+"""
+    This python script demonstrate the CV scans with multiple different scan rates.
+"""
+
 # ========== Sample Settings Below ========== #
 
 Sample_Name = "K4[Fe(CN)6]"
@@ -13,13 +17,13 @@ V_init = 0                  # Unit: Initial Voltage in V
 V_max = 0.5                 # Unit: Highest Voltage in V
 V_min = 0                   # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
-Cycle_Numbers: int = 3    # The Numer of Cycles at each Scan Rate
+Cycle_Numbers: int = 3      # The Numer of Cycles at each Scan Rate
 
 Scan_Rates = [0.050, 0.100, 0.200, 0.400, 1.000]    # Unit: Scan Rate in V/s
 # Example  = [0.050, 0.100, 0.200, 0.400, 1.000]
 
 Disable_GUI: bool = False
-Simulation: bool = False
+Simulation: bool = False    # This option can turn ON/OFF the Simulation Mode
 
 # ========== Sample Settings Above ========== #
 
@@ -33,7 +37,7 @@ with open(PARENT_DIR / "test_settings" / "file_settings") as file:
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_CV_multi_scan_rate.log",
+    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_CV_multi_scan_rate.log",
     disable_gui=False
 )
 

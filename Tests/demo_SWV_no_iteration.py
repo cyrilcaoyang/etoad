@@ -6,6 +6,10 @@ from etoad.HardwareController.Potentiostat.EChemController import EChemControlle
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime, get_dropbox_path
 
+"""
+    This python script demonstrate a simple SWV scan.
+"""
+
 # ========== Sample Settings Below ========== #
 
 Sample_Name = "K4[Fe(CN)6]"
@@ -24,7 +28,7 @@ with open(PARENT_DIR / "test_settings" / "file_settings") as file:
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_simple_SWV.log",
+    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_simple_SWV.log",
     disable_gui=Disable_GUI
 )
 

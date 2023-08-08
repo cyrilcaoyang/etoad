@@ -1,9 +1,11 @@
 import os
 from pathlib import Path
 
-# This file set up the folder path in which data will be stored.
-# Add settings for the location of data storage, write into /test_settings/file_settings
-#   TODO: Remove the need for DropboxPath.py
+"""
+    After installation of eTOAD,
+    Run this file to set up the folder path in which experimental data will be stored.
+    Add settings for the location of data storage, write into /test_settings/file_settings
+"""
 
 PARENT_PATH = Path(__file__).parent
 
