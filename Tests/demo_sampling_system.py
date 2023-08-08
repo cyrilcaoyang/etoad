@@ -34,7 +34,7 @@ logger = GraphicalInterface(
 sampler = SamplingSystem(
     config_file=PARENT_DIR / "test_settings" / "sampler_settings.json",
     logger=logger,
-    initial_wash=0,
+    pump_wash=0,
     cell_filled=True
 )
 

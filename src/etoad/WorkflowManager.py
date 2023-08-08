@@ -146,7 +146,7 @@ class WorkflowManager(object):
         """
         self.logger.info("SYSTEM INITIALIZATION")
         self._potentiostat: EChemController = EChemController(self._potentiostat_settings, logger=self.logger)
-        self._sampling_system: SamplingSystem = SamplingSystem(self._sampler_settings, logger=self.logger, initial_wash=initial_wash, cell_filled=sample_in_cell)
+        self._sampling_system: SamplingSystem = SamplingSystem(self._sampler_settings, logger=self.logger, pump_wash=initial_wash, cell_filled=sample_in_cell)
         self._analyzer: DataAnalyzer = DataAnalyzer(self._data_path, logger=self.logger)
 
     @log_exceptions
