@@ -24,7 +24,7 @@ from ctypes import (
     sizeof,
     addressof,
     string_at,
-#    WinDLL,        # Commented off because it was unused, and caused Import Error on Macbook.
+    WinDLL,
 )
 
 #------------------------------------------------------------------------------#

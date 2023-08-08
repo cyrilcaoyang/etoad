@@ -1,5 +1,7 @@
+from pathlib import Path
+
 from src.etoad.HardwareController import SamplingSystem
-from src.etoad.Utils import timestamp_datetime, get_dropbox_path
+from src.etoad.Utils import timestamp_datetime
 from src.etoad.Interface import GraphicalInterface
 
 # ========== Sample Settings Below ========== #
@@ -10,22 +12,23 @@ Source_Port = 9                 # The Port from which the Sample will be added.
 Clean_Up: bool = False          # Cleaning Up the EChem Reactor afterwards.
 
 Disable_GUI: bool = True        # We are disabling GUI for simple liquid transfer.
-Simulation: bool = False
 
 # ========== Sample Settings Above ========== #
 
-PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem"
+PARENT_DIR = Path(__file__).parent
+with open(PARENT_DIR / "test_settings" / "file_settings") as file:
+    DATA_DIR = Path(file.read())
 
 # We are not using GUI for simple liquid transfer
 logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "Settings" / "logger_settings.json",
-    log_file=PARENT_DIR / "Logs" / f"{timestamp_datetime()}_test_Sampling_System.log",
+    logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
+    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_test_Sampling_System.log",
     disable_gui=Disable_GUI
 )
 
 # The EChem Reactor is filled with electrolyte solution by default.
 sampler = SamplingSystem(
-    config_file=PARENT_DIR / "Settings" / "sampler_settings.json",
+    config_file=PARENT_DIR / "test_settings" / "sampler_settings.json",
     logger=logger,
     initial_wash=0,
     cell_filled=True

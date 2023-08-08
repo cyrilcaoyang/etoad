@@ -176,13 +176,13 @@ class SamplingSystem:
     def wash_cell(self, wash_volume: float, cycles=3) -> None:
         """
         Washes the cell for n times:
-            - first time: 18 mL of wash solution to wash off also the sides of the measurement cell
+            - first time: 15 mL of wash solution to wash off also the sides of the measurement cell
             - other n-1 times: given volume of the wash solution.
         """
         self._logger.debug(f"Measurement Cell will be washed {cycles} times.")
         self._empty_cell()
 
-        self.transfer_to_cell(self.wash_port, 18)
+        self.transfer_to_cell(self.wash_port, 15)
         time.sleep(5)
         self._empty_cell()
 

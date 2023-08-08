@@ -1,5 +1,6 @@
 import threading
 import numpy
+from pathlib import Path
 
 from etoad.HardwareController.Potentiostat.EChemController import EChemController
 from etoad.Interface import GraphicalInterface
@@ -26,11 +27,13 @@ Simulation: bool = False
 Demonstration of Iterations of CV scans with various scan rates. 
 """
 
-PARENT_DIR = get_dropbox_path() / "PythonScript" / "EChem"
+PARENT_DIR = Path(__file__).parent
+with open(PARENT_DIR / "test_settings" / "file_settings") as file:
+    DATA_DIR = Path(file.read())
 
 logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "Settings" / "logger_settings.json",
-    log_file=PARENT_DIR / "Logs" / f"{timestamp_datetime()}_CV_multi_scan_rate.log",
+    logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
+    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_CV_multi_scan_rate.log",
     disable_gui=False
 )
 
@@ -43,7 +46,7 @@ print(Scan_Rates)
 def do_measurement():
 
     potentiostat = EChemController(
-        config_file=PARENT_DIR / "Settings" / "potentiostat_settings.json",
+        config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
         logger=logger,
         simulation_mode=False,
     )
@@ -74,7 +77,7 @@ def do_measurement():
     )
 
     # saving the data before disconnection
-    filename = PARENT_DIR.parent / "Data" / f"CV_Multi_ScanRate_{logger.sample_name}_{timestamp_datetime()}.csv"
+    filename = DATA_DIR / "Data" / f"CV_Multi_ScanRate_{logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
     logger.info(f"<<< Result of CV scans of {logger.sample_name} is saved as {filename}.")
     potentiostat.disconnect()

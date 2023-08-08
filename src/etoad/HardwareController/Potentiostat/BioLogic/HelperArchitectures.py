@@ -3,6 +3,7 @@ from .kbio_types import *
 
 # TODO: Refactor and properly implement
 
+
 def pp_plural(nb, label, num=True, nothing=''):
     """Return a user friendly version of an ordinal and a label.
 
