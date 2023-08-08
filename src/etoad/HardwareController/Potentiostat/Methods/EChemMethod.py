@@ -4,6 +4,7 @@ from typing import Optional, Callable, Tuple, Union, List
 import numpy as np
 from ..BioLogic import TECH_ID, PROG_STATE, CurrentValues, DataInfo, DataBuffer
 from ....Utils import ConfigLoader
+from logging import Logger
 
 
 class EChemMethod(metaclass=ABCMeta):
@@ -11,19 +12,18 @@ class EChemMethod(metaclass=ABCMeta):
     Abstract base class for electrochemical methods to be run on the Bio-Logic Instrument using the Python Interface.
 
     Public methods:
-        __str__()
         method_file() -> str: Returns the path to the ecc file for the specific method.
         load_parameters(set_parameters: dict) -> list: Merges user-defined parameters into default configuration
         extract_data(data: tuple, numeric_to_single: Callable) -> tuple: Extracts results from the raw loaded data.
         process_data(extracted_data: np.ndarray) -> np.ndarray: Processes the full measurement dataset.
 
-    Abstract attributes (need to be defined in "child" classes):
+    Abstract attributes (need to be defined in child classes):
         method_name (str): Name of the experimental method
         method_name_short (str): Short form of the method name
         method_file_name (str): Name of the ecc file.
         data_structure (tuple): Tuple of column headers of the final data structure.
 
-    Abstract methods (need to be defined in "child" classes):
+    Abstract methods (need to be defined in child classes):
         _decode_row(row: tuple, timebase: float, numeric_to_single: Callable) -> np.array: Decoder for raw data points.
         [OPTIONAL] process_data(extracted_data: np.ndarray) -> np.ndarray: Processes the full measurement dataset
 
@@ -37,9 +37,11 @@ class EChemMethod(metaclass=ABCMeta):
 
     def __init__(
             self,
-            path_to_binaries: Path
+            logger: Logger,
+            path_to_binaries: Path,
     ):
         self.method = path_to_binaries / self.method_file_name
+        self._logger: Logger = logger
 
     def __str__(
             self
@@ -148,8 +150,8 @@ class EChemMethod(metaclass=ABCMeta):
 
         return parsed_parameter
 
-    @staticmethod
     def _validate_parameter(
+            self,
             name: str,
             variable_type: str,
             value: Union[int, float, bool],
@@ -185,7 +187,7 @@ class EChemMethod(metaclass=ABCMeta):
 
         if constraints:
             if not eval(constraints, {"range": range}, {"x": value}):
-                raise ValueError(f"The value {value} violates the constraint {constraints} for the parameter {name}.")
+                raise ValueError(f"The value {value} violates the constraint for the parameter {name}.")
 
         if not index:
             return name, parameter_type, value
@@ -223,21 +225,21 @@ class EChemMethod(metaclass=ABCMeta):
             key_found: bool = False
             if key in parameters["TechniqueParameters"]:
                 parameters["TechniqueParameters"][key]["value"] = set_parameters["TechniqueParameters"][key]["value"]
-                if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key]:
-                    parameters["TechniqueParameters"][key]["changed_over_iterations"] = False
-                else: set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
+                parameters["TechniqueParameters"][key]["changed_over_iterations"] = False \
+                    if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key] \
+                    else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                 key_found = True
             else:
                 for param in parameters["TechniqueParameters"]:
                     if key == parameters["TechniqueParameters"][param]["name"]:
                         parameters["TechniqueParameters"][param]["value"] = set_parameters["TechniqueParameters"][key]["value"]
-                        if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key]:
-                            parameters["TechniqueParameters"][param]["changed_over_iterations"] = False
-                        else: set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
+                        parameters["TechniqueParameters"][param]["changed_over_iterations"] = False \
+                            if "changed_over_iterations" not in set_parameters["TechniqueParameters"][key] \
+                            else set_parameters["TechniqueParameters"][key]["changed_over_iterations"]
                         key_found = True
 
             if not key_found:
-                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}.") # TODO: log this KeyError
+                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}."")
 
         return parameters
 
@@ -251,8 +253,11 @@ class EChemMethod(metaclass=ABCMeta):
         Returns:
             Dictionary of default settings.
         """
+        self._logger.debug(f"Loading default settings of {self.method_name_short} method.")
         default_file: Path = Path(__file__).parent / f"{self.method_name_short}_Defaults.json"
-        return ConfigLoader.load_config(default_file)
+        config = ConfigLoader.load_config(default_file)
+        self._logger.debug(f"Loaded default settings from {default_file}.")
+        return config
 
     def extract_data(
             self,

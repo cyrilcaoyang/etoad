@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from modbus_tk.modbus_rtu import RtuMaster
 import modbus_tk.defines as cst
 from serial import Serial
+from logging import Logger
 
 
 class AtmosphereHandler(object):
@@ -12,18 +13,22 @@ class AtmosphereHandler(object):
     Public Methods to be Called from External:
         open_atmosphere() -> None: Context Manager for opening & closing the gas supply.
     """
-    def __init__(self, port: str, module_address: int, channel: int):
+    def __init__(self, logger: Logger, port: str, module_address: int, channel: int):
         """
         Instantiates the AtmosphereHandler object by setting the hardware connection ports.
 
         Args:
+            logger: Logger object
             port: Name of the com port (e.g. "com3").
             module_address: Address of the module (set by pins on the device).
             channel: Channel to which the solenoid is connected.
         """
+        self._logger: Logger = logger
         self._port: str = port
         self._module_address: int = module_address
         self._channel: int = channel
+
+        self._logger.info(f"Inert Gas Handling initialized.")
 
     @contextmanager
     def open_atmosphere(self) -> None:
@@ -51,6 +56,7 @@ class AtmosphereHandler(object):
                 starting_address=self._channel,
                 output_value=int(open_nitrogen)
             )
+            self._logger.debug(f"Nitrogen Open? {open_nitrogen}.")
 
     @contextmanager
     def _open_relay_connection(self):

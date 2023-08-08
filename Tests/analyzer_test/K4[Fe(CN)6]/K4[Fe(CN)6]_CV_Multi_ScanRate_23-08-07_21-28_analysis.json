@@ -1,0 +1,182 @@
+{
+  "iteration_0": {
+    "Peak Picking": [
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.199,
+          "current": -6.08e-05,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.281,
+          "current": 8.36e-05,
+          "peak_idx": 27
+        }
+      ],
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.199,
+          "current": -6.09e-05,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.281,
+          "current": 8.34e-05,
+          "peak_idx": 26
+        }
+      ]
+    ],
+    "Integration": [
+      2.2819283836140917e-05,
+      2.2503637762515502e-05
+    ]
+  },
+  "iteration_1": {
+    "Peak Picking": [
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.199,
+          "current": -9.1e-05,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.281,
+          "current": 0.000113,
+          "peak_idx": 27
+        }
+      ],
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.199,
+          "current": -9.09e-05,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.281,
+          "current": 0.000113,
+          "peak_idx": 27
+        }
+      ]
+    ],
+    "Integration": [
+      3.256694558316398e-05,
+      3.2102745392600215e-05
+    ]
+  },
+  "iteration_2": {
+    "Peak Picking": [
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.199,
+          "current": -0.000131,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.291,
+          "current": 0.000153,
+          "peak_idx": 26
+        }
+      ],
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.199,
+          "current": -0.000131,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.291,
+          "current": 0.000153,
+          "peak_idx": 26
+        }
+      ]
+    ],
+    "Integration": [
+      4.52668526735172e-05,
+      4.462055268448419e-05
+    ]
+  },
+  "iteration_3": {
+    "Peak Picking": [
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.189,
+          "current": -0.000185,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.291,
+          "current": 0.000205,
+          "peak_idx": 28
+        }
+      ],
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.189,
+          "current": -0.000185,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.291,
+          "current": 0.000205,
+          "peak_idx": 28
+        }
+      ]
+    ],
+    "Integration": [
+      6.138917747385189e-05,
+      6.039499612339639e-05
+    ]
+  },
+  "iteration_4": {
+    "Peak Picking": [
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.179,
+          "current": -0.000284,
+          "peak_idx": 30
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.301,
+          "current": 0.000301,
+          "peak_idx": 27
+        }
+      ],
+      [
+        {
+          "peak_type": "Minimum",
+          "voltage": 0.179,
+          "current": -0.000284,
+          "peak_idx": 29
+        },
+        {
+          "peak_type": "Maximum",
+          "voltage": 0.301,
+          "current": 0.0003,
+          "peak_idx": 26
+        }
+      ]
+    ],
+    "Integration": [
+      8.935281382440445e-05,
+      8.775301458322224e-05
+    ]
+  }
+}
