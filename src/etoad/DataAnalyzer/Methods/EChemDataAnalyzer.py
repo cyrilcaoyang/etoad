@@ -6,6 +6,7 @@ from logging import Logger
 import numpy as np
 
 from ...Utils import ConfigLoader
+from ...Utils import log_exceptions
 
 
 class EChemDataAnalyzer(metaclass=ABCMeta):
@@ -47,7 +48,7 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
             self._analysis_results: Dictionary of all analysis results per analysis step.
             self._figures: Dictionary of all generated Figure objects.
         """
-        self._logger: Logger = logger
+        self.logger: Logger = logger
 
         self._analysis_steps: dict = self._get_config(analysis_settings)
 
@@ -125,6 +126,7 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
         separated_data = [raw_data[raw_data[:, -1] == iteration] for iteration in range(no_iterations)]
         return separated_data
 
+    @log_exceptions
     def run_analysis(
             self,
     ) -> Tuple[dict, dict]:

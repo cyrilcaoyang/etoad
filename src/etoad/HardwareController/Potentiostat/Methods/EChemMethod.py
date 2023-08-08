@@ -41,7 +41,7 @@ class EChemMethod(metaclass=ABCMeta):
             path_to_binaries: Path,
     ):
         self.method = path_to_binaries / self.method_file_name
-        self._logger: Logger = logger
+        self.logger: Logger = logger
 
     def __str__(
             self
@@ -239,7 +239,7 @@ class EChemMethod(metaclass=ABCMeta):
                         key_found = True
 
             if not key_found:
-                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}."")
+                raise KeyError(f"{key} was not found in the default settings for {self.method_name_short}.")
 
         return parameters
 
@@ -253,10 +253,10 @@ class EChemMethod(metaclass=ABCMeta):
         Returns:
             Dictionary of default settings.
         """
-        self._logger.debug(f"Loading default settings of {self.method_name_short} method.")
+        self.logger.debug(f"Loading default settings of {self.method_name_short} method.")
         default_file: Path = Path(__file__).parent / f"{self.method_name_short}_Defaults.json"
         config = ConfigLoader.load_config(default_file)
-        self._logger.debug(f"Loaded default settings from {default_file}.")
+        self.logger.debug(f"Loaded default settings from {default_file}.")
         return config
 
     def extract_data(

@@ -3,6 +3,7 @@ from modbus_tk.modbus_rtu import RtuMaster
 import modbus_tk.defines as cst
 from serial import Serial
 from logging import Logger
+from ...Utils import log_exceptions
 
 
 class AtmosphereHandler(object):
@@ -23,12 +24,12 @@ class AtmosphereHandler(object):
             module_address: Address of the module (set by pins on the device).
             channel: Channel to which the solenoid is connected.
         """
-        self._logger: Logger = logger
+        self.logger: Logger = logger
         self._port: str = port
         self._module_address: int = module_address
         self._channel: int = channel
 
-        self._logger.info(f"Inert Gas Handling initialized.")
+        self.logger.info(f"Inert Gas Handling initialized.")
 
     @contextmanager
     def open_atmosphere(self) -> None:
@@ -42,6 +43,7 @@ class AtmosphereHandler(object):
         finally:
             self._set_atmosphere(False)
 
+    @log_exceptions
     def _set_atmosphere(self, open_nitrogen: bool = False) -> None:
         """
         Sets the relay either to open (True) or closed (False)
@@ -56,7 +58,7 @@ class AtmosphereHandler(object):
                 starting_address=self._channel,
                 output_value=int(open_nitrogen)
             )
-            self._logger.debug(f"Nitrogen Open? {open_nitrogen}.")
+            self.logger.debug(f"Nitrogen Open? {open_nitrogen}.")
 
     @contextmanager
     def _open_relay_connection(self):

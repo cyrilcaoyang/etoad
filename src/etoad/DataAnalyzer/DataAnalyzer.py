@@ -7,6 +7,7 @@ import numpy as np
 
 from ..Utils import timestamp_datetime
 from ..Utils import save_as_csv, save_as_json
+from ..Utils import log_exceptions
 from .Methods import CVAnalyzer, PulseTechniqueAnalyzer, EChemDataAnalyzer
 
 
@@ -34,8 +35,9 @@ class DataAnalyzer:
             logger: Logger object
         """
         self._data_path: Path = data_path
-        self._logger: Logger = logger
+        self.logger: Logger = logger
 
+    @log_exceptions
     def analyze_data(
             self,
             sample_name: str,
@@ -63,11 +65,11 @@ class DataAnalyzer:
         analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](
             analysis_settings=analysis_settings,
             raw_data=raw_data,
-            logger=self._logger
+            logger=self.logger
         )
 
         analysis_results, figures = analyzer.run_analysis()
-        self._logger.debug(f"Data Analysis Completed:\n {pprint.pformat(analysis_results)}")  # pprint is prettier :)
+        self.logger.debug(f"Data Analysis Completed:\n {pprint.pformat(analysis_results)}")  # pprint is prettier :)
 
         self._save_data(raw_data, analysis_results, figures, sample_dir, basename)
 
@@ -96,6 +98,7 @@ class DataAnalyzer:
 
         return sample_dir, file_basename
 
+    @log_exceptions
     def _save_data(
             self,
             raw_data: np.ndarray,
@@ -112,10 +115,10 @@ class DataAnalyzer:
             analysis_results: Dictionary of all analysis results returned by the EChemAnalyzer
         """
         save_as_csv(raw_data, sample_dir / f"{file_basename}.csv")
-        self._logger.info(f"Raw data was saved to {sample_dir / f'{file_basename}.csv'}")
+        self.logger.info(f"Raw data was saved to {sample_dir / f'{file_basename}.csv'}")
 
         save_as_json(analysis_results, sample_dir / f"{file_basename}_analysis.json")
-        self._logger.info(f"Analysis results were saved to {sample_dir / f'{file_basename}_analysis.json'}")
+        self.logger.info(f"Analysis results were saved to {sample_dir / f'{file_basename}_analysis.json'}")
 
         for fig_name, figure in zip(figures, figures.values()):
             figure.savefig(sample_dir / f"{file_basename}_{fig_name}.png", transparent=True, dpi=600)

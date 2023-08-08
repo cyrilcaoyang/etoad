@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__author__ = 'Felix Strieth-Kalthoff'
+__author__ = 'Felix Strieth-Kalthoff (@felix-s-k)'
 
 from array import array
 from contextlib import contextmanager
@@ -8,6 +8,7 @@ from typing import Union, List
 import numpy as np
 
 from ...Utils import ConfigLoader
+from ...Utils import log_exceptions
 from ...Interface import GraphicalInterface
 from .Binaries import BINARY_PATH
 from ..Potentiostat import BioLogic as KBIO
@@ -64,6 +65,7 @@ class EChemController(object):
 
         self.technique: Union[EChemMethod, None] = None
 
+    @log_exceptions
     def _connect(
             self,
     ) -> int:
@@ -122,6 +124,7 @@ class EChemController(object):
 
         return device_id.value
 
+    @log_exceptions
     def disconnect(
             self
     ) -> None:
@@ -207,6 +210,7 @@ class EChemController(object):
     # METHODS RELATED TO ACTUALLY PERFORMING A MEASUREMENT #
     ########################################################
 
+    @log_exceptions
     def do_measurement(
             self,
             technique: str,
@@ -256,6 +260,7 @@ class EChemController(object):
 
         return results
 
+    @log_exceptions
     def _run_single_measurement(
             self,
             channel: Union[int, None] = None

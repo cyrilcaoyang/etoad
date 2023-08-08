@@ -5,7 +5,7 @@ import numpy as np
 
 from .Interface import GraphicalInterface
 from .Utils import ConfigLoader
-from .Utils import SkipExecution, StopExecution
+from .Utils import SkipExecution, StopExecution, log_exceptions
 from .Utils import ThreadWithReturn
 from .HardwareController import EChemController, SamplingSystem
 from .DataAnalyzer import DataAnalyzer
@@ -25,7 +25,7 @@ class WorkflowManager(object):
     Public methods:
         measure_sample(sample_name: str, sample_location: int, workflow_path: Path) -> None
     """
-    # TODO: include threading
+    # TODO: include multithreading for running multiple samples on different potentiostat channels simultaneously
 
     _required_settings: set = {
         "Protocol Name",
@@ -54,9 +54,9 @@ class WorkflowManager(object):
         """
         Instantiates the workflow manager object by instantiating the individual modules:
             - self.logger
-            - self.potentiostat (EChemController object)
-            - self.sampling_system (SamplingSystem object)
-            - self.analyzer (DataAnalyzer object)
+            - self._potentiostat (EChemController object)
+            - self._sampling_system (SamplingSystem object)
+            - self._analyzer (DataAnalyzer object)
 
         Args:
             logger_settings: Path to the json file containing the logger settings
@@ -66,18 +66,18 @@ class WorkflowManager(object):
             logfile: Optional - name of the logfile used.
             disable_gui: Optional - if True, the GUI will not be started.
         """
-        # TODO: Refactor to hide private attributes
         self.logger: GraphicalInterface = GraphicalInterface(logger_settings, log_file=logfile, disable_gui=disable_gui)
-        self.potentiostat_settings = potentiostat_settings
-        self.sampler_settings = sampler_settings
-        self.data_path = data_path
+        self._potentiostat_settings = potentiostat_settings
+        self._sampler_settings = sampler_settings
+        self._data_path = data_path
 
-        self.potentiostat: Optional[EChemController] = None
-        self.sampling_system: Optional[SamplingSystem] = None
-        self.analyzer: Optional[DataAnalyzer] = None
+        self._potentiostat: Optional[EChemController] = None
+        self._sampling_system: Optional[SamplingSystem] = None
+        self._analyzer: Optional[DataAnalyzer] = None
 
-        self.samples: list = list()
+        self._samples: list = list()
 
+    @log_exceptions
     def submit_samples(self, samples: List[dict]) -> None:
         """
         Public method to submit all samples to measure to the WorkflowManager.
@@ -92,7 +92,7 @@ class WorkflowManager(object):
         """
         for sample in samples:
             if {"sample_name", "sample_location", "workflow_path"}.issubset(sample.keys()):
-                self.samples.append(sample)
+                self._samples.append(sample)
             else:
                 raise KeyError(f"The settings for sample {sample} are inclomplete.")
 
@@ -109,7 +109,7 @@ class WorkflowManager(object):
         Raises:
             ValueError if no samples have been loaded.
         """
-        if not self.samples:
+        if not self._samples:
             raise ValueError("No samples have been submitted – system initialization will be skipped.")
 
         measurements = ThreadWithReturn(target=self._run_system)
@@ -129,12 +129,13 @@ class WorkflowManager(object):
         self.initialize_system()
 
         results: dict = dict()
-        for sample in self.samples:
+        for sample in self._samples:
             results[sample["sample_name"]] = self._measure_sample(**sample)
 
         self.shutdown_system()
         return results
 
+    @log_exceptions
     def initialize_system(self, initial_wash: int = 1, sample_in_cell: bool = True) -> None:
         """
         Initializes the system by initializing the potentiostat, the sampling system and the data analyzer.
@@ -144,10 +145,11 @@ class WorkflowManager(object):
             sample_in_cell: If the cell needs to be emptied before starting the workflow.
         """
         self.logger.info("SYSTEM INITIALIZATION")
-        self.potentiostat: EChemController = EChemController(self.potentiostat_settings, logger=self.logger)
-        self.sampling_system: SamplingSystem = SamplingSystem(self.sampler_settings, logger=self.logger, initial_wash=initial_wash, cell_filled=sample_in_cell)
-        self.analyzer: DataAnalyzer = DataAnalyzer(self.data_path, logger=self.logger)
+        self._potentiostat: EChemController = EChemController(self._potentiostat_settings, logger=self.logger)
+        self._sampling_system: SamplingSystem = SamplingSystem(self._sampler_settings, logger=self.logger, initial_wash=initial_wash, cell_filled=sample_in_cell)
+        self._analyzer: DataAnalyzer = DataAnalyzer(self._data_path, logger=self.logger)
 
+    @log_exceptions
     def _measure_sample(
             self,
             sample_name: str,
@@ -191,6 +193,7 @@ class WorkflowManager(object):
 
         return result
 
+    @log_exceptions
     def _execute_step(
             self,
             sample_name: str,
@@ -239,10 +242,10 @@ class WorkflowManager(object):
              washing_cycles: Iterations for washing the cell
         """
         self.logger.experiment_name = "Filling Cell"
-        self.sampling_system.transfer_to_cell(autosampler_position, sample_volume)
-        self.sampling_system.dilute_cell(volume=total_volume-sample_volume)
+        self._sampling_system.transfer_to_cell(autosampler_position, sample_volume)
+        self._sampling_system.dilute_cell(volume=total_volume - sample_volume)
         self.logger.info(f"Sample was successfully transferred to the measurement cell ({sample_volume} + {total_volume-sample_volume} mL).")
-        self.sampling_system.purge_cell(purge_time)
+        self._sampling_system.purge_cell(purge_time)
         self.logger.experiment_name = "Purging Cell"
         try:
             yield
@@ -251,9 +254,10 @@ class WorkflowManager(object):
             self.logger.info(f"Measurements for sample completed.")
             self.logger.experiment_name = "Emptying Cell"
             if discard_sample:
-                self.sampling_system.wash_autosampler_position(autosampler_position)
-            self.sampling_system.wash_cell(wash_volume, washing_cycles)
+                self._sampling_system.wash_autosampler_position(autosampler_position)
+            self._sampling_system.wash_cell(wash_volume, washing_cycles)
 
+    @log_exceptions
     def run_measurement(
             self,
             sample_name: str,
@@ -286,13 +290,13 @@ class WorkflowManager(object):
                 parameters=parameters,
                 previous_results=results)
 
-        raw_data: np.ndarray = self.potentiostat.do_measurement(
+        raw_data: np.ndarray = self._potentiostat.do_measurement(
             technique=technique,
             set_parameters=parameters,
             channel=channel
         )
 
-        analysis_results: dict = self.analyzer.analyze_data(
+        analysis_results: dict = self._analyzer.analyze_data(
             sample_name=sample_name,
             experiment_name=step_name,
             technique=technique,
@@ -303,6 +307,7 @@ class WorkflowManager(object):
         results[step_name] = analysis_results
         return results
 
+    @log_exceptions
     def _dilute_cell(
             self,
             sample_name: str,
@@ -320,12 +325,13 @@ class WorkflowManager(object):
             results: Dictionary of previous results
             kwargs: Keyword arguments for the dilute_cell method (either "volume" or "factor")
         """
-        self.sampling_system.dilute_cell(**kwargs)
+        self._sampling_system.dilute_cell(**kwargs)
         results["dilution"] = True
         self.logger.debug(f"Sample {sample_name} was diluted.")
 
         return results
 
+    @log_exceptions
     def _update_parameters(
             self,
             update_settings: list,
@@ -367,6 +373,7 @@ class WorkflowManager(object):
 
         return parameters
 
+    @log_exceptions
     def shutdown_system(
             self,
             fill_cell: bool = True
@@ -378,7 +385,7 @@ class WorkflowManager(object):
         """
         if fill_cell:
             self._dilute_cell("shutdown", "shutdown", volume=5.0, results={})
-        self.potentiostat.disconnect()
-        self.sampling_system.disconnect()
+        self._potentiostat.disconnect()
+        self._sampling_system.disconnect()
         self.logger.stop_gui()
 
