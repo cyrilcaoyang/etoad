@@ -28,6 +28,7 @@ class SamplingSystem:
 
     required_settings: set = {
         "com_port",
+        "address",
         "pump_volume",
         "pump_default_file",  # This is a weird af setting of the SerialDevice class that contradicts the idea of a default imo. But it's required atm – I've created an issue on the repo already.
         "cell_port",
@@ -92,6 +93,7 @@ class SamplingSystem:
         self._pump: TecanXCPump = TecanXCPump(
             settings={
                 "com_port": self._config["com_port"],
+                "address": self._config["address"],
             },
             default_settings=self._config["pump_defaults_file"],
         )
