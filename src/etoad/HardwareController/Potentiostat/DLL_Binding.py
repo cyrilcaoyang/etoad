@@ -115,7 +115,6 @@ class EClibDLLInterface(object):
 
         raise ConnectionError(f"Error upon execution of method {function_name}: Error Code {check_value}")
 
-
     def _get_dll_file(
             self,
             binary_path: Path

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__author__ = 'Felix Strieth-Kalthoff'
+__author__ = 'Felix Strieth-Kalthoff (@felix-s-k)'
 
 from array import array
 from contextlib import contextmanager

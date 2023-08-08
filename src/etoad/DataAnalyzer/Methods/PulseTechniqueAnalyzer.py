@@ -260,7 +260,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             cv_offset = float(min(max_peak_offset, selected_peak["offset"] + additional_voltage))
 
             if cv_onset > selected_peak["onset"] or cv_offset < selected_peak["offset"]:
-                self._logger.warning("Peak overlap on the pulsed technique measurement. CV parameters must be treated"
+                self.logger.warning("Peak overlap on the pulsed technique measurement. CV parameters must be treated"
                                      "with caution. ")
 
             cv_parameters = [cv_offset, cv_offset, cv_onset, cv_offset, cv_offset]

@@ -56,9 +56,9 @@ class SamplingSystem:
 
         self._config: dict = ConfigLoader.load_config(config_file, self.required_settings)
 
-        self._logger: Logger = logger
+        self.logger: Logger = logger
 
-        self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(self._logger, **self._config["relay_settings"])
+        self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(self.logger, **self._config["relay_settings"])
 
         self._pump: Union[XCPump, None] = None
         self.cell_port: Union[int, None] = None
@@ -70,20 +70,20 @@ class SamplingSystem:
         self._initialize_pump(initial_wash)
 
         if cell_filled:
-            self._logger.debug(f"Measurement Cell was NOT empty.")
+            self.logger.debug(f"Measurement Cell was NOT empty.")
             self._cell_volume: float = 5.0
             self._empty_cell()
         else:
-            self._logger.debug(f"Measurement Cell was empty.")
+            self.logger.debug(f"Measurement Cell was empty.")
             self._cell_volume: float = 0
 
-        self._logger.info("Sampling System Initialized. ")
+        self.logger.info("Sampling System Initialized. ")
 
     def _initialize_pump(self, initial_wash: int = 3) -> None:
         """
         Creates an instance of the XCPump, sets the velocity and primes the pump.
         """
-        self._logger.info(f"Pump initialization started.")
+        self.logger.info(f"Pump initialization started.")
         self._pump: TecanPump = TecanPump(
             visa_address=self._config["visa_address"],
             device_address=self._config["device_address"],
@@ -99,7 +99,7 @@ class SamplingSystem:
         """
         for port in self.defined_ports:
             setattr(self, port, self._config[port])
-            self._logger.info(f"Pump {port} configured as {self._config[port]}.")
+            self.logger.info(f"Pump {port} configured as {self._config[port]}.")
 
     def transfer_to_cell(self, source_port: int, volume: float, wash_line: bool = False) -> None:
         """
@@ -113,11 +113,11 @@ class SamplingSystem:
         if wash_line:
             self._pump.draw_and_dispense(source_port, self.waste_port, self._config["dead_volume"], wait=1)
             self._wash_pump(1)
-            self._logger.debug(f"Line from port {source_port} washed once.")
+            self.logger.debug(f"Line from port {source_port} washed once.")
 
         self._pump.draw_and_dispense(source_port, self.cell_port, volume + self._config["dead_volume"], wait=2)
         self._update_cell_volume(volume)
-        self._logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
+        self.logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
 
     def dilute_cell(self, volume: float = 0, factor: float = 1) -> None:
         """
@@ -130,10 +130,10 @@ class SamplingSystem:
         if volume == 0:
             volume = self._cell_volume * (factor - 1)
             if factor > 1:
-                self._logger.info(f"The Measurement Cell was diluted by a factor of {factor}.")
+                self.logger.info(f"The Measurement Cell was diluted by a factor of {factor}.")
 
         self.transfer_to_cell(self.wash_port, volume)
-        self._logger.debug(f"The cell was diluted by {volume} mL of wash solution.")
+        self.logger.debug(f"The cell was diluted by {volume} mL of wash solution.")
 
     def purge_cell(self, purge_time: float = 10) -> None:
         """
@@ -142,12 +142,12 @@ class SamplingSystem:
         Args:
             purge_time: Purge time (in seconds).
         """
-        self._logger.debug("N2 purging will be turned ON.")
+        self.logger.debug("N2 purging will be turned ON.")
         with self._atmosphere_handler.open_atmosphere():
             time.sleep(purge_time)
 
-        self._logger.debug("N2 purging was turned OFF.")
-        self._logger.info(f"Cell was purged with Nitrogen gas for {purge_time} sec.")
+        self.logger.debug("N2 purging was turned OFF.")
+        self.logger.info(f"Cell was purged with Nitrogen gas for {purge_time} sec.")
 
     def _wash_pump(self, cycles=3):
         """
@@ -156,7 +156,7 @@ class SamplingSystem:
         for _ in range(cycles):
             self._pump.draw_and_dispense(self.wash_port, self.waste_port, self._config["pump_volume"], wait=1)
 
-        self._logger.info(f"Pump washed {cycles} times.")
+        self.logger.info(f"Pump washed {cycles} times.")
 
     def wash_autosampler_position(self, sampler_position: int, no_cycles: int = 3) -> None:
         """
@@ -171,7 +171,7 @@ class SamplingSystem:
         for _ in range(no_cycles):
             self._pump.draw_and_dispense(self.wash_port, sampler_position, 5)
             self._pump.draw_and_dispense(sampler_position, self.waste_port, 6)
-        self._logger.info(f"Sample position {sampler_position} was washed {no_cycles} times.")
+        self.logger.info(f"Sample position {sampler_position} was washed {no_cycles} times.")
 
     def wash_cell(self, wash_volume: float, cycles=3) -> None:
         """
@@ -179,7 +179,7 @@ class SamplingSystem:
             - first time: 15 mL of wash solution to wash off also the sides of the measurement cell
             - other n-1 times: given volume of the wash solution.
         """
-        self._logger.debug(f"Measurement Cell will be washed {cycles} times.")
+        self.logger.debug(f"Measurement Cell will be washed {cycles} times.")
         self._empty_cell()
 
         self.transfer_to_cell(self.wash_port, 15)
@@ -191,18 +191,18 @@ class SamplingSystem:
             time.sleep(5)
             self._empty_cell()
 
-        self._logger.info(f"Measurement Cell was washed {cycles} times and emptied.")
+        self.logger.info(f"Measurement Cell was washed {cycles} times and emptied.")
 
     def _empty_cell(self):
         """
         Removes the entire amount of liquid from the cell.
         """
-        self._logger.debug(f"Measurement Cell to be emptied.")
+        self.logger.debug(f"Measurement Cell to be emptied.")
 
         with self._atmosphere_handler.open_atmosphere():
             self._pump.draw_and_dispense(self.cell_port, self.waste_port, self._cell_volume + 2, wait=1)
             self._update_cell_volume(-self._cell_volume)
-            self._logger.debug(f"All liquid in Measurement Cell moved to waste.")
+            self.logger.debug(f"All liquid in Measurement Cell moved to waste.")
 
     def _update_cell_volume(self, volume: float) -> None:
         """
@@ -212,12 +212,12 @@ class SamplingSystem:
             volume: Volume added to (positive) / removed from (negative) the cell.
         """
         self._cell_volume += volume
-        self._logger.debug(f"The amount of liquid in the Measurement Cell is {self._cell_volume} mL.")
+        self.logger.debug(f"The amount of liquid in the Measurement Cell is {self._cell_volume} mL.")
 
     def disconnect(self) -> None:
         """
         Closes the connection to the pump by closing the pyvisa resource manager.
         """
         self._pump.manager.close()
-        self._logger.info("Connection to the sampling system was successfully closed.")
+        self.logger.info("Connection to the sampling system was successfully closed.")
 

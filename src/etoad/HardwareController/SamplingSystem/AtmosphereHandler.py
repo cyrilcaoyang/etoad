@@ -23,12 +23,12 @@ class AtmosphereHandler(object):
             module_address: Address of the module (set by pins on the device).
             channel: Channel to which the solenoid is connected.
         """
-        self._logger: Logger = logger
+        self.logger: Logger = logger
         self._port: str = port
         self._module_address: int = module_address
         self._channel: int = channel
 
-        self._logger.info(f"Inert Gas Handling initialized.")
+        self.logger.info(f"Inert Gas Handling initialized.")
 
     @contextmanager
     def open_atmosphere(self) -> None:
@@ -56,7 +56,7 @@ class AtmosphereHandler(object):
                 starting_address=self._channel,
                 output_value=int(open_nitrogen)
             )
-            self._logger.debug(f"Nitrogen Open? {open_nitrogen}.")
+            self.logger.debug(f"Nitrogen Open? {open_nitrogen}.")
 
     @contextmanager
     def _open_relay_connection(self):

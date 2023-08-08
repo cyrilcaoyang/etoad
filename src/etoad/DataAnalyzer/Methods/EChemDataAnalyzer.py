@@ -47,7 +47,7 @@ class EChemDataAnalyzer(metaclass=ABCMeta):
             self._analysis_results: Dictionary of all analysis results per analysis step.
             self._figures: Dictionary of all generated Figure objects.
         """
-        self._logger: Logger = logger
+        self.logger: Logger = logger
 
         self._analysis_steps: dict = self._get_config(analysis_settings)
 
