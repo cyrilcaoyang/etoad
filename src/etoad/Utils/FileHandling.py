@@ -4,7 +4,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from typing import Any
+from typing import Union, Any
 
 
 def save_as_pkl(
@@ -38,7 +38,7 @@ def save_as_csv(
 
 
 def save_as_json(
-        data: dict,
+        data: Union[dict, list],
         file_name: Path
 ) -> None:
     """

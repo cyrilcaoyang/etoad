@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple, Dict
+from typing import Union, Tuple, Dict
 from logging import Logger
 import matplotlib.figure
 import numpy as np
@@ -42,7 +42,7 @@ class DataAnalyzer:
             technique: str,
             analysis_settings: dict,
             raw_data: np.ndarray,
-    ) -> dict:
+    ) -> Dict[str, Union[list, dict]]:
         """
         Public method to run the data for a specific electrochemical measurement technique.
         Instantiates the analyzer object for the specific technique and runs the data analysis.
@@ -59,7 +59,12 @@ class DataAnalyzer:
         """
         sample_dir, basename = self._get_target_folder(sample_name, experiment_name)
 
-        analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](analysis_settings, raw_data, self._logger)
+        analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](
+            analysis_settings=analysis_settings,
+            raw_data=raw_data,
+            logger=self._logger
+        )
+
         analysis_results, figures = analyzer.run_analysis()
         self._logger.info(f"Data Analysis Completed: {analysis_results}")
 
@@ -93,7 +98,7 @@ class DataAnalyzer:
     def _save_data(
             self,
             raw_data: np.ndarray,
-            analysis_results: dict,
+            analysis_results: Dict[str, Union[list, dict]],
             figures: Dict[str, matplotlib.figure.Figure],
             sample_dir: Path,
             file_basename: str
@@ -105,11 +110,9 @@ class DataAnalyzer:
             raw_data: Numpy ndarray of the obtained raw data.
             analysis_results: Dictionary of all analysis results returned by the EChemAnalyzer
         """
-        # save_as_pkl(raw_data, sample_dir / f"{file_basename}.pkl")
         save_as_csv(raw_data, sample_dir / f"{file_basename}.csv")
         self._logger.info(f"Raw data was saved to {sample_dir / f'{file_basename}.csv'}")
 
-        # save_as_pkl(analysis_results, sample_dir / f"{file_basename}_analysis.pkl")
         save_as_json(analysis_results, sample_dir / f"{file_basename}_analysis.json")
         self._logger.info(f"Analysis results were saved to {sample_dir / f'{file_basename}_analysis.json'}")
 
