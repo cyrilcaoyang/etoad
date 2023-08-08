@@ -34,9 +34,7 @@ Job_Queue = [
 
 PARENT_DIR = Path(__file__).parent
 with open(PARENT_DIR / "test_settings" / "file_settings") as file:
-    if os.path.exists(file):
-        DATA_DIR = Path(file.read())
-    else: raise FileExistsError
+    DATA_DIR = Path(file.read())
 
 manager: WorkflowManager = WorkflowManager(
     logger_settings=PARENT_DIR / "test_settings" / "logger_settings.json",
