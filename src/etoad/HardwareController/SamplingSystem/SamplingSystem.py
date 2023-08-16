@@ -93,8 +93,8 @@ class SamplingSystem:
             com_port=self._config["com_port"],
             address=self._config["address"],
             syringe_volume=self._config["pump_volume"],
-            init_valve_pos=self.wash_port,
-            out_valve_pos=self.waste_port,
+            init_valve=self.wash_port,
+            out_valve=self.waste_port,
         )
         self._wash_pump(initial_wash)
 

@@ -1,6 +1,6 @@
 {
-  "visa_address": "ASRL4::INSTR",
-  "device_address": 0,
+  "com_port": "4",
+  "address": 0,
   "pump_volume": 2.5,
   "initial_valve": 12,
   "default_velocity": 600,
