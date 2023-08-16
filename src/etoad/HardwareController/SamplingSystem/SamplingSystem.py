@@ -30,7 +30,6 @@ class SamplingSystem:
         "com_port",
         "address",
         "pump_volume",
-        "pump_default_file",  # This is a weird af setting of the SerialDevice class that contradicts the idea of a default imo. But it's required atm – I've created an issue on the repo already.
         "cell_port",
         "wash_port",
         "waste_port",
@@ -91,11 +90,11 @@ class SamplingSystem:
         """
         self.logger.info(f"Pump initialization started.")
         self._pump: TecanXCPump = TecanXCPump(
-            settings={
-                "com_port": self._config["com_port"],
-                "address": self._config["address"],
-            },
-            default_settings=self._config["pump_defaults_file"],
+            com_port=self._config["com_port"],
+            address=self._config["address"],
+            syringe_volume=self._config["pump_volume"],
+            init_valve_pos=self.wash_port,
+            out_valve_pos=self.waste_port,
         )
         self._wash_pump(initial_wash)
 
