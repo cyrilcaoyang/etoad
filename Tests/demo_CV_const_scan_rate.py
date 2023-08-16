@@ -69,7 +69,7 @@ def do_measurement():
     # saving the data before disconnection
     filename = DATA_DIR / "Data" / f"CV_Const_ScanRate_{logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
-    logger.info(f"<<< Result of CV scans of {logger.sample_name} is saved as {filename}.")
+    logger.info(f"Result of CV scans of {logger.sample_name} is saved as {filename}.")
     potentiostat.disconnect()
     logger.stop_gui()
 
