@@ -5,10 +5,13 @@ from etoad import WorkflowManager
 from etoad.Utils import timestamp_datetime
 
 # Executes the workflow in the following steps using a GUI (which can be turned off):
+#   - Turns on the GUI
 #   - Sample transfer to the measurement cell
-#   - Square Wave Voltammetry measurement
-#   - Cyclic Voltammetry measurement based on parameters inferred from the SWV measurement
+#   - First measurement (Square Wave Voltammetry)
 #   - Data analysis, visualization and storage
+#   - Second measurement (Cyclic Voltammetry measurement) based on parameters inferred from the first one.
+#   - Data analysis, visualization and storage
+#   - ...Potentially more measurements...
 #   - Cell cleaning after the measurements
 
 #   {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("test_stability_pos.json")}
@@ -35,7 +38,12 @@ Disable_GUI: bool = False
 # ========== Submit Samples Above ========== #
 
 
-def run_workflow(job_queue=Job_Queue, disable_gui=Disable_GUI):
+def run_workflow(job_queue=Job_Queue, disable_gui=Disable_GUI) -> dict:
+    """
+    This python script demonstrate workflows of multiple measurements of different techniques on different samples.
+    Returns:
+        a dictionary of results of all samples.
+    """
 
     parent_dir = Path(__file__).parent
     with open(parent_dir / "test_settings" / "file_settings") as file:
@@ -59,6 +67,6 @@ if __name__ == "__main__":
 
 
 # TODO: come up with a way to trigger a 'skip current run' exception, save data, and go to the next job
-# TODO: can we check all echem parameters first, before running echem?
+# TODO: can we check all echem parameters first, before running sampler?
 # test DPV-OCV-CV: after negative square wave, time.sleep for 30 sec and start CV from OCV
 # change initial port to WASTE (This will be done with Han's new codes)

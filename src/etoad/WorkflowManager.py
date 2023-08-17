@@ -1,7 +1,8 @@
+import numpy as np
+import pprint
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Union, Any, Optional, List
-import numpy as np
 
 from .Interface import GraphicalInterface
 from .Utils import ConfigLoader
@@ -133,6 +134,8 @@ class WorkflowManager(object):
             results[sample["sample_name"]] = self._measure_sample(**sample)
 
         self.shutdown_system()
+
+        self.logger.debug(f"Results of all samples: {pprint.pformat(results)}")
         return results
 
     @log_exceptions

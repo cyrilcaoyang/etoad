@@ -4,7 +4,7 @@ from pathlib import Path
 
 from etoad.HardwareController.Potentiostat.EChemController import EChemController
 from etoad.Interface import GraphicalInterface
-from etoad.Utils import timestamp_datetime
+from etoad.Utils import timestamp_datetime, ThreadWithReturn
 
 """
     This python script demonstrate the CV scans with constant scan rates.
@@ -25,26 +25,41 @@ Simulation: bool = False    # This option can turn ON/OFF the Simulation Mode
 
 # ========== Sample Settings Above ========== #
 
-PARENT_DIR = Path(__file__).parent
-with open(PARENT_DIR / "test_settings" / "file_settings") as file:
-    DATA_DIR = Path(file.read())
 
-logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_CV_const_scan_rate.log",
-    disable_gui=Disable_GUI
-)
+def define_paths() -> tuple:
+    """
+    This function defines the path of the working and data directory.
+    """
+    parent_dir = Path(__file__).parent
+    with open(parent_dir / "test_settings" / "file_settings") as file:
+        data_dir = Path(file.read())
+    return parent_dir, data_dir
 
 
-def do_measurement():
+def make_logger(disable_gui: bool) -> GraphicalInterface:
+    """
+    This function creates a logger for the experiment.
+    """
+    parent_dir, data_dir = define_paths()
+    logger = GraphicalInterface(
+        logging_config=parent_dir / "test_settings" / "logger_settings.json",
+        log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_CV_const_scan_rate.log",
+        disable_gui=disable_gui
+    )
+    return logger
+
+
+def do_measurement(sample_name: str, simulation_mode: bool, logger: GraphicalInterface) -> None:
+
+    parent_dir, data_dir = define_paths()
     potentiostat = EChemController(
-        config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
+        config_file=parent_dir / "test_settings" / "potentiostat_settings.json",
         logger=logger,
-        simulation_mode=Simulation,
+        simulation_mode=simulation_mode,
     )
 
-    logger.sample_name = Sample_Name
-    logger.info(f"*** Starting Experiment: CV Scans of {logger.sample_name}.")
+    logger.sample_name = sample_name
+    logger.info(f"Starting Experiment: CV Scans of {logger.sample_name}.")
 
     results = potentiostat.do_measurement(
         technique="CV",
@@ -67,16 +82,21 @@ def do_measurement():
     )
 
     # saving the data before disconnection
-    filename = DATA_DIR / "Data" / f"CV_Const_ScanRate_{logger.sample_name}_{timestamp_datetime()}.csv"
+    filename = data_dir / "Data" / f"CV_Const_ScanRate_{logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
     logger.info(f"Result of CV scans of {logger.sample_name} is saved as {filename}.")
     potentiostat.disconnect()
     logger.stop_gui()
 
 
-worker_thread = threading.Thread(target=do_measurement)
-worker_thread.start()
-logger.start_gui()
-worker_thread.join()
+if __name__ == "__main__":
+
+    logger = make_logger(Disable_GUI)
+    worker_thread = ThreadWithReturn(
+        target=do_measurement(sample_name=Sample_Name, simulation_mode=Simulation, logger=logger)
+    )
+    worker_thread.start()
+    logger.start_gui()
+    worker_thread.join()
 
 

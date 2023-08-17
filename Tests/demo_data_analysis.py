@@ -1,4 +1,5 @@
 import numpy as np
+import pprint
 
 from etoad.DataAnalyzer import DataAnalyzer
 from etoad.Interface import GraphicalInterface
@@ -11,8 +12,8 @@ from pathlib import Path
     The first one analyze a csv file, while the second one reads a pickle file.
 """
 
-Analyze_CV: bool = True
-Analyze_Cyclic_SWV: bool = False
+Analyze_CV: bool = False
+Analyze_Cyclic_SWV: bool = True
 
 PARENT_DIR = Path(__file__).parent
 with open(PARENT_DIR / "test_settings" / "file_settings") as file:
@@ -47,6 +48,8 @@ if Analyze_CV:
 
 if Analyze_Cyclic_SWV:
     data = np.load(PARENT_DIR / "analyzer_test" / "Test_Cyclic_SWV.pkl", allow_pickle=True)
+    print(data.shape)
+    pprint.pprint(data)
     data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)
     data_analyzer.analyze_data(
         sample_name="K4[Fe(CN)6]",
