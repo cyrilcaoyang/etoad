@@ -7,7 +7,8 @@ from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime, ThreadWithReturn
 
 """
-    This python script demonstrate the CV scans with constant scan rates.
+    This python script demonstrate the CV scans with constant scan rates, without using the Workflow Manager
+    Without the usage of the GUI, the experiment can be run in the background.
 """
 
 # ========== Sample Settings Below ========== #
@@ -36,21 +37,24 @@ def define_paths() -> tuple:
     return parent_dir, data_dir
 
 
-def make_logger(disable_gui: bool) -> GraphicalInterface:
+def make_logger(sample_name: str, disable_gui: bool) -> GraphicalInterface:
     """
     This function creates a logger for the experiment.
     """
     parent_dir, data_dir = define_paths()
     logger = GraphicalInterface(
         logging_config=parent_dir / "test_settings" / "logger_settings.json",
-        log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_CV_const_scan_rate.log",
+        log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{sample_name}_CV_const_scan_rate.log",
         disable_gui=disable_gui
     )
+    logger.sample_name = sample_name
     return logger
 
 
-def do_measurement(sample_name: str, simulation_mode: bool, logger: GraphicalInterface) -> None:
-
+def do_measurement(simulation_mode: bool, logger: GraphicalInterface) -> None:
+    """
+    This function performs the CV scans with constant scan rates.
+    """
     parent_dir, data_dir = define_paths()
     potentiostat = EChemController(
         config_file=parent_dir / "test_settings" / "potentiostat_settings.json",
@@ -58,7 +62,6 @@ def do_measurement(sample_name: str, simulation_mode: bool, logger: GraphicalInt
         simulation_mode=simulation_mode,
     )
 
-    logger.sample_name = sample_name
     logger.info(f"Starting Experiment: CV Scans of {logger.sample_name}.")
 
     results = potentiostat.do_measurement(
@@ -91,10 +94,10 @@ def do_measurement(sample_name: str, simulation_mode: bool, logger: GraphicalInt
 
 if __name__ == "__main__":
 
-    logger = make_logger(Disable_GUI)
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(Sample_Name, Simulation, logger))
+    gui_logger = make_logger(Sample_Name, Disable_GUI)
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(Sample_Name, Simulation, gui_logger))
     worker_thread.start()
-    logger.start_gui()
+    gui_logger.start_gui()
     worker_thread.join()
 
 

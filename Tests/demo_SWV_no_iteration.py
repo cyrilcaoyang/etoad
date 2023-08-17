@@ -4,7 +4,7 @@ from pathlib import Path
 
 from etoad.HardwareController.Potentiostat.EChemController import EChemController
 from etoad.Interface import GraphicalInterface
-from etoad.Utils import timestamp_datetime, get_dropbox_path
+from etoad.Utils import timestamp_datetime
 
 """
     This python script demonstrate a simple SWV scan.
