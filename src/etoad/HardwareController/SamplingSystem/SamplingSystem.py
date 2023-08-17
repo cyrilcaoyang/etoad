@@ -117,11 +117,20 @@ class SamplingSystem:
             wash_line: Whether to wash the line to remove contaminations, e.g. from previous samples.
         """
         if wash_line:
-            self._pump.draw_and_dispense(source_port, self.waste_port, self._config["dead_volume"], wait=1)
+            self._pump.draw_and_dispense(
+                volume=self._config["dead_volume"],
+                draw_valve_port=source_port,
+                dispense_valve_port=self.waste_port,
+                wait=1
+            )
             self._wash_pump(1)
             self.logger.debug(f"Line from port {source_port} washed once.")
 
-        self._pump.draw_and_dispense(source_port, self.cell_port, volume + self._config["dead_volume"], wait=2)
+        self._pump.draw_and_dispense(
+            draw_valve_port=source_port,
+            dispense_valve_port=self.cell_port,
+            volume=volume + self._config["dead_volume"], wait=2
+        )
         self._update_cell_volume(volume)
         self.logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
 
@@ -163,8 +172,12 @@ class SamplingSystem:
         Washes the syringe pump for three times with its volume of wash liquid.
         """
         for _ in range(cycles):
-            self._pump.draw_and_dispense(self.wash_port, self.waste_port, self._config["pump_volume"], wait=1)
-
+            self._pump.draw_and_dispense(
+                volume=self._config["pump_volume"],
+                draw_valve_port=self.wash_port,
+                dispense_valve_port=self.waste_port,
+                wait=1, speed=0.5
+            )
         self.logger.info(f"Pump washed {cycles} times.")
 
     @log_exceptions
@@ -176,11 +189,21 @@ class SamplingSystem:
             sampler_position: Source port of the sample vial that should be cleaned.
             no_cycles: Number of wash cycles.
         """
-        self._pump.draw_and_dispense(sampler_position, self.waste_port, 7.5, wait=1)
+        self._pump.draw_and_dispense(
+            volume=7.5, draw_valve_port=sampler_position, dispense_valve_port=self.waste_port, wait=1
+        )
         self._wash_pump(1)
         for _ in range(no_cycles):
-            self._pump.draw_and_dispense(self.wash_port, sampler_position, 5)
-            self._pump.draw_and_dispense(sampler_position, self.waste_port, 6)
+            self._pump.draw_and_dispense(
+                volume=5,
+                draw_valve_port=self.wash_port, dispense_valve_port=sampler_position,
+                wait=1, speed=0.5
+            )
+            self._pump.draw_and_dispense(
+                volume=6,
+                draw_valve_port=sampler_position, dispense_valve_port=self.waste_port,
+                wait=1, speed=0.5
+            )
         self.logger.info(f"Sample position {sampler_position} was washed {no_cycles} times.")
 
     @log_exceptions
@@ -211,7 +234,13 @@ class SamplingSystem:
         self.logger.debug(f"Measurement Cell to be emptied.")
 
         with self._atmosphere_handler.open_atmosphere():
-            self._pump.draw_and_dispense(self.cell_port, self.waste_port, self._cell_volume + 2, wait=1)
+            self._pump.draw_and_dispense(
+                volume=self._cell_volume + 2,
+                draw_valve_port=self.cell_port,
+                dispense_valve_port=self.waste_port,
+                wait=1,
+                speed=0.5
+            )
             self._update_cell_volume(-self._cell_volume)
             self.logger.debug(f"All liquid in Measurement Cell moved to waste.")
 
