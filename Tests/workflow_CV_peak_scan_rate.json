@@ -1,32 +1,117 @@
 {
-  "Protocol Name": "CV Peaks vs Scan Rate",
+  "Protocol Name": "SWV, then CV Peaks vs Scan Rate",
   "Steps": {
-    "CV": {
+    "SWV": {
       "task": "measure",
-      "technique": "CV",
+      "technique": "SWV",
       "parameters": {
-        "IterationSettings": {"no_iterations": 5},
+        "IterationSettings": {"no_iterations": 1},
         "TechniqueParameters": {
-          "Voltage Profile": {
-            "value": [0.0, 0.5, 0, 0, 0]
+          "Initial Voltage": {
+            "value": 1.2
           },
-          "Number of Cycles": {
-            "value": 3
-          },
-          "Scan Rate": {
-            "value": [
-              [0.05, 0.05, 0.05, 0.05, 0.05],
-              [0.1, 0.1, 0.1, 0.1, 0.1],
-              [0.2, 0.2, 0.2, 0.2, 0.2],
-              [0.5, 0.5, 0.5, 0.5, 0.5],
-              [1.0, 1.0, 1.0, 1.0, 1.0]
-            ]
+          "Final Voltage": {
+            "value": 0
           }
         }
       },
       "update_parameters": [],
       "analysis_settings": {
-        "Plot": {"title": "CV peaks vs Scan Rate"},
+        "Plot": {
+          "title": "Square Wave Voltammetry"
+        },
+        "Peak Picking": {},
+        "CV Parameters": {
+          "filters": [
+            {
+              "key": "peak",
+              "operation": "x > 0"
+            },
+            {
+              "key": "rel_shape_factor",
+              "operation": "x > 0.1"
+            }
+          ],
+          "selection": {
+            "key": "peak",
+            "operation": "max(x)"
+          }
+        }
+      }
+      },
+    "CV": {
+      "task": "measure",
+      "technique": "CV",
+      "parameters": {
+        "IterationSettings": {
+          "no_iterations": 5
+        },
+        "TechniqueParameters": {
+          "Voltage Profile": {
+            "value": [
+              0,
+              0.5,
+              0,
+              0,
+              0
+            ]
+          },
+          "Number of Cycles": {
+            "value": 3
+          },
+          "Scan Rate": {
+            "changed_over_iterations": true,
+            "value": [
+              [
+                0.05,
+                0.05,
+                0.05,
+                0.05,
+                0.05
+              ],
+              [
+                0.1,
+                0.1,
+                0.1,
+                0.1,
+                0.1
+              ],
+              [
+                0.2,
+                0.2,
+                0.2,
+                0.2,
+                0.2
+              ],
+              [
+                0.5,
+                0.5,
+                0.5,
+                0.5,
+                0.5
+              ],
+              [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ]
+            ]
+          }
+        }
+      },
+      "update_parameters": [
+        {
+          "parameter" : "Voltage Profile",
+          "from measurement": "SWV",
+          "key": "CV Parameters"
+        }
+      ],
+      "analysis_settings": {
+        "Plot": {
+          "title": "CV peaks vs Scan Rate"
+        },
         "Peak Picking": {},
         "Peaks Scanrate": {}
       }

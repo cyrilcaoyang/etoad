@@ -58,7 +58,10 @@ class AtmosphereHandler(object):
                 starting_address=self._channel,
                 output_value=int(open_nitrogen)
             )
-            self.logger.debug(f"Nitrogen Open? {open_nitrogen}.")
+            if open_nitrogen:
+                self.logger.debug(f"Nitrogen flow is ON!")
+            else:
+                self.logger.debug(f"Nitrogen flow is OFF!")
 
     @contextmanager
     def _open_relay_connection(self):

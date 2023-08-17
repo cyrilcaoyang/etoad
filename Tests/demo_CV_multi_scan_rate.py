@@ -5,7 +5,7 @@ from etoad.HardwareController.Potentiostat.EChemController import EChemControlle
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime
 from etoad.Utils import ThreadWithReturn
-from etoad.DataAnalyzer import CVAnalyzer
+from etoad.DataAnalyzer import DataAnalyzer
 
 """
     This python script demonstrate the CV scans with multiple different scan rates.
@@ -22,7 +22,8 @@ V_min = 0                   # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
 Cycle_Numbers: int = 3      # The Numer of Cycles at each Scan Rate
 
-Scan_Rates = {0.050, 0.100, 0.200, 0.400, 1.000}    # Unit: Scan Rate in V/s
+Scan_Rates = {0.500, 1.000}    # Unit: Scan Rate in V/s
+# Scan_Rates = {0.050, 0.100, 0.200, 0.400, 1.000}    # Unit: Scan Rate in V/s
 
 Disable_GUI: bool = False
 Simulation: bool = False    # This option can turn ON/OFF the Simulation Mode
@@ -30,41 +31,15 @@ Simulation: bool = False    # This option can turn ON/OFF the Simulation Mode
 # ========== Sample Settings Above ========== #
 
 
-def set_directory() -> (Path, Path):
-    """
-    Returns the path of the parent and data directory
-    """
-    _parent_dir = Path(__file__).parent
-    with open(_parent_dir / "test_settings" / "file_settings") as file:
-        _data_dir = Path(file.read())
-    return _parent_dir, _data_dir
-
-
-def gui_logger(disable_gui=Disable_GUI) -> GraphicalInterface:
-    """
-    Instantiates the logger and reads the settings from the logger_settings.json file
-    """
-    _parent_dir, _data_dir = set_directory()
-
-    _logger = GraphicalInterface(
-        logging_config=_parent_dir / "test_settings" / "logger_settings.json",
-        log_file=_data_dir / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_CV_multi_scan_rate.log",
-        disable_gui=disable_gui,
-    )
-    _logger.sample_name = Sample_Name
-    _logger.info(f"Starting Experiment: CV scans of {_logger.sample_name} at Various Scan Rates.")
-    return _logger
-
-
-def do_measurement(
+def go_measurement(
         v_init=V_init, v_max=V_max, v_min=V_min, v_fin=V_fin,
         cycle_numbers=Cycle_Numbers,
         scan_rates=tuple(Scan_Rates),
         simulation=Simulation,
-        _logger=gui_logger(),
+        _data_dir: Path = None,
+        _parent_dir: Path = None,
+        _logger: GraphicalInterface = None,
 ):
-
-    _data_dir, _parent_dir = set_directory()
 
     # Calculates the number of iterations, and creates a list of scan rates for each iteration
     num_iter = len(scan_rates)
@@ -99,23 +74,49 @@ def do_measurement(
         }
     )
 
-    cv_analyzer: CVAnalyzer = CVAnalyzer(results, _logger)
-    figure = cv_analyzer.plot_peak_current_vs_scan_rate
-
-    # Saves the data before disconnection.
-    filename = data_dir / "Data" / f"CV_Multi_ScanRate_{logger.sample_name}_{timestamp_datetime()}.csv"
+    # Saves the data before disconnecting from the potentiostat.
+    filename = _data_dir / "Data" / f"CV_Multi_ScanRate_{_logger.sample_name}_{timestamp_datetime()}.csv"
     numpy.savetxt(filename, results, delimiter=',')
-    logger.info(f"Result of CV scans of {logger.sample_name} is saved as {filename}.")
+    _logger.info(f"Result of CV scans of {_logger.sample_name} is saved as {filename}.")
     potentiostat.disconnect()
-    logger.stop_gui()
+
+    # Analyzes the data.
+    cv_analyzer: DataAnalyzer = DataAnalyzer(_data_dir / "DATA", logger=_logger)
+    cv_analyzer.analyze_data(
+        sample_name="K4[Fe(CN)6]",
+        experiment_name="CV_Multi_ScanRate",
+        technique="CV",
+        analysis_settings={
+            "Plot": {"title": f"{sample_name} CV_Multi_ScanRate"},
+            "Peak Picking": {},
+            "Integration": {},
+            "Peaks Scanrate": {}
+        },
+        raw_data=results
+    )
+
+    _logger.stop_gui()
 
 
 if __name__ == "__main__":
-    logger, data_dir, parent_dir = gui_logger()
 
-    worker_thread = ThreadWithReturn(target=do_measurement)
+    parent_dir = Path(__file__).parent
+    with open(parent_dir / "test_settings" / "file_settings") as file:
+        data_dir = Path(file.read())
+
+    print(f"{parent_dir=}")
+    sample_name = Sample_Name
+
+    logger = GraphicalInterface(
+        logging_config=parent_dir / "test_settings" / "logger_settings.json",
+        log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{sample_name}_CV_multi_scan_rate.log",
+        disable_gui=False,
+    )
+    logger.sample_name = sample_name
+    logger.info(f"Starting Experiment: CV scans of {logger.sample_name} at Various Scan Rates.")
+
+    worker_thread = ThreadWithReturn(target=go_measurement(_data_dir=data_dir, _parent_dir=parent_dir, _logger=logger))
     worker_thread.start()
     logger.start_gui()
     worker_thread.join()
 
-# TODO: Add Analysis of results, and Plots

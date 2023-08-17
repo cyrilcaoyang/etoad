@@ -183,7 +183,7 @@ class EChemMethod(metaclass=ABCMeta):
             if type(value) in (int, float) and parameter_type in (int, float):
                 value = parameter_type(value)
             else:
-                raise TypeError("The passed value does not match the parameter type signature.")
+                raise TypeError(f"The passed value {name} does not match the parameter type signature.")
 
         if constraints:
             if not eval(constraints, {"range": range}, {"x": value}):

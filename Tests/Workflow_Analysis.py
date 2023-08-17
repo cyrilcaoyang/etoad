@@ -59,5 +59,6 @@ if __name__ == "__main__":
 
 
 # TODO: come up with a way to trigger a 'skip current run' exception, save data, and go to the next job
+# TODO: can we check all echem parameters first, before running echem?
 # test DPV-OCV-CV: after negative square wave, time.sleep for 30 sec and start CV from OCV
 # change initial port to WASTE (This will be done with Han's new codes)

@@ -1,5 +1,4 @@
 import numpy as np
-import csv
 
 from etoad.DataAnalyzer import DataAnalyzer
 from etoad.Interface import GraphicalInterface
@@ -12,19 +11,21 @@ from pathlib import Path
     The first one analyze a csv file, while the second one reads a pickle file.
 """
 
+Analyze_CV: bool = True
+Analyze_Cyclic_SWV: bool = False
+
 PARENT_DIR = Path(__file__).parent
 with open(PARENT_DIR / "test_settings" / "file_settings") as file:
     DATA_DIR = Path(file.read())
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_data_analysis.log"
+    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_data_analysis.log",
+    disable_gui=False
     )
 
 # Example A
 # Analyzing a multi-iteration CV experiment, and plotting the peak position vs scan rates.
-
-Analyze_CV: bool = True
 
 if Analyze_CV:
     data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)
@@ -44,9 +45,8 @@ if Analyze_CV:
 # Example B
 # Analyzing a cyclic SWV experiment, and plot the intergrated area.
 
-Analyze_Cyclic_SWV: bool = False
-
 if Analyze_Cyclic_SWV:
+    data = np.load(PARENT_DIR / "analyzer_test" / "Test_Cyclic_SWV.pkl", allow_pickle=True)
     data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)
     data_analyzer.analyze_data(
         sample_name="K4[Fe(CN)6]",
@@ -58,5 +58,5 @@ if Analyze_Cyclic_SWV:
             "CV Parameters": {},
             "Integration": {}
         },
-        raw_data=np.load(PARENT_DIR / "analyzer_test" / "Test_Cyclic_SWV.pkl", allow_pickle=True)
+        raw_data=data
     )

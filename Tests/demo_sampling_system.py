@@ -14,8 +14,8 @@ Sample_Name = "K4[Fe(CN)6]"     # Name of the Chemical Solution
 Source_Port = 9                 # The Port from which the Sample will be added.
 Sample_Vol = 0.5                # The volume of sample in mL (< 5mL) to be diluted to 5 mL in the Cell.
 
-Clean_Up: bool = False          # Cleaning Up the EChem Reactor by washing the cell with 3 x 5 mL Solvent.
 Disable_GUI: bool = True        # We are disabling GUI for simple liquid transfer.
+Clean_Up: bool = False          # Cleaning Up the EChem Reactor by washing the cell with 3 x 5 mL Solvent.
 
 # ========== Test Settings Above ========== #
 
