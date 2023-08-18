@@ -1,4 +1,4 @@
-{
+
   "Protocol Name": "Sample Vial Wash",
   "Steps": {},
   "Sample Volume": 0.0,
@@ -7,6 +7,6 @@
   "Purge": 0,
   "Wash": {
     "wash_volume": 5.0,
-    "washing_cycles": 1
+    "washing_cycles": 0
   }
 }

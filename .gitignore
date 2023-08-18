@@ -128,3 +128,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# eTOAD Device Specific Settings
+Tests/test_settings/file_settings
+Tests/analyzer_test/
