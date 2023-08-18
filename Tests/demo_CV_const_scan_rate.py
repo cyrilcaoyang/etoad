@@ -95,7 +95,7 @@ def do_measurement(simulation_mode: bool, logger: GraphicalInterface) -> None:
 if __name__ == "__main__":
 
     gui_logger = make_logger(Sample_Name, Disable_GUI)
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(Sample_Name, Simulation, gui_logger))
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(Simulation, gui_logger))
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()

@@ -259,6 +259,6 @@ class SamplingSystem:
         """
         Closes the connection to the pump by closing the pyvisa resource manager.
         """
-        self._pump.manager.close()
+        # self._pump.manager.close() # Serial device is automatically closed with @open_close
         self.logger.info("Connection to the sampling system was successfully closed.")
 

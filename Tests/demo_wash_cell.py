@@ -11,25 +11,35 @@ This Script is created to wash the EChem Cell in case an experiment was interrup
 # ========== Sample Settings Below ========== #
 
 Disable_GUI: bool = True        # We are disabling GUI for simple cell washing.
+REPEAT: int = 3                 # How many times the cell will be washed.
+WASH_VOLUME = 5.0               # Wash volume each time
 
 # ========== Sample Settings Above ========== #
 
-PARENT_DIR = Path(__file__).parent
-with open(PARENT_DIR / "test_settings" / "file_settings") as file:
-    DATA_DIR = Path(file.read())
 
-logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "logs" / f"{timestamp_datetime()}_wash_echem_cell.log",
-    disable_gui=Disable_GUI
-)
+def wash_cell(disable_gui=Disable_GUI, repeat=REPEAT, wash_volume=WASH_VOLUME):
 
-sampler = SamplingSystem(
-    config_file=PARENT_DIR / "test_settings" / "sampler_settings.json",
-    logger=logger,
-    pump_wash=0,
-    cell_filled=True
-)
+    parent_dir = Path(__file__).parent
+    with open(parent_dir / "test_settings" / "file_settings") as file:
+        data_dir = Path(file.read())
 
-sampler.wash_cell(3)
-sampler.transfer_to_cell(source_port=12, volume=5, wash_line=True)
+    logger = GraphicalInterface(
+        logging_config=parent_dir / "test_settings" / "logger_settings.json",
+        log_file=data_dir / "logs" / f"{timestamp_datetime()}_wash_echem_cell.log",
+        disable_gui=disable_gui
+    )
+
+    sampler = SamplingSystem(
+        config_file=parent_dir / "test_settings" / "sampler_settings.json",
+        logger=logger,
+        pump_wash=0,
+        cell_filled=True
+    )
+
+    sampler.wash_cell(repeat)
+    sampler.transfer_to_cell(source_port=12, volume=wash_volume, wash_line=True)
+
+
+if __name__ == "__main__":
+    wash_cell()
+

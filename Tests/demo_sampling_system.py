@@ -16,7 +16,7 @@ Source_Port = 9                 # The Port from which the Sample will be added.
 Sample_Vol = 0.5                # The volume of sample in mL (< 5mL) to be diluted to 5 mL in the Cell.
 
 Disable_GUI: bool = False        # GUI can be disabled for simple liquid transfer.
-Clean_Up: bool = True
+Clean_Up: bool = False
 # ========== Test Settings Above ========== #
 
 

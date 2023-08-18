@@ -21,7 +21,7 @@ from etoad.Utils import timestamp_datetime
 
 Job_Queue = [
     {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_stability_pos.json")},
-    {"sample_name": "Fe-ligand184-1", "sample_location": 1, "workflow_path": Path("workflow_stability_pos.json")},
+    # {"sample_name": "Fe-ligand184-1", "sample_location": 1, "workflow_path": Path("workflow_stability_pos.json")},
     # {"sample_name": "Fe-ligand184-2", "sample_location": 2, "workflow_path": Path("workflow_stability_pos.json")},
     # {"sample_name": "CYR-181", "sample_location": 3, "workflow_path": Path("")},
     # {"sample_name": "wash", "sample_location": 4, "workflow_path": Path("")},
@@ -29,7 +29,7 @@ Job_Queue = [
     # {"sample_name": "Fe-bpy", "sample_location": 6, "workflow_path": Path("workflow_stability_pos.json")},
     # {"sample_name": "Fe-bpy-44Me", "sample_location": 7, "workflow_path": Path("workflow_stability_pos.json")},
     # {"sample_name": "wash", "sample_location": 8, "workflow_path": Path("workflow_clean_vials.json")},
-    {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_stability_pos.json")},
+    # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_stability_pos.json")},
 ]
 
 Disable_GUI: bool = False
@@ -66,6 +66,5 @@ if __name__ == "__main__":
 
 
 # TODO: come up with a way to trigger a 'skip current run' exception, save data, and go to the next job
-# TODO: can we check all echem parameters first, before running sampler?
 # test DPV-OCV-CV: after negative square wave, time.sleep for 30 sec and start CV from OCV
 # change initial port to WASTE (This will be done with Han's new codes)
