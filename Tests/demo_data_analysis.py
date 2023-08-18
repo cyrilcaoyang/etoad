@@ -12,8 +12,8 @@ from pathlib import Path
     The first one analyze a csv file, while the second one reads a pickle file.
 """
 
-Analyze_CV: bool = False
-Analyze_Cyclic_SWV: bool = True
+Analyze_CV: bool = True
+Analyze_Cyclic_SWV: bool = False
 
 PARENT_DIR = Path(__file__).parent
 with open(PARENT_DIR / "test_settings" / "file_settings") as file:
