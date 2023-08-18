@@ -121,7 +121,7 @@ class SamplingSystem:
                 volume=self._config["dead_volume"],
                 draw_valve_port=source_port,
                 dispense_valve_port=self.waste_port,
-                wait=1
+                wait=1, speed=0.5
             )
             self._wash_pump(1)
             self.logger.debug(f"Line from port {source_port} washed once.")
@@ -129,7 +129,7 @@ class SamplingSystem:
         self._pump.draw_and_dispense(
             draw_valve_port=source_port,
             dispense_valve_port=self.cell_port,
-            volume=volume + self._config["dead_volume"], wait=2
+            volume=volume + self._config["dead_volume"], wait=2, speed=0.5
         )
         self._update_cell_volume(volume)
         self.logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
@@ -190,7 +190,9 @@ class SamplingSystem:
             no_cycles: Number of wash cycles.
         """
         self._pump.draw_and_dispense(
-            volume=7.5, draw_valve_port=sampler_position, dispense_valve_port=self.waste_port, wait=1
+            volume=7.5,
+            draw_valve_port=sampler_position, dispense_valve_port=self.waste_port,
+            wait=1, speed=0.5
         )
         self._wash_pump(1)
         for _ in range(no_cycles):
@@ -238,8 +240,7 @@ class SamplingSystem:
                 volume=self._cell_volume + 2,
                 draw_valve_port=self.cell_port,
                 dispense_valve_port=self.waste_port,
-                wait=1,
-                speed=0.5
+                wait=1, speed=0.5
             )
             self._update_cell_volume(-self._cell_volume)
             self.logger.debug(f"All liquid in Measurement Cell moved to waste.")

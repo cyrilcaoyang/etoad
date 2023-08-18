@@ -75,7 +75,7 @@
   "Discard Sample": false,
   "Purge": 30,
   "Wash": {
-    "wash_volume": 5.0,
+    "wash_volume": 15.0,
     "washing_cycles": 2
   }
 }
