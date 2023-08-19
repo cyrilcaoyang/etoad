@@ -19,8 +19,8 @@ class CVAnalyzer(EChemDataAnalyzer):
     """
     analysis_method_name: str = "CV"
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._raw_data = self._split_cycles(self._raw_data)
 
     @staticmethod

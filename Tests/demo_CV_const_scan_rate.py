@@ -1,4 +1,3 @@
-import threading
 import numpy
 from pathlib import Path
 

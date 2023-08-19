@@ -70,12 +70,12 @@
       }
     }
   },
-  "Sample Volume": 0.5,
+  "Sample Volume": 1.0,
   "Total Volume": 5.0,
   "Discard Sample": false,
   "Purge": 30,
   "Wash": {
-    "wash_volume": 15.0,
+    "wash_volume": 5.0,
     "washing_cycles": 2
   }
 }
