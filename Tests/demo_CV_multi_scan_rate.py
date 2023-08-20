@@ -31,7 +31,7 @@ def do_measurement(scan_rates: list, simulation_mode: bool, logger: GraphicalInt
     num_iter = len(scan_rates)
     list_scan_rates = [[scan_rates[i] for _ in range(5)] for i in range(num_iter)]
 
-    potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=False)
+    potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation_mode)
     results = potentiostat.do_measurement(
         technique="CV",
         set_parameters={

@@ -5,7 +5,8 @@ pandas==1.4.3
 Pillow==9.2.0
 pyserial==3.5
 python-dotenv==0.21.0
-matterlab_pumps==0.1.0
+matterlab-serial-device==0.0.0
+matterlab-pumps==0.1.0
 scipy==1.9.0
 setuptools==65.3.0
 slackclient==2.9.4

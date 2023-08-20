@@ -21,7 +21,7 @@ SIMULATION: bool = False
 # ========== Sample Settings Above ========== #
 
 
-def do_measurement(simulation: bool,logger: GraphicalInterface, **kwargs):
+def do_measurement(simulation: bool, logger: GraphicalInterface):
 
     potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation)
     results = potentiostat.do_measurement(
@@ -50,4 +50,3 @@ if __name__ == "__main__":
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()
-

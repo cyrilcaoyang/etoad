@@ -26,7 +26,7 @@ SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
 
 def do_measurement(simulation: bool, logger: GraphicalInterface) -> None:
 
-    potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=SIMULATION)
+    potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation)
     results = potentiostat.do_measurement(
         technique="CV",
         set_parameters={

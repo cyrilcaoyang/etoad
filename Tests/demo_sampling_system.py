@@ -39,7 +39,7 @@ def sampler_test(
     sampler.purge_cell(10)
 
     if clean_up:
-        sampler.wash_cell(wash_volume=total_vol,cycles=3)
+        sampler.wash_cell(wash_volume=total_vol, cycles=3)
         sampler.transfer_to_cell(source_port=12, volume=total_vol, wash_line=True)
     sampler.disconnect()
     logger.stop_gui()

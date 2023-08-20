@@ -24,7 +24,7 @@ def mk_logger(
         log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{sample_name}_{task_name}.log",
         disable_gui=disable_gui
     )
-    logger.task_name = task_name
+    logger.experiment_name = task_name
     logger.sample_name = sample_name
     return logger
 
@@ -94,6 +94,6 @@ def mk_csv(
     This script saves raw data into CSV files.
     """
     parent_dir, data_dir = PathFinder.data_path()
-    filename = data_dir / "Data" / f"{logger.task_name}_{logger.sample_name}_{timestamp_datetime()}.csv"
+    filename = data_dir / "Data" / f"{logger.experiment_name}_{logger.sample_name}_{timestamp_datetime()}.csv"
     FileHandling.save_as_csv(results, filename)
-    logger.info(f"{logger.task_name} of {logger.sample_name} is saved as {filename}.")
+    logger.info(f"{logger.experiment_name} of {logger.sample_name} is saved as {filename}.")

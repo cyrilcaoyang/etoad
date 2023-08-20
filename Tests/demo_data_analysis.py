@@ -1,5 +1,4 @@
 import numpy as np
-import csv
 
 from etoad.DataAnalyzer import DataAnalyzer
 from etoad.Interface import GraphicalInterface
