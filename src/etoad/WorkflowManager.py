@@ -90,11 +90,14 @@ class WorkflowManager(object):
         Raises:
             KeyError if any of the samples does not contain all required keys.
         """
+        self.logger.debug(f"The list of samples are:")
+
         for sample in samples:
             if {"sample_name", "sample_location", "workflow_path"}.issubset(sample.keys()):
                 self._samples.append(sample)
+                self.logger.debug(f"    {sample}")
             else:
-                raise KeyError(f"The settings for sample {sample} are inclomplete.")
+                raise KeyError(f"The settings for sample {sample} are incomplete.")
 
     def start_system(self) -> dict:
         """
@@ -144,6 +147,7 @@ class WorkflowManager(object):
             initial_wash: Number of initial syringe washes.
             sample_in_cell: If the cell needs to be emptied before starting the workflow.
         """
+
         self.logger.info("SYSTEM INITIALIZATION")
         self._potentiostat: EChemController = EChemController(self._potentiostat_settings, logger=self.logger)
         self._sampling_system: SamplingSystem = SamplingSystem(

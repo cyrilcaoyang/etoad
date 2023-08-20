@@ -20,16 +20,15 @@ from etoad.Utils import timestamp_datetime
 # ========== Submit Samples Below ========== #
 
 Job_Queue = [
-    # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_stability_pos.json")},
     # {"sample_name": "wash", "sample_location": 1, "workflow_path": Path("workflow_clean_vials.json")},
     # {"sample_name": "wash", "sample_location": 2, "workflow_path": Path("workflow_clean_vials.json")},
-    {"sample_name": "CYR-181", "sample_location": 3, "workflow_path": Path("workflow_stability_neg.json")},
+    # {"sample_name": "wash", "sample_location": 3, "workflow_path": Path("workflow_clean_vials.json")},
     # {"sample_name": "wash", "sample_location": 4, "workflow_path": Path("workflow_clean_vials.json")},
-    # {"sample_name": "diquat-44Me-C2Br2", "sample_location": 5, "workflow_path": Path("workflow_stability_neg.json"),
+    # {"sample_name": "wash", "sample_location": 5, "workflow_path": Path("workflow_clean_vials.json")},
     # {"sample_name": "Fe-bpy", "sample_location": 6, "workflow_path": Path("workflow_stability_pos.json")},
     # {"sample_name": "Fe-bpy-44Me", "sample_location": 7, "workflow_path": Path("workflow_stability_pos.json")},
     # {"sample_name": "wash", "sample_location": 8, "workflow_path": Path("workflow_clean_vials.json")},
-    # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_stability_pos.json")},
+    {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_stability_pos.json")},
 ]
 
 Disable_GUI: bool = False

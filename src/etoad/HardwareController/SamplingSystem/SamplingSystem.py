@@ -1,4 +1,5 @@
 import time
+import builtins
 from pathlib import Path
 from typing import Union
 from logging import Logger
@@ -88,6 +89,7 @@ class SamplingSystem:
         """
         Creates an instance of the XCPump, sets the velocity and primes the pump.
         """
+        builtins.print = self.logger.debug      # Hijacking the print function in the Serial Pump package
         self.logger.info(f"Pump initialization started.")
         self._pump: TecanXCPump = TecanXCPump(
             com_port=self._config["com_port"],
@@ -97,6 +99,7 @@ class SamplingSystem:
             out_valve=self.waste_port,
         )
         self._wash_pump(initial_wash)
+        builtins.print = print                  # Resetting the print function
 
     def _set_ports(self) -> None:
         """
