@@ -1,9 +1,6 @@
-import numpy
-from pathlib import Path
-
-from etoad.HardwareController.Potentiostat.EChemController import EChemController
 from etoad.Interface import GraphicalInterface
-from etoad.Utils import timestamp_datetime, ThreadWithReturn
+from etoad.Utils import ThreadWithReturn
+import test_utils.MakeObjects as MakeObjects
 
 """
     This python script demonstrate the CV scans with constant scan rates, without using the Workflow Manager
@@ -12,57 +9,24 @@ from etoad.Utils import timestamp_datetime, ThreadWithReturn
 
 # ========== Sample Settings Below ========== #
 
-Sample_Name = "K4[Fe(CN)6]"
+SAMPLE_NAME = "K4[Fe(CN)6]"
+TASK_NAME = "CV_Const_ScanRate"
 V_init = 0                  # Unit: Initial Voltage in V
 V_max = 0.5                 # Unit: Highest Voltage in V
 V_min = 0                   # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
-Scan_Rate = 0.050           # Unit: Scan Rate in V/s
-Cycle_Numbers: int = 10     # The Numer of Cycles as an Integer
+SCAN_RATE = 0.100           # Unit: Scan Rate in V/s
+CYCLE_NUM: int = 10     # The Numer of Cycles as an Integer
 
-Disable_GUI: bool = False
-Simulation: bool = False    # This option can turn ON/OFF the Simulation Mode
+DISABLE_GUI: bool = False
+SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
 
 # ========== Sample Settings Above ========== #
 
 
-def define_paths() -> tuple:
-    """
-    This function defines the path of the working and data directory.
-    """
-    parent_dir = Path(__file__).parent
-    with open(parent_dir / "test_settings" / "file_settings") as file:
-        data_dir = Path(file.read())
-    return parent_dir, data_dir
+def do_measurement(simulation: bool, logger: GraphicalInterface) -> None:
 
-
-def make_logger(sample_name: str, disable_gui: bool) -> GraphicalInterface:
-    """
-    This function creates a logger for the experiment.
-    """
-    parent_dir, data_dir = define_paths()
-    logger = GraphicalInterface(
-        logging_config=parent_dir / "test_settings" / "logger_settings.json",
-        log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{sample_name}_CV_const_scan_rate.log",
-        disable_gui=disable_gui
-    )
-    logger.sample_name = sample_name
-    return logger
-
-
-def do_measurement(simulation_mode: bool, logger: GraphicalInterface) -> None:
-    """
-    This function performs the CV scans with constant scan rates.
-    """
-    parent_dir, data_dir = define_paths()
-    potentiostat = EChemController(
-        config_file=parent_dir / "test_settings" / "potentiostat_settings.json",
-        logger=logger,
-        simulation_mode=simulation_mode,
-    )
-
-    logger.info(f"Starting Experiment: CV Scans of {logger.sample_name}.")
-
+    potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=SIMULATION)
     results = potentiostat.do_measurement(
         technique="CV",
         set_parameters={
@@ -73,30 +37,23 @@ def do_measurement(simulation_mode: bool, logger: GraphicalInterface) -> None:
                 "Voltage Profile": {
                     "value": [V_init, V_max, V_min, V_init, V_fin]
                 },
-                "Scan Rate": {
-                    "value": [Scan_Rate, Scan_Rate, Scan_Rate, Scan_Rate, Scan_Rate]
-                },
-                "Number of Cycles": {
-                    "value": Cycle_Numbers
-                }
+                "Scan Rate": {"value": [SCAN_RATE]*5},
+                "Number of Cycles": {"value": CYCLE_NUM}
             }
         }
     )
 
-    # saving the data before disconnection
-    filename = data_dir / "Data" / f"CV_Const_ScanRate_{logger.sample_name}_{timestamp_datetime()}.csv"
-    numpy.savetxt(filename, results, delimiter=',')
-    logger.info(f"Result of CV scans of {logger.sample_name} is saved as {filename}.")
+    MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as CVS file
     potentiostat.disconnect()
     logger.stop_gui()
 
 
 if __name__ == "__main__":
 
-    gui_logger = make_logger(Sample_Name, Disable_GUI)
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(Simulation, gui_logger))
+    gui_logger = MakeObjects.mk_logger(TASK_NAME, SAMPLE_NAME, DISABLE_GUI)
+    gui_logger.info(f"Starting {TASK_NAME} of {SAMPLE_NAME}.")
+
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(SIMULATION, gui_logger))
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()
-
-
