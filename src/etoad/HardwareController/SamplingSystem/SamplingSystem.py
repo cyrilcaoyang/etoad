@@ -75,7 +75,7 @@ class SamplingSystem:
         self._initialize_pump(pump_wash)
 
         if cell_filled:
-            self.logger.debug(f"Measurement Cell was NOT empty.")
+            self.logger.debug(f"Measurement Cell was not empty.")
             self._cell_volume: float = 5.0
             self._empty_cell()
         else:
@@ -89,7 +89,9 @@ class SamplingSystem:
         """
         Creates an instance of the XCPump, sets the velocity and primes the pump.
         """
-        builtins.print = self.logger.debug      # Hijacking the print function in the Serial Pump package
+        builtins.print = self.logger.debug  # Redirecting the print function to the logger (since the pump uses it...)
+        # TODO: Create an issue on the matterlab_pumps repo to change this behavior
+
         self.logger.info(f"Pump initialization started.")
         self._pump: TecanXCPump = TecanXCPump(
             com_port=self._config["com_port"],
@@ -99,7 +101,7 @@ class SamplingSystem:
             out_valve=self.waste_port,
         )
         self._wash_pump(initial_wash)
-        builtins.print = print                  # Resetting the print function
+        builtins.print = print  # Resetting the print function
 
     def _set_ports(self) -> None:
         """
@@ -124,7 +126,8 @@ class SamplingSystem:
                 volume=self._config["dead_volume"],
                 draw_valve_port=source_port,
                 dispense_valve_port=self.waste_port,
-                wait=1, speed=0.5
+                wait=1,
+                speed=0.5
             )
             self._wash_pump(1)
             self.logger.debug(f"Line from port {source_port} washed once.")
@@ -132,7 +135,9 @@ class SamplingSystem:
         self._pump.draw_and_dispense(
             draw_valve_port=source_port,
             dispense_valve_port=self.cell_port,
-            volume=volume + self._config["dead_volume"], wait=2, speed=0.5
+            volume=volume + self._config["dead_volume"],
+            wait=2,
+            speed=0.5
         )
         self._update_cell_volume(volume)
         self.logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
@@ -179,7 +184,8 @@ class SamplingSystem:
                 volume=self._config["pump_volume"],
                 draw_valve_port=self.wash_port,
                 dispense_valve_port=self.waste_port,
-                wait=1, speed=0.5
+                wait=1,
+                speed=0.5
             )
         self.logger.info(f"Pump washed {cycles} times.")
 
@@ -194,20 +200,26 @@ class SamplingSystem:
         """
         self._pump.draw_and_dispense(
             volume=7.5,
-            draw_valve_port=sampler_position, dispense_valve_port=self.waste_port,
-            wait=1, speed=0.5
+            draw_valve_port=sampler_position,
+            dispense_valve_port=self.waste_port,
+            wait=1,
+            speed=0.5
         )
         self._wash_pump(1)
         for _ in range(no_cycles):
             self._pump.draw_and_dispense(
                 volume=5,
-                draw_valve_port=self.wash_port, dispense_valve_port=sampler_position,
-                wait=1, speed=0.5
+                draw_valve_port=self.wash_port,
+                dispense_valve_port=sampler_position,
+                wait=1,
+                speed=0.5
             )
             self._pump.draw_and_dispense(
                 volume=6,
-                draw_valve_port=sampler_position, dispense_valve_port=self.waste_port,
-                wait=1, speed=0.5
+                draw_valve_port=sampler_position,
+                dispense_valve_port=self.waste_port,
+                wait=1,
+                speed=0.5
             )
         self.logger.info(f"Sample position {sampler_position} was washed {no_cycles} times.")
 
@@ -243,7 +255,8 @@ class SamplingSystem:
                 volume=self._cell_volume + 2,
                 draw_valve_port=self.cell_port,
                 dispense_valve_port=self.waste_port,
-                wait=1, speed=0.5
+                wait=1,
+                speed=0.5
             )
             self._update_cell_volume(-self._cell_volume)
             self.logger.debug(f"All liquid in Measurement Cell moved to waste.")
@@ -260,8 +273,12 @@ class SamplingSystem:
 
     def disconnect(self) -> None:
         """
-        Closes the connection to the pump by closing the pyvisa resource manager.
+        Closes the connection to the sampling system.
+
+        ATTN: This method is just legacy for now -- the TecanXCPump automatically closes the connection after every
+              operation, and the AtmosphereHandler works the same... .
+              After all hardware components are reliably implemented via SerialDevice inheritance, this method can
+              probably be removed.
         """
-        # self._pump.manager.close() # Serial device is automatically closed with @open_close
         self.logger.info("Connection to the sampling system was successfully closed.")
 

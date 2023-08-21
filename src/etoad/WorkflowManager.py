@@ -147,11 +147,13 @@ class WorkflowManager(object):
             initial_wash: Number of initial syringe washes.
             sample_in_cell: If the cell needs to be emptied before starting the workflow.
         """
-
         self.logger.info("SYSTEM INITIALIZATION")
         self._potentiostat: EChemController = EChemController(self._potentiostat_settings, logger=self.logger)
         self._sampling_system: SamplingSystem = SamplingSystem(
-            self._sampler_settings, logger=self.logger, pump_wash=initial_wash, cell_filled=sample_in_cell
+            self._sampler_settings,
+            logger=self.logger,
+            pump_wash=initial_wash,
+            cell_filled=sample_in_cell
         )
         self._analyzer: DataAnalyzer = DataAnalyzer(self._data_path, logger=self.logger)
 
@@ -352,6 +354,7 @@ class WorkflowManager(object):
             {
                 "parameter": Name of the parameter to be updated
                 "from measurement": Name of the measurement performed
+                "from_iteration": Iteration of the measurement (if applicable), otherwise, 0 is chosen.
                 "key": Key in the results dictionary for this measurement.
             },
             ...
@@ -365,17 +368,17 @@ class WorkflowManager(object):
         Raises:
             WorkflowException (according to keywords in self._exception_keywords) if skipping / cancelling is triggered.
         """
-        # TODO: Double-check how that method works with the new iterative measurement technique # Yang: 2023 not good...
-
         for param_to_update in update_settings:
-            new_value: Any = previous_results[param_to_update["from measurement"]]["Iteration 0"][param_to_update["key"]]
+            update_from_measurement: str = param_to_update["from measurement"]
+            update_from_iteration: int = param_to_update.get("from_iteration", 0)
+            new_value: Any = previous_results[update_from_measurement][f"Iteration_{update_from_iteration}"][param_to_update["key"]]
 
             if isinstance(new_value, str):
                 if new_value in self._exception_keywords:
                     raise self._exception_keywords[new_value]
 
-            parameter_name = param_to_update["parameter"]
-            parameters["TechniqueParameters"][parameter_name]["value"] = new_value
+            para = param_to_update["parameter"]
+            parameters["TechniqueParameters"][para]["value"] = new_value
 
         return parameters
 
