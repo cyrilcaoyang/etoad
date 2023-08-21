@@ -368,14 +368,14 @@ class WorkflowManager(object):
         # TODO: Double-check how that method works with the new iterative measurement technique # Yang: 2023 not good...
 
         for param_to_update in update_settings:
-            new_val: Any = previous_results[param_to_update["from measurement"]]["Iteration 0"][param_to_update["key"]]
+            new_value: Any = previous_results[param_to_update["from measurement"]]["Iteration 0"][param_to_update["key"]]
 
-            if isinstance(new_val, str):
-                if new_val in self._exception_keywords:
-                    raise self._exception_keywords[new_val]
+            if isinstance(new_value, str):
+                if new_value in self._exception_keywords:
+                    raise self._exception_keywords[new_value]
 
-            para = param_to_update["parameter"]
-            parameters["TechniqueParameters"][para]["value"] = new_val
+            parameter_name = param_to_update["parameter"]
+            parameters["TechniqueParameters"][parameter_name]["value"] = new_value
 
         return parameters
 
