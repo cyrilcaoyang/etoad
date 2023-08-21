@@ -1,96 +1,76 @@
-import threading
-import numpy
-from pathlib import Path
-
-from etoad.HardwareController.Potentiostat.EChemController import EChemController
+import test_utils.MakeObjects as MakeObjects
 from etoad.Interface import GraphicalInterface
-from etoad.Utils import timestamp_datetime, get_dropbox_path
+from etoad.Utils import ThreadWithReturn
 
 """
     This python script demonstrate the CV scans with multiple different scan rates.
+    Without the usage of the GUI, the experiment can be run in the background.
+    The results are analyzed and plotted.
 """
 
 # ========== Sample Settings Below ========== #
 
-Sample_Name = "K4[Fe(CN)6]"
+SAMPLE_NAME = "K4[Fe(CN)6]"
+TASK_NAME = "Constant Scan Rate CV"
 V_init = 0                  # Unit: Initial Voltage in V
 V_max = 0.5                 # Unit: Highest Voltage in V
 V_min = 0                   # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
-Cycle_Numbers: int = 3      # The Numer of Cycles at each Scan Rate
 
-Scan_Rates = [0.050, 0.100, 0.200, 0.400, 1.000]    # Unit: Scan Rate in V/s
-# Example  = [0.050, 0.100, 0.200, 0.400, 1.000]
+SCAN_RATES = [0.050, 0.100, 0.200, 0.400, 1.000]    # Unit: Scan Rate in V/s
+CYCLE_NUM: int = 3      # The Numer of Cycles at each Scan Rate
 
-Disable_GUI: bool = False
-Simulation: bool = False    # This option can turn ON/OFF the Simulation Mode
+DISABLE_GUI: bool = False
+SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
 
 # ========== Sample Settings Above ========== #
 
-"""
-Demonstration of Iterations of CV scans with various scan rates. 
-"""
 
-PARENT_DIR = Path(__file__).parent
-with open(PARENT_DIR / "test_settings" / "file_settings") as file:
-    DATA_DIR = Path(file.read())
+def do_measurement(scan_rates: list, simulation_mode: bool, logger: GraphicalInterface):
 
-logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_{Sample_Name}_CV_multi_scan_rate.log",
-    disable_gui=False
-)
+    num_iter = len(scan_rates)
+    list_scan_rates = [[scan_rates[i] for _ in range(5)] for i in range(num_iter)]
 
-Num_Iter = len(Scan_Rates)
-list_scan_rates = [[Scan_Rates[i] for _ in range(5)] for i in range(Num_Iter)]
-print(Num_Iter)
-print(Scan_Rates)
-
-
-def do_measurement():
-
-    potentiostat = EChemController(
-        config_file=PARENT_DIR / "test_settings" / "potentiostat_settings.json",
-        logger=logger,
-        simulation_mode=False,
-    )
-
-    # logger.sample_name = ""
-    logger.sample_name = "K4[Fe(CN)6]"
-    logger.info(f"*** Starting Experiment: CV scans of {logger.sample_name} at Various Scan Rates.")
-
+    potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation_mode)
     results = potentiostat.do_measurement(
         technique="CV",
         set_parameters={
-            "IterationSettings": {
-                "no_iterations": Num_Iter
-            },
+            "IterationSettings": {"no_iterations": num_iter},
             "TechniqueParameters": {
-                "Voltage Profile": {
-                    "value": [V_init, V_max, V_min, V_init, V_fin]
-                },
+                "Voltage Profile": {"value": [V_init, V_max, V_min, V_init, V_fin]},
                 "Scan Rate": {
                     "changed_over_iterations": True,
                     "value": list_scan_rates
                 },
-                "Number of Cycles": {
-                    "value": Cycle_Numbers
-                }
+                "Number of Cycles": {"value": CYCLE_NUM}
             }
         }
     )
-
-    # saving the data before disconnection
-    filename = DATA_DIR / "Data" / f"CV_Multi_ScanRate_{logger.sample_name}_{timestamp_datetime()}.csv"
-    numpy.savetxt(filename, results, delimiter=',')
-    logger.info(f"<<< Result of CV scans of {logger.sample_name} is saved as {filename}.")
     potentiostat.disconnect()
+
+    MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as a CVS file.
+
+    analyzer = MakeObjects.mk_analyzer(logger=logger)
+    analyzer.analyze_data(
+        sample_name=logger.sample_name,
+        experiment_name=logger.experiment_name,
+        technique="CV",
+        analysis_settings={
+            "Plot": {"title": "Cyclic Voltammetry of Multiple Scans"},
+            "Peak Picking": {},
+            "Integration": {}
+        },
+        raw_data=results
+    )
     logger.stop_gui()
 
 
-worker_thread = threading.Thread(target=do_measurement)
-worker_thread.start()
-logger.start_gui()
-worker_thread.join()
+if __name__ == "__main__":
 
-# TODO: Add Analysis of results, and Plots
+    gui_logger = MakeObjects.mk_logger(TASK_NAME, SAMPLE_NAME, DISABLE_GUI)
+    gui_logger.info(f"Starting {TASK_NAME} of {SAMPLE_NAME}.")
+
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(SCAN_RATES, SIMULATION, gui_logger))
+    worker_thread.start()
+    gui_logger.start_gui()
+    worker_thread.join()

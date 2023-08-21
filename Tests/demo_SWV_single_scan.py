@@ -1,44 +1,37 @@
-from etoad.Interface import GraphicalInterface
+from etoad.Interface.GraphicalInterface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn
 import test_utils.MakeObjects as MakeObjects
 
 """
-    This python script demonstrate the CV scans with constant scan rates, without using the Workflow Manager
+    This python script demonstrate a simple SWV scan, without using the Workflow Manager.
     Without the usage of the GUI, the experiment can be run in the background.
 """
 
 # ========== Sample Settings Below ========== #
 
+TASK_NAME = "SWV_Single_Scan"
 SAMPLE_NAME = "K4[Fe(CN)6]"
-TASK_NAME = "CV_Const_ScanRate"
-V_init = 0                  # Unit: Initial Voltage in V
-V_max = 0.5                 # Unit: Highest Voltage in V
-V_min = 0                   # Unit: Lowest Voltage in V
-V_fin = 0                   # Unit: Final Voltage in V
-SCAN_RATE = 0.100           # Unit: Scan Rate in V/s
-CYCLE_NUM: int = 10     # The Numer of Cycles as an Integer
+V_init = 1            # Unit: Initial Voltage in V
+V_fin = -0.5               # Unit: Final Voltage in V
+T_rest = 10             # The Resting Time Before the Scan
 
 DISABLE_GUI: bool = False
-SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
+SIMULATION: bool = False
 
 # ========== Sample Settings Above ========== #
 
 
-def do_measurement(simulation: bool, logger: GraphicalInterface) -> None:
+def do_measurement(simulation: bool, logger: GraphicalInterface):
 
     potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation)
     results = potentiostat.do_measurement(
-        technique="CV",
+        technique="SWV",
         set_parameters={
-            "IterationSettings": {
-                "no_iterations": 1
-            },
+            "IterationSettings": {"no_iterations": 1},
             "TechniqueParameters": {
-                "Voltage Profile": {
-                    "value": [V_init, V_max, V_min, V_init, V_fin]
-                },
-                "Scan Rate": {"value": [SCAN_RATE]*5},
-                "Number of Cycles": {"value": CYCLE_NUM}
+                "Initial Voltage": {"value": V_init},
+                "Rest Time": {"value": T_rest},
+                "Final Voltage": {"value": V_fin},
             }
         }
     )

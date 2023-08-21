@@ -1,35 +1,44 @@
-from pathlib import Path
+import test_utils.MakeObjects as MakeObjects
 
-from etoad.HardwareController import SamplingSystem
 from etoad.Interface import GraphicalInterface
-from etoad.Utils import timestamp_datetime, get_dropbox_path
+from etoad.Utils import ThreadWithReturn
 
 """
-This Script is created to wash the EChem Cell in case an experiment was interrupted.
+This Script is created to wash the EChem Cell.
 """
 
 # ========== Sample Settings Below ========== #
 
-Disable_GUI: bool = True        # We are disabling GUI for simple cell washing.
+REPEAT: int = 3                 # How many times the cell will be washed.
+WASH_VOLUME = 5.0               # Wash volume each time
+DISABLE_GUI: bool = True        # We are disabling GUI for simple cell washing.
 
 # ========== Sample Settings Above ========== #
 
-PARENT_DIR = Path(__file__).parent
-with open(PARENT_DIR / "test_settings" / "file_settings") as file:
-    DATA_DIR = Path(file.read())
 
-logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "logs" / f"{timestamp_datetime()}_wash_echem_cell.log",
-    disable_gui=Disable_GUI
-)
+def wash_cell(
+        repeat: int,
+        wash_volume: float,
+        logger: GraphicalInterface
+) -> None:
 
-sampler = SamplingSystem(
-    config_file=PARENT_DIR / "test_settings" / "sampler_settings.json",
-    logger=logger,
-    initial_wash=0,
-    cell_filled=True
-)
+    sampler = MakeObjects.mk_sampler(logger=logger)
+    sampler.wash_cell(repeat)
+    sampler.transfer_to_cell(source_port=12, volume=wash_volume, wash_line=True)
 
-sampler.wash_cell(3)
-sampler.transfer_to_cell(source_port=12, volume=5, wash_line=True)
+
+if __name__ == "__main__":
+
+    gui_logger = MakeObjects.mk_logger(
+        task_name="wash_cell",
+        sample_name="CELL_WASH",
+        disable_gui=DISABLE_GUI
+    )
+
+    worker_thread = ThreadWithReturn(
+        target=wash_cell, args=(REPEAT, WASH_VOLUME, gui_logger)
+    )
+    worker_thread.start()
+    gui_logger.start_gui()
+    worker_thread.join()
+

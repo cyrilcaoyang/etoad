@@ -1,9 +1,10 @@
 import time
+import builtins
 from pathlib import Path
 from typing import Union
 from logging import Logger
 
-from .TecanPump import TecanPump
+from matterlab_pumps import TecanXCPump
 from .AtmosphereHandler import AtmosphereHandler
 from ...Utils import ConfigLoader
 from ...Utils import log_exceptions
@@ -27,12 +28,9 @@ class SamplingSystem:
     # vessel as the sample. But that's not a generalizable solution...
 
     required_settings: set = {
-        "visa_address",
-        "device_address",
+        "com_port",
+        "address",
         "pump_volume",
-        "initial_valve",
-        "default_velocity",
-        "dead_volume",
         "cell_port",
         "wash_port",
         "waste_port",
@@ -45,15 +43,20 @@ class SamplingSystem:
         "waste_port"
     }
 
-    def __init__(self, config_file: Path, logger: Logger,
-                 initial_wash: int = 1, cell_filled: bool = True):
+    def __init__(
+            self,
+            config_file: Path,
+            logger: Logger,
+            pump_wash: int = 3,
+            cell_filled: bool = True
+    ):
         """
         Creates an instance of the SamplingSystem class.
 
         Args:
             config_file: Path to the configuration file. Needs to contain the specified keys in self.required_settings.
             logger: Logger object
-            initial_wash: Number of initial washing steps. Default: 3  # TODO: Refactor to pump_wash or a similar name to not confuse it with cell_wash
+            pump_wash: Number of initial washing steps. Default: 3
         """
 
         self._config: dict = ConfigLoader.load_config(config_file, self.required_settings)
@@ -62,17 +65,17 @@ class SamplingSystem:
 
         self._atmosphere_handler: AtmosphereHandler = AtmosphereHandler(self.logger, **self._config["relay_settings"])
 
-        self._pump: Union[TecanPump, None] = None
+        self._pump: Union[TecanXCPump, None] = None
         self.cell_port: Union[int, None] = None
 
         self.wash_port: Union[int, None] = None
         self.waste_port: Union[int, None] = None
 
         self._set_ports()
-        self._initialize_pump(initial_wash)
+        self._initialize_pump(pump_wash)
 
         if cell_filled:
-            self.logger.debug(f"Measurement Cell was NOT empty.")
+            self.logger.debug(f"Measurement Cell was not empty.")
             self._cell_volume: float = 5.0
             self._empty_cell()
         else:
@@ -86,15 +89,19 @@ class SamplingSystem:
         """
         Creates an instance of the XCPump, sets the velocity and primes the pump.
         """
+        builtins.print = self.logger.debug  # Redirecting the print function to the logger (since the pump uses it...)
+        # TODO: Create an issue on the matterlab_pumps repo to change this behavior
+
         self.logger.info(f"Pump initialization started.")
-        self._pump: TecanPump = TecanPump(
-            visa_address=self._config["visa_address"],
-            device_address=self._config["device_address"],
-            init_valve=self._config["initial_valve"],
+        self._pump: TecanXCPump = TecanXCPump(
+            com_port=self._config["com_port"],
+            address=self._config["address"],
             syringe_volume=self._config["pump_volume"],
+            init_valve=self.wash_port,
+            out_valve=self.waste_port,
         )
-        self._pump.set_velocity(self._config["default_velocity"])
         self._wash_pump(initial_wash)
+        builtins.print = print  # Resetting the print function
 
     def _set_ports(self) -> None:
         """
@@ -115,11 +122,23 @@ class SamplingSystem:
             wash_line: Whether to wash the line to remove contaminations, e.g. from previous samples.
         """
         if wash_line:
-            self._pump.draw_and_dispense(source_port, self.waste_port, self._config["dead_volume"], wait=1)
+            self._pump.draw_and_dispense(
+                volume=self._config["dead_volume"],
+                draw_valve_port=source_port,
+                dispense_valve_port=self.waste_port,
+                wait=1,
+                speed=0.5
+            )
             self._wash_pump(1)
             self.logger.debug(f"Line from port {source_port} washed once.")
 
-        self._pump.draw_and_dispense(source_port, self.cell_port, volume + self._config["dead_volume"], wait=2)
+        self._pump.draw_and_dispense(
+            draw_valve_port=source_port,
+            dispense_valve_port=self.cell_port,
+            volume=volume + self._config["dead_volume"],
+            wait=2,
+            speed=0.5
+        )
         self._update_cell_volume(volume)
         self.logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
 
@@ -161,8 +180,13 @@ class SamplingSystem:
         Washes the syringe pump for three times with its volume of wash liquid.
         """
         for _ in range(cycles):
-            self._pump.draw_and_dispense(self.wash_port, self.waste_port, self._config["pump_volume"], wait=1)
-
+            self._pump.draw_and_dispense(
+                volume=self._config["pump_volume"],
+                draw_valve_port=self.wash_port,
+                dispense_valve_port=self.waste_port,
+                wait=1,
+                speed=0.5
+            )
         self.logger.info(f"Pump washed {cycles} times.")
 
     @log_exceptions
@@ -174,11 +198,29 @@ class SamplingSystem:
             sampler_position: Source port of the sample vial that should be cleaned.
             no_cycles: Number of wash cycles.
         """
-        self._pump.draw_and_dispense(sampler_position, self.waste_port, 7.5, wait=1)
+        self._pump.draw_and_dispense(
+            volume=7.5,
+            draw_valve_port=sampler_position,
+            dispense_valve_port=self.waste_port,
+            wait=1,
+            speed=0.5
+        )
         self._wash_pump(1)
         for _ in range(no_cycles):
-            self._pump.draw_and_dispense(self.wash_port, sampler_position, 5)
-            self._pump.draw_and_dispense(sampler_position, self.waste_port, 6)
+            self._pump.draw_and_dispense(
+                volume=5,
+                draw_valve_port=self.wash_port,
+                dispense_valve_port=sampler_position,
+                wait=1,
+                speed=0.5
+            )
+            self._pump.draw_and_dispense(
+                volume=6,
+                draw_valve_port=sampler_position,
+                dispense_valve_port=self.waste_port,
+                wait=1,
+                speed=0.5
+            )
         self.logger.info(f"Sample position {sampler_position} was washed {no_cycles} times.")
 
     @log_exceptions
@@ -209,7 +251,13 @@ class SamplingSystem:
         self.logger.debug(f"Measurement Cell to be emptied.")
 
         with self._atmosphere_handler.open_atmosphere():
-            self._pump.draw_and_dispense(self.cell_port, self.waste_port, self._cell_volume + 2, wait=1)
+            self._pump.draw_and_dispense(
+                volume=self._cell_volume + 2,
+                draw_valve_port=self.cell_port,
+                dispense_valve_port=self.waste_port,
+                wait=1,
+                speed=0.5
+            )
             self._update_cell_volume(-self._cell_volume)
             self.logger.debug(f"All liquid in Measurement Cell moved to waste.")
 
@@ -225,8 +273,12 @@ class SamplingSystem:
 
     def disconnect(self) -> None:
         """
-        Closes the connection to the pump by closing the pyvisa resource manager.
+        Closes the connection to the sampling system.
+
+        ATTN: This method is just legacy for now -- the TecanXCPump automatically closes the connection after every
+              operation, and the AtmosphereHandler works the same... .
+              After all hardware components are reliably implemented via SerialDevice inheritance, this method can
+              probably be removed.
         """
-        self._pump.manager.close()
         self.logger.info("Connection to the sampling system was successfully closed.")
 

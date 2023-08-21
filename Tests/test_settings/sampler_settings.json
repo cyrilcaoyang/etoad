@@ -1,7 +1,7 @@
 {
-  "visa_address": "ASRL4::INSTR",
-  "device_address": 0,
-  "pump_volume": 2.5,
+  "com_port": "com3",
+  "address": 0,
+  "pump_volume": 0.005,
   "initial_valve": 12,
   "default_velocity": 600,
   "dead_volume": 0.5,
@@ -9,7 +9,7 @@
   "wash_port": 12,
   "waste_port": 11,
   "relay_settings": {
-    "port": "com5",
+    "port": "com4",
     "module_address": 3,
     "channel": 0
   }
