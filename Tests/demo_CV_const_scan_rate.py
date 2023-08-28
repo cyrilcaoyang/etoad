@@ -9,14 +9,14 @@ import test_utils.MakeObjects as MakeObjects
 
 # ========== Sample Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]"
+SAMPLE_NAME = "K4[Fe(CN)6]-tests"
 TASK_NAME = "CV_Const_ScanRate"
 V_init = 0                  # Unit: Initial Voltage in V
 V_max = 0.5                 # Unit: Highest Voltage in V
 V_min = 0                   # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
-SCAN_RATE = 0.100           # Unit: Scan Rate in V/s
-CYCLE_NUM: int = 10     # The Numer of Cycles as an Integer
+SCAN_RATE = 0.050           # Unit: Scan Rate in V/s
+CYCLE_NUM: int = 2000     # The Numer of Cycles as an Integer
 
 DISABLE_GUI: bool = False
 SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode

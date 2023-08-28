@@ -11,8 +11,8 @@ import test_utils.MakeObjects as MakeObjects
 
 TASK_NAME = "SWV_Single_Scan"
 SAMPLE_NAME = "K4[Fe(CN)6]"
-V_init = 1            # Unit: Initial Voltage in V
-V_fin = -0.5               # Unit: Final Voltage in V
+V_init = -0.5            # Unit: Initial Voltage in V
+V_fin = 1.0               # Unit: Final Voltage in V
 T_rest = 10             # The Resting Time Before the Scan
 
 DISABLE_GUI: bool = False

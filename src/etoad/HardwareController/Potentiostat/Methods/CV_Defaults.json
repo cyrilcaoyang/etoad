@@ -62,7 +62,7 @@
       "variable_type": "int",
       "changed_over_iterations": false,
       "value": 5,
-      "constraints": "x in range(1, 500)"
+      "constraints": "x in range(1, 1000)"
     },
     "Start Averaging Interval": {
       "name": "Begin_measuring_I",

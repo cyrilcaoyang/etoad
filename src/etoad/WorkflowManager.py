@@ -371,7 +371,7 @@ class WorkflowManager(object):
         for param_to_update in update_settings:
             update_from_measurement: str = param_to_update["from measurement"]
             update_from_iteration: int = param_to_update.get("from_iteration", 0)
-            new_value: Any = previous_results[update_from_measurement][f"Iteration_{update_from_iteration}"][param_to_update["key"]]
+            new_value: Any = previous_results[update_from_measurement][f"Iteration {update_from_iteration}"][param_to_update["key"]]
 
             if isinstance(new_value, str):
                 if new_value in self._exception_keywords:
