@@ -9,14 +9,14 @@ import test_utils.MakeObjects as MakeObjects
 
 # ========== Sample Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]-tests"
+SAMPLE_NAME = "K4[Fe(CN)6]-sandpaper3000"
 TASK_NAME = "CV_Const_ScanRate"
 V_init = 0                  # Unit: Initial Voltage in V
-V_max = 0.5                 # Unit: Highest Voltage in V
-V_min = 0                   # Unit: Lowest Voltage in V
-V_fin = 0                   # Unit: Final Voltage in V
-SCAN_RATE = 0.050           # Unit: Scan Rate in V/s
-CYCLE_NUM: int = 2000     # The Numer of Cycles as an Integer
+V_max = 1.0                 # Unit: Highest Voltage in V
+V_min = -1.0                   # Unit: Lowest Voltage in V
+V_fin = 0.0                   # Unit: Final Voltage in V
+SCAN_RATE = 0.100           # Unit: Scan Rate in V/s
+CYCLE_NUM: int = 3     # The Numer of Cycles as an Integer
 
 DISABLE_GUI: bool = False
 SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
@@ -45,7 +45,7 @@ def do_measurement(simulation: bool, logger: GraphicalInterface) -> None:
 
     MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as CVS file
     potentiostat.disconnect()
-    logger.stop_gui()
+    # logger.stop_gui()
 
 
 if __name__ == "__main__":

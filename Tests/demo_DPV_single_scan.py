@@ -3,16 +3,16 @@ from etoad.Utils import ThreadWithReturn
 import test_utils.MakeObjects as MakeObjects
 
 """
-    This python script demonstrate a simple SWV scan, without using the Workflow Manager.
+    This python script demonstrate a simple DPV scan, without using the Workflow Manager.
     Without the usage of the GUI, the experiment can be run in the background.
 """
 
 # ========== Sample Settings Below ========== #
 
-TASK_NAME = "K4[Fe(CN)6]_SWV_Single_Scan"
-SAMPLE_NAME = "K4[Fe(CN)6]"
-V_init = 0            # Unit: Initial Voltage in V
-V_fin = 0.8               # Unit: Final Voltage in V
+SAMPLE_NAME = "K4[Fe(CN)6]_DPV_Single_Scan"
+TASK_NAME = "Single Scan of DPV"
+V_init = 0.8            # Unit: Initial Voltage in V
+V_fin = 0               # Unit: Final Voltage in V
 T_rest = 10             # The Resting Time Before the Scan
 
 DISABLE_GUI: bool = False
@@ -25,7 +25,7 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
 
     potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation)
     results = potentiostat.do_measurement(
-        technique="SWV",
+        technique="DPV",
         set_parameters={
             "IterationSettings": {"no_iterations": 1},
             "TechniqueParameters": {
@@ -35,9 +35,21 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
             }
         }
     )
-
-    MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as CVS file
     potentiostat.disconnect()
+
+    MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as a CVS file.
+    analyzer = MakeObjects.mk_analyzer(logger=logger)
+    analyzer.analyze_data(
+        sample_name=logger.sample_name,
+        experiment_name=logger.experiment_name,
+        technique="DPV",
+        analysis_settings={
+            "Plot": {"title": "DPV of Single Scan"},
+            "Peak Picking": {}
+            # "Integration": {}
+        },
+        raw_data=results
+    )
     logger.stop_gui()
 
 

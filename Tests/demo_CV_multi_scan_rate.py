@@ -10,15 +10,15 @@ from etoad.Utils import ThreadWithReturn
 
 # ========== Sample Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]"
-TASK_NAME = "Constant Scan Rate CV"
+SAMPLE_NAME = "K4[Fe(CN)6]_scan_rate_test"
+TASK_NAME = "Multiple Scan Rate CVs"
 V_init = 0                  # Unit: Initial Voltage in V
-V_max = 0.5                 # Unit: Highest Voltage in V
+V_max = 0.8                 # Unit: Highest Voltage in V
 V_min = 0                   # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
 
-SCAN_RATES = [0.050, 0.100, 0.200, 0.400, 1.000]    # Unit: Scan Rate in V/s
-CYCLE_NUM: int = 3      # The Numer of Cycles at each Scan Rate
+SCAN_RATES = [0.025, 0.050, 0.100, 0.200, 0.500]    # Unit: Scan Rate in V/s
+CYCLE_NUM: int = 5      # The Numer of Cycles at each Scan Rate
 
 DISABLE_GUI: bool = False
 SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
@@ -49,7 +49,6 @@ def do_measurement(scan_rates: list, simulation_mode: bool, logger: GraphicalInt
     potentiostat.disconnect()
 
     MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as a CVS file.
-
     analyzer = MakeObjects.mk_analyzer(logger=logger)
     analyzer.analyze_data(
         sample_name=logger.sample_name,
@@ -58,7 +57,9 @@ def do_measurement(scan_rates: list, simulation_mode: bool, logger: GraphicalInt
         analysis_settings={
             "Plot": {"title": "Cyclic Voltammetry of Multiple Scans"},
             "Peak Picking": {},
-            "Integration": {}
+            "Integration": {},
+            "Peaks Scanrate": {},
+            "Currents Scanrate": {}
         },
         raw_data=results
     )

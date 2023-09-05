@@ -12,7 +12,7 @@ import test_utils.MakeObjects as MakeObjects
 
 SAMPLE_NAME = "K4[Fe(CN)6]"     # Name of the Chemical Solution
 SOURCE_PORT = 9                 # The Port from which the Sample will be added.
-SAMPLE_VOL = 0.5                # The volume of sample in mL (< 5mL) to be diluted to 5 mL in the Cell.
+SAMPLE_VOL = 1.0                # The volume of sample in mL (< 5mL) to be diluted to 5 mL in the Cell.
 TOTAL_VOL = 5.0                 # The total volume of the diluted solution
 
 DISABLE_GUI: bool = True        # GUI can be disabled for simple liquid transfer.

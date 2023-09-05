@@ -1,3 +1,4 @@
+import math
 from typing import List, Tuple
 import numpy as np
 import pandas as pd
@@ -56,6 +57,7 @@ class CVAnalyzer(EChemDataAnalyzer):
             "Peak Picking": self._peak_picking,
             "Integration": self._integration,
             "Peaks Scanrate": self._plot_peaks_scan_rate,
+            "Currents Scanrate": self._plot_currents_scan_rate,
             "Plot": self._plot
         }
 
@@ -260,3 +262,26 @@ class CVAnalyzer(EChemDataAnalyzer):
         )
 
         self._figures["CV_Peaks_Scanrate"] = figure
+
+    @log_exceptions
+    def _plot_currents_scan_rate(self):
+        """
+        Generates a plot of peak currents vs. square root of the scan rates.
+        Saves the figure object to self.figures["CV_Currents_Scanrate"].
+        """
+        all_peaks: list = []
+        for idx, iteration in enumerate(self._raw_data):
+            peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[f"Iteration {idx}"]["Peak Picking"]))
+            peak_positions: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
+            peak_positions["scan_rate"] = self._get_scan_rate(iteration)
+            all_peaks.append(np.array(peak_positions))
+
+        figure = DataVisualizer.plot_multiple_points(
+            data_to_plot=[(math.sqrt(peaks[:, 2]), peaks[:, 1]) for peaks in all_peaks],
+            x_label="Square Root of Scan Rate [V$^{0.5}$ s$^{-0.5}$",
+            y_label="Peak Current [I]",
+            title="Peak Current as a Function of the Square Root of Scan Rate",
+            legend=[f"Iteration {i + 1}" for i in range(len(all_peaks))]
+        )
+
+        self._figures["CV_Currents_Scanrate"] = figure

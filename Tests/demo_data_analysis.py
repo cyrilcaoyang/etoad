@@ -12,7 +12,7 @@ from pathlib import Path
 """
 
 PARENT_DIR = Path(__file__).parent
-with open(PARENT_DIR / "test_settings" / "file_settings") as file:
+with open(PARENT_DIR / "test_settings" / "data_settings") as file:
     DATA_DIR = Path(file.read())
 
 logger = GraphicalInterface(
@@ -29,15 +29,15 @@ if Analyze_CV:
     data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)
     data_analyzer.analyze_data(
         sample_name="K4[Fe(CN)6]",
-        experiment_name="CV_Multi_ScanRate",
+        experiment_name="CV_const_ScanRate",
         technique="CV",
         analysis_settings={
             "Plot": {"title": "Test CV Measurement"},
             "Peak Picking": {},
-            "Integration": {},
-            "Peaks Scanrate": {}
+            "Integration": {}
+            # "Peaks Scanrate": {}
         },
-        raw_data=np.genfromtxt(PARENT_DIR / "analyzer_test" / "CV_Multi_ScanRate_K4[Fe(CN)6]_23-08-07_21-02.csv", delimiter=',')
+        raw_data=np.genfromtxt(PARENT_DIR / "analyzer_test" / "CV_K4[Fe(CN)6]-smooth_23-08-31_16-02.csv", delimiter=',')
     )
 
 # Example B
