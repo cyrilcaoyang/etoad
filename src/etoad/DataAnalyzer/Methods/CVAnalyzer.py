@@ -272,12 +272,12 @@ class CVAnalyzer(EChemDataAnalyzer):
         all_peaks: list = []
         for idx, iteration in enumerate(self._raw_data):
             peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[f"Iteration {idx}"]["Peak Picking"]))
-            peak_positions: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
-            peak_positions["scan_rate"] = self._get_scan_rate(iteration)
-            all_peaks.append(np.array(peak_positions))
+            peak_info: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
+            peak_info["scan_rate_sqrt"] = self._get_scan_rate(iteration) ** 0.5
+            all_peaks.append(np.array(peak_info))
 
         figure = DataVisualizer.plot_multiple_points(
-            data_to_plot=[(math.sqrt(peaks[:, 2]), peaks[:, 1]) for peaks in all_peaks],
+            data_to_plot=[(peaks[:, 2], peaks[:, 1]) for peaks in all_peaks],
             x_label="Square Root of Scan Rate [V$^{0.5}$ s$^{-0.5}$",
             y_label="Peak Current [I]",
             title="Peak Current as a Function of the Square Root of Scan Rate",

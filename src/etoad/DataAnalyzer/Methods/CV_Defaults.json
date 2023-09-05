@@ -11,5 +11,6 @@
   "Integration": {
     "plot": true
   },
-  "Peaks Scanrate": {}
+  "Peaks Scanrate": {},
+  "Currents Scanrate": {}
 }

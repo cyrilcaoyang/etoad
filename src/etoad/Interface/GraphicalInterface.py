@@ -84,8 +84,8 @@ class GraphicalInterface(Logger):
         """
         # Set Up the Entire GUI Window
         self._gui.title("EToad – Electrochemical Technique Operation for Autonomous Discovery")
-        height = int(0.9 * self._gui.winfo_screenheight())
-        width = int(0.6 * self._gui.winfo_screenwidth())
+        height = int(0.8 * self._gui.winfo_screenheight())
+        width = int(0.4 * self._gui.winfo_screenwidth())
         self._gui.geometry(f"{width}x{height}")
         self._gui.config(background=BACKGROUND)
 
@@ -94,7 +94,7 @@ class GraphicalInterface(Logger):
         img = ImageTk.PhotoImage(Image.open(Path(__file__).parent / "MatterLab.png").resize(size=(int(0.1*height), int(0.1*height))))
         self._gui_details["logo_label"] = tk.Label(self._gui_details["title_frame"], background=BACKGROUND, image=img)
         self._gui_details["logo_label"].image = img
-        self._gui_details["title_label"] = tk.Label(self._gui_details["title_frame"], text=self.title, background=BACKGROUND, foreground=WHITE, font=("Arial", 24))
+        self._gui_details["title_label"] = tk.Label(self._gui_details["title_frame"], text=self.title, background=BACKGROUND, foreground=WHITE, font=("Arial", 18))
         self._gui_details["title_frame"].pack(side="top", fill="both")
         self._gui_details["logo_label"].pack(side="right", fill="both")
         self._gui_details["title_label"].pack(side="top", fill="both", expand=True, padx=(int(0.1 * height), 0))
