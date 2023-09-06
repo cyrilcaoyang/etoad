@@ -10,7 +10,7 @@ class OCV(EChemMethod):
     method_name: str = "Open Circuit Voltammetry"
     method_name_short: str = "OCV"
     method_file_name: str = "ocv4.ecc"
-    data_structure: tuple = ("Time", "Voltage")
+    data_structure: tuple = ("Current", "Time", "Voltage")
 
     @staticmethod
     def _decode_row(row: tuple, timebase: float, numeric_to_single: Optional[Callable]) -> np.array:
@@ -26,5 +26,6 @@ class OCV(EChemMethod):
 
         time = timebase * ((time_high << 32) + time_low)
         voltage = numeric_to_single(voltage)
+        current = 0
 
-        return np.asarray([time, voltage])
+        return np.asarray([current, time, voltage])

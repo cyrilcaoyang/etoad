@@ -1,20 +1,28 @@
 {
-  "Rest Time": {
-    "name": "Rest_time_T",
-    "variable_type": "float",
-    "value": 10,
-    "constraints": "0 < x <= 120"
+  "IterationSettings": {
+    "no_iterations": 1
   },
-  "Voltage Interval Size": {
-    "name": "Record_every_dE",
-    "variable_type": "float",
-    "value": 0.01,
-    "constraints": "0 < x < 1"
-  },
-  "Time Interval Size": {
-    "name": "Record_every_dT",
-    "variable_type": "float",
-    "value": 0.01,
-    "constraints": "0 < x <= 10"
+  "TechniqueParameters": {
+    "Rest Time": {
+      "name": "Rest_time_T",
+      "variable_type": "float",
+      "changed_over_iterations": false,
+      "value": 10,
+      "constraints": "0 < x <= 120"
+    },
+    "Voltage Interval Size": {
+      "name": "Record_every_dE",
+      "variable_type": "float",
+      "changed_over_iterations": false,
+      "value": 0.01,
+      "constraints": "0 < x < 1"
+    },
+    "Time Interval Size": {
+      "name": "Record_every_dT",
+      "variable_type": "float",
+      "changed_over_iterations": false,
+      "value": 0.01,
+      "constraints": "0 < x <= 10"
+    }
   }
 }

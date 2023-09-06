@@ -12,12 +12,12 @@ import test_utils.MakeObjects as MakeObjects
 SAMPLE_NAME = "K4[Fe(CN)6]_Pulse_Voltammetry"
 TASK_NAME = "SWV_cyclic_scans"
 
-V_init = 0                # Unit: Initial Voltage in V
-V_fin = 0.9                   # Unit: Final Voltage in V
-T_rest = 0                 # The Resting Time Before the Scan in seconds
-CYCLE_NUM: int = 5      # The Numer of Cycles at each Scan Rate
+V_init = 0                    # Unit: Initial Voltage in V
+V_fin = 0.6                   # Unit: Final Voltage in V
+T_rest = 0.01                 # The Resting Time Before the Scan in seconds
+CYCLE_NUM: int = 50           # The Numer of Cycles
 
-DISABLE_GUI: bool = False
+DISABLE_GUI: bool = True      # This option can turn ON/OFF the GUI
 SIMULATION: bool = False
 
 # ========== Sample Settings Above ========== #
@@ -28,7 +28,7 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
     list_v_init = []
     list_v_fin = []
 
-    for i in range(CYCLE_NUM):
+    for i in range(2*CYCLE_NUM):
         list_v_init.append(V_init) if i % 2 == 0 else list_v_init.append(V_fin)
         list_v_fin.append(V_fin) if i % 2 == 0 else list_v_fin.append(V_init)
     logger.info(f"The list of initial voltages is: {list_v_init}")
@@ -38,7 +38,7 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
     results = potentiostat.do_measurement(
         technique="SWV",
         set_parameters={
-            "IterationSettings": {"no_iterations": CYCLE_NUM},
+            "IterationSettings": {"no_iterations": 2*CYCLE_NUM},
             "TechniqueParameters": {
                 "Initial Voltage": {
                     "changed_over_iterations": True,

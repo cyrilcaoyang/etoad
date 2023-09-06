@@ -13,7 +13,8 @@ SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
 
 # ========== Sample Settings Above ========== #
 
-def do_measurement(scan_rates: [], simulation_mode: bool, logger: GraphicalInterface):
+
+def do_measurement(simulation_mode: bool, logger: GraphicalInterface):
     potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation_mode)
     potentiostat.disconnect()
 
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     gui_logger = MakeObjects.mk_logger('disconnection', 'None', DISABLE_GUI)
     gui_logger.info(f"Disconnecting the potentiostat.")
 
-    worker_thread = ThreadWithReturn(target=do_measurement, args=([], SIMULATION, gui_logger))
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(SIMULATION, gui_logger))
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()
