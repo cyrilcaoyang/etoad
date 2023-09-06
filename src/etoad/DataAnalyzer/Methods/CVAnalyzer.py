@@ -255,7 +255,7 @@ class CVAnalyzer(EChemDataAnalyzer):
 
         figure = DataVisualizer.plot_multiple_points(
             data_to_plot=[(peaks[:, 2], peaks[:, 0]) for peaks in all_peaks],
-            x_label="Scan Rate [V s$^{-1}$",
+            x_label="Scan Rate [V*s$^{-1}$]",
             y_label="Peak Voltage [V]",
             title="Peak Positions as a Function of Scan Rate",
             legend=[f"Iteration {i + 1}" for i in range(len(all_peaks))]
@@ -278,7 +278,7 @@ class CVAnalyzer(EChemDataAnalyzer):
 
         figure = DataVisualizer.plot_multiple_points(
             data_to_plot=[(peaks[:, 2], peaks[:, 1]) for peaks in all_peaks],
-            x_label="Square Root of Scan Rate [V$^{0.5}$ s$^{-0.5}$",
+            x_label="Square Root of Scan Rate [V$^{0.5}$*s$^{-0.5}$]",
             y_label="Peak Current [I]",
             title="Peak Current as a Function of the Square Root of Scan Rate",
             legend=[f"Iteration {i + 1}" for i in range(len(all_peaks))]

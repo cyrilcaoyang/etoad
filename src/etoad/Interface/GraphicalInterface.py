@@ -84,8 +84,8 @@ class GraphicalInterface(Logger):
         """
         # Set Up the Entire GUI Window
         self._gui.title("EToad – Electrochemical Technique Operation for Autonomous Discovery")
-        height = int(0.8 * self._gui.winfo_screenheight())
-        width = int(0.4 * self._gui.winfo_screenwidth())
+        height = int(0.90 * self._gui.winfo_screenheight())
+        width = int(0.45 * self._gui.winfo_screenwidth())
         self._gui.geometry(f"{width}x{height}")
         self._gui.config(background=BACKGROUND)
 
@@ -94,7 +94,7 @@ class GraphicalInterface(Logger):
         img = ImageTk.PhotoImage(Image.open(Path(__file__).parent / "MatterLab.png").resize(size=(int(0.1*height), int(0.1*height))))
         self._gui_details["logo_label"] = tk.Label(self._gui_details["title_frame"], background=BACKGROUND, image=img)
         self._gui_details["logo_label"].image = img
-        self._gui_details["title_label"] = tk.Label(self._gui_details["title_frame"], text=self.title, background=BACKGROUND, foreground=WHITE, font=("Arial", 18))
+        self._gui_details["title_label"] = tk.Label(self._gui_details["title_frame"], text=self.title, background=BACKGROUND, foreground=WHITE, font=("Arial", 16))
         self._gui_details["title_frame"].pack(side="top", fill="both")
         self._gui_details["logo_label"].pack(side="right", fill="both")
         self._gui_details["title_label"].pack(side="top", fill="both", expand=True, padx=(int(0.1 * height), 0))
@@ -105,7 +105,7 @@ class GraphicalInterface(Logger):
 
         # Set Up the Logging Window
         self._gui_details["log_window"] = tk.Frame(self._gui, height=0.3 * height, width=0.9 * width, background=BACKGROUND)
-        self._gui_details["log_record"] = ScrolledText(self._gui, background=BACKGROUND_LIGHT, foreground=BACKGROUND, font=("Arial", 12), spacing3=4, highlightbackground=BACKGROUND_LIGHT)
+        self._gui_details["log_record"] = ScrolledText(self._gui, background=BACKGROUND_LIGHT, foreground=BACKGROUND, font=("Arial", 11), spacing3=4, highlightbackground=BACKGROUND_LIGHT)
         self._gui_details["log_record"].pack(in_=self._gui_details["log_window"], expand=True, fill="both", side="left")
         self._gui_details["log_window"].pack(side="bottom", fill="both", padx=20, pady=10)
 

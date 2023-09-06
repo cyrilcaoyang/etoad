@@ -53,9 +53,9 @@ class SWV(EChemMethod):
 
         processed_data: np.ndarray = np.vstack(
             (
-                extracted_data[:, 0][0::2][:no_data_points],  # Time from Column 0
-                extracted_data[:, 1][0::2][:no_data_points],  # Voltage from Column 1
-                delta_current                          # Differential Current from Column 2
+                extracted_data[:, 0][0::2][:no_data_points],    # Time from Column 0
+                extracted_data[:, 1][0::2][:no_data_points],    # Voltage from Column 1
+                delta_current                                   # Differential Current from Column 2
             )
         )
 

@@ -9,14 +9,14 @@ import test_utils.MakeObjects as MakeObjects
 
 # ========== Sample Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]-sandpaper3000"
-TASK_NAME = "CV_Const_ScanRate"
-V_init = 0                  # Unit: Initial Voltage in V
-V_max = 1.0                 # Unit: Highest Voltage in V
-V_min = -1.0                   # Unit: Lowest Voltage in V
+SAMPLE_NAME = "K4[Fe(CN)6]-polishing"
+TASK_NAME = "CV_Const_ScanRate_smooth"
+V_init = 0.0                  # Unit: Initial Voltage in V
+V_max = 0.8                 # Unit: Highest Voltage in V
+V_min = -0.0                   # Unit: Lowest Voltage in V
 V_fin = 0.0                   # Unit: Final Voltage in V
 SCAN_RATE = 0.100           # Unit: Scan Rate in V/s
-CYCLE_NUM: int = 3     # The Numer of Cycles as an Integer
+CYCLE_NUM: int = 5     # The Numer of Cycles as an Integer
 
 DISABLE_GUI: bool = False
 SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
@@ -42,10 +42,21 @@ def do_measurement(simulation: bool, logger: GraphicalInterface) -> None:
             }
         }
     )
-
-    MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as CVS file
     potentiostat.disconnect()
-    # logger.stop_gui()
+
+    analyzer = MakeObjects.mk_analyzer(logger=logger)
+    analyzer.analyze_data(
+        sample_name=logger.sample_name,
+        experiment_name=logger.experiment_name,
+        technique="CV",
+        analysis_settings={
+            "Plot": {"title": "Cyclic Voltammetry of a Single Scan"},
+            "Peak Picking": {},
+            "Integration": {}
+        },
+        raw_data=results
+    )
+    logger.stop_gui()
 
 
 if __name__ == "__main__":

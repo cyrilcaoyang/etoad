@@ -40,7 +40,6 @@ class DPV(EChemMethod):
 
         Returns:
             processed_data: 2D Numpy array of all pulse data points.
-
         """
         pulse_high: np.array = extracted_data[:, 2][0::2]
         pulse_low: np.array = extracted_data[:, 2][1::2]
@@ -56,7 +55,7 @@ class DPV(EChemMethod):
             (
                 extracted_data[:, 0][0::2][:no_data_points],    # Time from Column 0
                 extracted_data[:, 1][0::2][:no_data_points],    # Voltage from Column 1
-                delta_current                           # Differential Current from Column 2
+                delta_current                                   # Differential Current from Column 2
             )
         )
 

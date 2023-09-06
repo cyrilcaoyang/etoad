@@ -48,7 +48,6 @@ def do_measurement(scan_rates: list, simulation_mode: bool, logger: GraphicalInt
     )
     potentiostat.disconnect()
 
-    MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as a CVS file.
     analyzer = MakeObjects.mk_analyzer(logger=logger)
     analyzer.analyze_data(
         sample_name=logger.sample_name,

@@ -9,11 +9,12 @@ import test_utils.MakeObjects as MakeObjects
 
 # ========== Sample Settings Below ========== #
 
-TASK_NAME = "K4[Fe(CN)6]_SWV_Single_Scan"
-SAMPLE_NAME = "K4[Fe(CN)6]"
-V_init = 0            # Unit: Initial Voltage in V
-V_fin = 0.8               # Unit: Final Voltage in V
-T_rest = 10             # The Resting Time Before the Scan
+SAMPLE_NAME = "K4[Fe(CN)6]_Pulse_Voltammetry"
+TASK_NAME = "SWV_single_scan"
+
+V_init = 0                # Unit: Initial Voltage in V
+V_fin = 0.9                   # Unit: Final Voltage in V
+T_rest = 10                 # The Resting Time Before the Scan in seconds
 
 DISABLE_GUI: bool = False
 SIMULATION: bool = False
@@ -35,9 +36,20 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
             }
         }
     )
-
-    MakeObjects.mk_csv(results, logger=logger)  # Saves Raw Data as CVS file
     potentiostat.disconnect()
+
+    analyzer = MakeObjects.mk_analyzer(logger=logger)
+    analyzer.analyze_data(
+        sample_name=logger.sample_name,
+        experiment_name=logger.experiment_name,
+        technique="SWV",
+        analysis_settings={
+            "Plot": {"title": "A Single Scan of SWV"},
+            "Peak Picking": {},
+            "Integration": {}
+        },
+        raw_data=results
+    )
     logger.stop_gui()
 
 
