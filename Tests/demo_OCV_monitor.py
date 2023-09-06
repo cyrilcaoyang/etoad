@@ -12,9 +12,9 @@ import time
 SAMPLE_NAME = "K4[Fe(CN)6]-OCV"
 TASK_NAME = "OCV_monitor"
 
-Voltage_Interval = 0.01          # Unit: Voltage Interval in V
+Voltage_Interval = 1          # Unit: Voltage Interval in mV
 Time_Interval = 0.05               # Unit: Time Interval in s
-Duration = 10                     # Unit: Duration in s
+Duration = 1                     # Unit: Duration in s
 
 SIMULATION: bool = False          # This option can turn ON/OFF the Simulation Mode
 DISABLE_GUI: bool = False         # This option can turn ON/OFF the GUI
@@ -27,7 +27,7 @@ def do_measurement(simulation: bool, duration: float, logger: GraphicalInterface
     potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation)
     start_time = time.time()
 
-    while time.time() - start_time < Duration:
+    while time.time() - start_time < duration:
         results = potentiostat.do_measurement(
             technique="OCV",
             set_parameters={
@@ -42,20 +42,18 @@ def do_measurement(simulation: bool, duration: float, logger: GraphicalInterface
             }
         )
     potentiostat.disconnect()
+    _ = MakeObjects.mk_csv(results, logger)
 
-    csv_result = MakeObjects.mk_csv(results, logger=logger)
-
-    # TODO: write a data analyzer for OCV
-    # analyzer = MakeObjects.mk_analyzer(logger=logger)
-    # analyzer.analyze_data(
-    #     sample_name=logger.sample_name,
-    #     experiment_name=logger.experiment_name,
-    #     technique="OCV",
-    #     analysis_settings={
-    #         "Plot": {"title": f"OCV for {Duration} seconds"},
-    #     },
-    #     raw_data=results
-    # )
+    analyzer = MakeObjects.mk_analyzer(logger=logger)
+    analyzer.analyze_data(
+         sample_name=logger.sample_name,
+         experiment_name=logger.experiment_name,
+         technique="OCV",
+         analysis_settings={
+             "Plot": {"title": f"OCV for {Duration} seconds"},
+         },
+         raw_data=results,
+    )
     logger.stop_gui()
 
 

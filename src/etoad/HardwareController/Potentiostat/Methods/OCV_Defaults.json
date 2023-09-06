@@ -15,7 +15,7 @@
       "variable_type": "float",
       "changed_over_iterations": false,
       "value": 0.01,
-      "constraints": "0 < x < 1"
+      "constraints": "0 < x < 10"
     },
     "Time Interval Size": {
       "name": "Record_every_dT",

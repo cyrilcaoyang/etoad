@@ -10,7 +10,7 @@ import test_utils.MakeObjects as MakeObjects
 # ========== Sample Settings Below ========== #
 
 SAMPLE_NAME = "K4[Fe(CN)6]_Pulse_Voltammetry"
-TASK_NAME = "DPV_single_scan"
+TASK_NAME = "DPV_single_scan_0.2mM_Ag-chip"
 
 V_init = 0.8            # Unit: Initial Voltage in V
 V_fin = 0               # Unit: Final Voltage in V

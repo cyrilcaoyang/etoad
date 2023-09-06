@@ -12,8 +12,8 @@ import test_utils.MakeObjects as MakeObjects
 SAMPLE_NAME = "K4[Fe(CN)6]_Pulse_Voltammetry"
 TASK_NAME = "SWV_single_scan"
 
-V_init = 0                # Unit: Initial Voltage in V
-V_fin = 0.9                   # Unit: Final Voltage in V
+V_init = 0.9                # Unit: Initial Voltage in V
+V_fin = 0                   # Unit: Final Voltage in V
 T_rest = 10                 # The Resting Time Before the Scan in seconds
 
 DISABLE_GUI: bool = False
@@ -45,8 +45,8 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
         technique="SWV",
         analysis_settings={
             "Plot": {"title": "A Single Scan of SWV"},
-            "Peak Picking": {},
-            "Integration": {}
+            # "Peak Picking": {},
+            # "Integration": {}
         },
         raw_data=results
     )

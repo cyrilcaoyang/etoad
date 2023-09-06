@@ -10,11 +10,11 @@ from etoad.Utils import ThreadWithReturn
 
 # ========== Sample Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]_scan_rate_test"
-TASK_NAME = "Multiple Scan Rate CVs"
-V_init = 0                  # Unit: Initial Voltage in V
+SAMPLE_NAME = "K4[Fe(CN)6]_CV_scan_rate"
+TASK_NAME = "Multiple_Rate_0.2mM_Ag-Chip"
+V_init = -0.2                  # Unit: Initial Voltage in V
 V_max = 0.8                 # Unit: Highest Voltage in V
-V_min = 0                   # Unit: Lowest Voltage in V
+V_min = -0.2                   # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
 
 SCAN_RATES = [0.025, 0.050, 0.100, 0.200, 0.500]    # Unit: Scan Rate in V/s

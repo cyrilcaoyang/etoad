@@ -24,7 +24,6 @@ def mk_logger(
         log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{sample_name}_{task_name}.log",
         disable_gui=disable_gui
     )
-    logger.experiment_name = task_name
     logger.sample_name = sample_name
     return logger
 

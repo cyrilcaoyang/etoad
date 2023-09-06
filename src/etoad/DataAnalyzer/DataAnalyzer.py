@@ -8,7 +8,7 @@ import numpy as np
 from ..Utils import timestamp_datetime
 from ..Utils import save_as_csv, save_as_json
 from ..Utils import log_exceptions
-from .Methods import CVAnalyzer, PulseTechniqueAnalyzer, EChemDataAnalyzer
+from .Methods import CVAnalyzer, PulseTechniqueAnalyzer, OCVAnalyzer, EChemDataAnalyzer
 
 
 class DataAnalyzer:
@@ -19,7 +19,8 @@ class DataAnalyzer:
     _technique_analyzers: dict = {
         "CV": CVAnalyzer,
         "SWV": PulseTechniqueAnalyzer,
-        "DPV": PulseTechniqueAnalyzer
+        "DPV": PulseTechniqueAnalyzer,
+        "OCV": OCVAnalyzer
     }
 
     def __init__(
@@ -94,8 +95,7 @@ class DataAnalyzer:
         sample_dir = self._data_path / sample_name
         sample_dir.mkdir(parents=True, exist_ok=True)
 
-        file_basename = f"{sample_name}_{experiment_name}_{timestamp_datetime()}"
-
+        file_basename = f"{sample_name}_{timestamp_datetime()}_{experiment_name}"
         return sample_dir, file_basename
 
     @log_exceptions

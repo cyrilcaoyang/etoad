@@ -10,14 +10,14 @@ import test_utils.MakeObjects as MakeObjects
 # ========== Sample Settings Below ========== #
 
 SAMPLE_NAME = "K4[Fe(CN)6]_Pulse_Voltammetry"
-TASK_NAME = "SWV_cyclic_scans"
+TASK_NAME = "SWV_cyclic_scans_0.2mM_Ag-chip"
 
-V_init = 0                    # Unit: Initial Voltage in V
-V_fin = 0.6                   # Unit: Final Voltage in V
-T_rest = 0.01                 # The Resting Time Before the Scan in seconds
-CYCLE_NUM: int = 50           # The Numer of Cycles
+V_init = -0.4              # Unit: Initial Voltage in V
+V_fin = 0.8                # Unit: Final Voltage in V
+T_rest = 5                 # The Resting Time Before the Scan in seconds
+CYCLE_NUM: int = 1         # The Numer of Cycles
 
-DISABLE_GUI: bool = True      # This option can turn ON/OFF the GUI
+DISABLE_GUI: bool = False      # This option can turn ON/OFF the GUI
 SIMULATION: bool = False
 
 # ========== Sample Settings Above ========== #
@@ -55,6 +55,8 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
         }
     )
     potentiostat.disconnect()
+
+    _ = MakeObjects.mk_csv(results, logger=logger)
 
     analyzer = MakeObjects.mk_analyzer(logger=logger)
     analyzer.analyze_data(
