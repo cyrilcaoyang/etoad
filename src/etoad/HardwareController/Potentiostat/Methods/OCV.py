@@ -29,3 +29,4 @@ class OCV(EChemMethod):
         current = 0
 
         return np.asarray([current, time, voltage])
+        # This data structure is adapted to be compatible with the GraphicalInterface

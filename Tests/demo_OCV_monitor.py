@@ -41,8 +41,6 @@ def do_measurement(simulation: bool, duration: float, logger: GraphicalInterface
                 }
             }
         )
-    # potentiostat.disconnect()
-    # _ = MakeObjects.mk_csv(results, logger)
 
     analyzer = MakeObjects.mk_analyzer(logger=logger)
     analyzer.analyze_data(

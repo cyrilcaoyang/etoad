@@ -4,3 +4,4 @@ from .noise_estimation import estimate_noise
 from .peak_selection import filter_peaks, select_peaks
 from .DataVisualizer import DataVisualizer
 from .significant_digits import significant_digits
+from .singal_smoothing import smooth
