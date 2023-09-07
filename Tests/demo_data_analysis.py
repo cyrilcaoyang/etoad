@@ -18,8 +18,7 @@ with open(PARENT_DIR / "test_settings" / "data_settings") as file:
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=f"{timestamp_datetime()}_data_analysis.log"
-    # log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_data_analysis.log"
+    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_data_analysis.log"
     )
 
 # Example A
