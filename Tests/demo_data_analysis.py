@@ -1,6 +1,7 @@
 import numpy as np
 
 from etoad.DataAnalyzer import DataAnalyzer
+from etoad.DataAnalyzer.Methods import OCVAnalyzer
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime
 from pathlib import Path
@@ -17,13 +18,14 @@ with open(PARENT_DIR / "test_settings" / "data_settings") as file:
 
 logger = GraphicalInterface(
     logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
-    log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_data_analysis.log"
+    log_file=f"{timestamp_datetime()}_data_analysis.log"
+    # log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_data_analysis.log"
     )
 
 # Example A
 # Analyzing a multi-iteration CV experiment, and plotting the peak position vs scan rates.
 
-Analyze_CV: bool = True
+Analyze_CV: bool = False
 
 if Analyze_CV:
     data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)
@@ -58,4 +60,21 @@ if Analyze_Cyclic_SWV:
             "Integration": {}
         },
         raw_data=np.load(PARENT_DIR / "analyzer_test" / "Test_Cyclic_SWV.pkl", allow_pickle=True)
+    )
+
+# Example C
+# Analyzing OCV experiment, and plot the data.
+
+Analyze_OCV: bool = False
+
+if Analyze_OCV:
+    data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)
+    data_analyzer.analyze_data(
+        sample_name="K4[Fe(CN)6]",
+        experiment_name="OCV scan",
+        technique="OCV",
+        analysis_settings={
+            "Plot": {},
+        },
+        raw_data=np.genfromtxt(PARENT_DIR / "analyzer_test" / "Open Circuit Voltammetry_K4[Fe(CN)6]-OCV_23-09-06_17-59-2.csv", delimiter=',')
     )

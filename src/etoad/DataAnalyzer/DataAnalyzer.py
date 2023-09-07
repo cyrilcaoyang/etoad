@@ -20,7 +20,7 @@ class DataAnalyzer:
         "CV": CVAnalyzer,
         "SWV": PulseTechniqueAnalyzer,
         "DPV": PulseTechniqueAnalyzer,
-        "OCV": OCVAnalyzer
+        "OCV": OCVAnalyzer,
     }
 
     def __init__(

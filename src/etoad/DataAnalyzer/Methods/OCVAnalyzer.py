@@ -7,6 +7,11 @@ from ...Utils import log_exceptions
 
 class OCVAnalyzer(EChemDataAnalyzer):
     """
+        Implementation of the EChemDataAnalyzer for open circuit voltage.
+
+    Available analysis techniques:
+        "Mean" -> Takes the mean of the voltage values
+        "Plot" -> plots the voltage vs time
     """
     analysis_method_name: str = "OCV"
 

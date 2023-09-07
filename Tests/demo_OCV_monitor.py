@@ -12,9 +12,9 @@ import time
 SAMPLE_NAME = "K4[Fe(CN)6]-OCV"
 TASK_NAME = "OCV_monitor"
 
-Voltage_Interval = 1          # Unit: Voltage Interval in mV
-Time_Interval = 0.05               # Unit: Time Interval in s
-Duration = 1                     # Unit: Duration in s
+Voltage_Interval = 0.1                # Unit: Voltage Interval in mV
+Time_Interval = 0.05                # Unit: Time Interval in s
+Duration = 5                        # Unit: Duration in s
 
 SIMULATION: bool = False          # This option can turn ON/OFF the Simulation Mode
 DISABLE_GUI: bool = False         # This option can turn ON/OFF the GUI
