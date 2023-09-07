@@ -1,7 +1,7 @@
 from typing import List
 import numpy as np
 from .EChemDataAnalyzer import EChemDataAnalyzer
-from ..AnalysisUtils import DataVisualizer, noise_estimation
+from ..AnalysisUtils import DataVisualizer
 from ...Utils import log_exceptions
 
 

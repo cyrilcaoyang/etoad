@@ -65,7 +65,7 @@ if Analyze_Cyclic_SWV:
 # Example C
 # Analyzing OCV experiment, and plot the data.
 
-Analyze_OCV: bool = False
+Analyze_OCV: bool = True
 
 if Analyze_OCV:
     data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)
