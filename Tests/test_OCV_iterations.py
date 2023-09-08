@@ -4,10 +4,10 @@ import test_utils.MakeObjects as MakeObjects
 import time
 
 """
+    
     This python script monitors Open Circuit Voltage over time, without using the Workflow Manager
     
     The result will be saved in the Data / "Data" Directory:
-        
         1. The raw data will be saved in a .csv file.
         2. Plots of the data will be saved in the same folder.
         3. The result of analysis is written to a .json file in the following format:
@@ -23,6 +23,7 @@ import time
             }
         
     The logs will be saved in the Data / "Log" Directory:
+    
     The Data directory:
         is defined by .test_utils.PathFinder.py,
         which read settings read from .test_settings.data_settings.
