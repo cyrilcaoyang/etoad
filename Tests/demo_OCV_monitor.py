@@ -5,39 +5,62 @@ import time
 
 """
     This python script monitors Open Circuit Voltage over time, without using the Workflow Manager
+    
+    The result will be saved in the Data / "Data" Directory:
+        
+        1. The raw data will be saved in a .csv file.
+        2. Plots of the data will be saved in the same folder.
+        3. The result of analysis is written to a .json file in the following format:
+            
+            {
+            ...
+                'Iteration XXX': 
+                {
+                    'Final Voltage': '0.XXXXX',
+                    'Is Voltage Stable': True/False
+                },
+            ...
+            }
+        
+    The logs will be saved in the Data / "Log" Directory:
+    The Data directory:
+        is defined by .test_utils.PathFinder.py,
+        which read settings read from .test_settings.data_settings.
+    
 """
 
 # ========== Sample Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]-OCV"
-TASK_NAME = "OCV_monitor"
+sample_name = "K4[Fe(CN)6]-OCV"   # Sample Name will the name of the folder that contains the data
+task_name = "OCV_monitor"
 
-Voltage_Interval = 0.1                # Unit: Voltage Interval in mV
-Time_Interval = 0.05                # Unit: Time Interval in s
-Duration = 5                        # Unit: Duration in s
+voltage_interval = 0.1            # Unit: Voltage Interval in mV
+time_interval = 0.05              # Unit: Time Interval in s
+time_per_iteration = 15           # Unit: Time per Iteration in s
+iterations = 100                  # Unit: Number of Iterations
 
-SIMULATION: bool = False          # This option can turn ON/OFF the Simulation Mode
-DISABLE_GUI: bool = False         # This option can turn ON/OFF the GUI
+simulation: bool = False          # This option can turn ON/OFF the Simulation Mode
+disable_gui: bool = True          # This option can turn ON/OFF the GUI
 
 # ========== Sample Settings Above ========== #
 
 
-def do_measurement(simulation: bool, duration: float, logger: GraphicalInterface) -> None:
+def do_measurement(simulation: bool, logger: GraphicalInterface) -> None:
 
     potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation)
     start_time = time.time()
 
-    while time.time() - start_time < duration:
+    while time.time() - start_time < time_per_iteration:
         results = potentiostat.do_measurement(
             technique="OCV",
             set_parameters={
                 "IterationSettings": {
-                    "no_iterations": 1
+                    "no_iterations": iterations
                 },
                 "TechniqueParameters": {
-                    "Rest Time": {"value": Duration},
-                    "Voltage Interval Size": {"value": Voltage_Interval},
-                    "Time Interval Size": {"value": Time_Interval}
+                    "Voltage Interval Size": {"value": voltage_interval},
+                    "Time Interval Size": {"value": time_interval},
+                    "Rest Time": {"value": time_per_iteration}
                 }
             }
         )
@@ -48,7 +71,8 @@ def do_measurement(simulation: bool, duration: float, logger: GraphicalInterface
          experiment_name=logger.experiment_name,
          technique="OCV",
          analysis_settings={
-             "Plot": {"title": f"OCV for {Duration} seconds"},
+             "Plot": {"title": f"OCV for {time_per_iteration} seconds"},
+             "Fin Voltage": {}
          },
          raw_data=results,
     )
@@ -57,10 +81,10 @@ def do_measurement(simulation: bool, duration: float, logger: GraphicalInterface
 
 if __name__ == "__main__":
 
-    gui_logger = MakeObjects.mk_logger(TASK_NAME, SAMPLE_NAME, DISABLE_GUI)
-    gui_logger.info(f"Starting {TASK_NAME} of {SAMPLE_NAME}.")
+    gui_logger = MakeObjects.mk_logger(task_name, sample_name, disable_gui)
+    gui_logger.info(f"Starting {task_name} of {sample_name}.")
 
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(SIMULATION, Duration, gui_logger))
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(simulation, gui_logger))
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()

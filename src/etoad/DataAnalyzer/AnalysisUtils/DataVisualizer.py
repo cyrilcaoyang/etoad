@@ -95,6 +95,7 @@ class DataVisualizer(object):
             colors: Tuple or list of colors.
                     - length = 1 -> all curves will be plotted in this single color
                     - length = 2 -> curves will be plotted as a gradient between these two colors
+                    - length = 4 -> curves will be plotted as a gradient between two colors for each half of the data
                     - length = len(data_to_plot) -> curves will be plotted in the given colors
             legend: List of legend entries for each curve to be plotted.
 
@@ -109,15 +110,23 @@ class DataVisualizer(object):
 
         # sets colors
         if len(colors) == 1:
-            colors = [colors[0]] * len(data_to_plot)
+            new_colors = [colors[0]] * len(data_to_plot)
         elif len(colors) == 2:
-            colors = cls._color_gradient(*colors, data_points=len(data_to_plot))
+            new_colors = cls._color_gradient(*colors, data_points=len(data_to_plot))
+        elif len(colors) == 4:
+            if len(data_to_plot) == 2:
+                new_colors = np.vstack((colors[0], colors[2]))
+            else:
+                new_colors = np.vstack((
+                    cls._color_gradient(*colors[:2], data_points=len(data_to_plot)//2),
+                    cls._color_gradient(*colors[2:], data_points=len(data_to_plot)-len(data_to_plot)//2)
+            ))
         elif len(colors) != len(data_to_plot):
             raise IndexError("The length of the color series could not be interpreted.")
 
         # plots the data
         for idx, curve in enumerate(data_to_plot):
-            ax.plot(curve[0], curve[1], color=colors[idx], zorder=-idx)
+            ax.plot(curve[0], curve[1], color=new_colors[idx], zorder=-idx)
             # ax.plot(curve[0], curve[1], marker="s", markersize=3, color=colors[idx], zorder=-idx)
             # plot with markers or without?
 
