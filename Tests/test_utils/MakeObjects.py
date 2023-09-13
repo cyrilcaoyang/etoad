@@ -1,3 +1,4 @@
+import logging
 from etoad.Utils import timestamp_datetime, FileHandling
 from etoad.Interface import GraphicalInterface
 from etoad.HardwareController.Potentiostat import EChemController
@@ -12,7 +13,7 @@ from typing import Any
 def mk_logger(
         task_name: str,
         sample_name: str,
-        disable_gui: bool
+        enable_gui: bool
 ) -> GraphicalInterface:
     """
     This function creates a GUI-logger for the experiment.
@@ -22,9 +23,29 @@ def mk_logger(
     logger = GraphicalInterface(
         logging_config=parent_dir / "test_settings" / "logger_settings.json",
         log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{sample_name}_{task_name}.log",
-        disable_gui=disable_gui
+        enable_gui=enable_gui
     )
     logger.sample_name = sample_name
+    return logger
+
+
+def mk_logger_gui_free(
+        task_name: str,
+        sample_name: str
+) -> GraphicalInterface:
+    """
+    This function creates a non-GUI-logger for the experiment.
+    """
+    parent_dir, data_dir = PathFinder.data_path()
+
+    logging.basicConfig(
+        filename = data_dir / "Logs" / f"{timestamp_datetime()}_{sample_name}_{task_name}.log",
+        format = '%(asctime)s %(message)s',
+        filemode = 'w'
+    )
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
     return logger
 
 
@@ -68,13 +89,13 @@ def mk_analyzer(logger: GraphicalInterface, **kwargs):
     return analyzer
 
 
-def mk_workflow_manager(disable_gui: bool, **kwargs):
+def mk_workflow_manager(enable_gui: bool, **kwargs):
     """
     This function creates a workflow manager object with the default settings.
     """
     parent_dir, data_dir = PathFinder.data_path()
     workflow_manager = WorkflowManager(
-        disable_gui=False,
+        enable_gui=True,
         logfile=Path(data_dir / "Logs" / f"{timestamp_datetime()}_workflow_manager.log"),
         logger_settings=parent_dir / "test_settings" / "logger_settings.json",
         potentiostat_settings=parent_dir / "test_settings" / "potentiostat_settings.json",

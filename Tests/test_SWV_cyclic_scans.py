@@ -11,7 +11,7 @@ import test_utils.MakeObjects as MakeObjects
 
 sample_name = "K4[Fe(CN)6]_Pulse_Voltammetry"       # This will the name of the folder that contains the data.
 task_name = "SWV_cyclic_scans_0.2mM_Ag-chip"        # Specific test conditions.
-disable_gui: bool = True                            # This option can turn ON/OFF the GUI.
+enable_gui: bool = True                            # This option can turn ON/OFF the GUI.
 
 V_init = -0.2                   # Unit: Initial Voltage in V
 V_fin = 0.8                     # Unit: Final Voltage in V
@@ -54,8 +54,6 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
     )
     potentiostat.disconnect()
 
-    _ = MakeObjects.mk_csv(results, logger=logger)
-
     analyzer = MakeObjects.mk_analyzer(logger=logger)
     analyzer.analyze_data(
         sample_name=logger.sample_name,
@@ -73,7 +71,7 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
 
 if __name__ == "__main__":
 
-    gui_logger = MakeObjects.mk_logger(task_name, sample_name, disable_gui)
+    gui_logger = MakeObjects.mk_logger(task_name, sample_name, enable_gui)
     gui_logger.info(f"Starting {task_name} of {sample_name}.")
 
     simulation = False

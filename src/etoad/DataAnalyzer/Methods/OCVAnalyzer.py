@@ -25,7 +25,7 @@ class OCVAnalyzer(EChemDataAnalyzer):
         Sets the self._analysis_methods attribute as the factory pattern
         """
         self._analysis_methods = {
-            "Fin Voltage": self._fin_voltage,
+            "Voltage": self._fin_voltage,
             "Plot": self._plot
         }
 
@@ -73,26 +73,32 @@ class OCVAnalyzer(EChemDataAnalyzer):
         """
         for i, iteration in enumerate(self._raw_data):
             column = np.vstack(iteration)[:, 2]
-            final_voltage, stability = self._is_voltage_stable(column)
+            final_voltage, stability = self.is_voltage_stable(column)
             self._analysis_results[f"Iteration {i}"]["Is Voltage Stable"] = stability
-            self._analysis_results[f"Iteration {i}"]["Final Voltage"] = final_voltage
+            self._analysis_results[f"Iteration {i}"]["Voltage Last Quarter"] = final_voltage
+            self._analysis_results[f"Iteration {i}"]["Voltage Average"] = "{:.5f}".format(np.mean(iteration[:, 2]))
+            self._analysis_results[f"Iteration {i}"]["Voltage Std Deviation"] = "{:.5f}".format(np.std(iteration[:, 2]))
 
     @staticmethod
-    def _is_voltage_stable(column: np.ndarray) -> (float, bool):
+    def is_voltage_stable(column: np.ndarray) -> (float, bool):
         """
-        Calculate the final voltage of the experiment
+        Calculate the mean voltage and standard deviation of the last quarter/20 points of the experiment/iteration
+        The voltage is not stable, if:
+            1. the difference b/w the mean of the 1st and last quarter > the standard deviation of the last quarter,
+            2. the difference b/w the mean of the middle and last quarter > the standard deviation of the last quarter.
+
         Returns:
             float: average of the last quarter/20 points of the voltage values
             bool: true if the voltage is stable in the last quarter/20 points of the experiment/iteration
         """
         quarter = min(20, len(column) // 4)
-        avg_first = np.mean(column[0:quarter])
-        avg_mid = np.mean(column[len(column) // 2 - quarter // 2:len(column) // 2 + quarter // 2])
-        avg_last = np.mean(column[-quarter:])
-        avg_last_d5 = "{:.5f}".format(avg_last)
-        if abs(avg_first - avg_last) > np.std(column[-quarter:]):
-            return avg_last_d5, False
-        elif abs(avg_mid - avg_last) > np.std(column[-quarter:]):
-            return avg_last_d5, False
+        avg_first_q = np.mean(column[0:quarter])
+        avg_mid_q = np.mean(column[len(column) // 2 - quarter // 2:len(column) // 2 + quarter // 2])
+        avg_last_q = np.mean(column[-quarter:])
+        avg_last = "{:.5f}".format(avg_last_q)
+        if abs(avg_first_q - avg_last_q) > np.std(column[-quarter:]):
+            return avg_last, False
+        elif abs(avg_mid_q - avg_last_q) > np.std(column[-quarter:]):
+            return avg_last, False
         else:
-            return avg_last_d5, True
+            return avg_last, True

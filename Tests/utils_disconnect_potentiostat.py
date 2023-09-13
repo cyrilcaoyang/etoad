@@ -8,8 +8,8 @@ from etoad.Utils import ThreadWithReturn
 
 # ========== Sample Settings Below ========== #
 
-DISABLE_GUI: bool = True
-SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
+enable_gui: bool = True
+simulation: bool = False    # This option can turn ON/OFF the Simulation Mode
 
 # ========== Sample Settings Above ========== #
 
@@ -21,10 +21,10 @@ def do_measurement(simulation_mode: bool, logger: GraphicalInterface):
 
 if __name__ == "__main__":
 
-    gui_logger = MakeObjects.mk_logger('disconnection', 'None', DISABLE_GUI)
+    gui_logger = MakeObjects.mk_logger('disconnection', 'None', enable_gui)
     gui_logger.info(f"Disconnecting the potentiostat.")
 
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(SIMULATION, gui_logger))
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(simulation, gui_logger))
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()

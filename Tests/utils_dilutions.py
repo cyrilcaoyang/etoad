@@ -10,13 +10,13 @@ import test_utils.MakeObjects as MakeObjects
 
 # ========== Test Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]"     # Name of the Chemical Solution
-SOURCE_PORT = 9                 # The Port from which the Sample will be added.
-SAMPLE_VOL = 1.0                # The volume of sample in mL (< 5mL) to be diluted to 5 mL in the Cell.
-TOTAL_VOL = 5.0                 # The total volume of the diluted solution
+sample_name = "K4[Fe(CN)6]"     # Name of the Chemical Solution
+source_port = 9                 # The Port from which the Sample will be added.
+sample_vol = 1.0                # The volume of sample in mL (< 5mL) to be diluted to 5 mL in the Cell.
+total_vol = 5.0                 # The total volume of the diluted solution
 
-DISABLE_GUI: bool = True        # GUI can be disabled for simple liquid transfer.
-CLEAN_UP: bool = False          # True = wash cell afterward with electrolyte solution.
+enable_gui: bool = True        # GUI can be disabled for simple liquid transfer.
+clean_up: bool = False          # True = wash cell afterward with electrolyte solution.
 
 # ========== Test Settings Above ========== #
 
@@ -49,11 +49,11 @@ if __name__ == "__main__":
 
     gui_logger = MakeObjects.mk_logger(
         task_name="sampler_testing",
-        sample_name=SAMPLE_NAME,
-        disable_gui=DISABLE_GUI
+        sample_name=sample_name,
+        enable_gui=enable_gui
     )
     worker_thread = ThreadWithReturn(
-        target=sampler_test, args=(SOURCE_PORT, SAMPLE_VOL, TOTAL_VOL, CLEAN_UP, gui_logger)
+        target=sampler_test, args=(source_port, sample_vol, total_vol, clean_up, gui_logger)
     )
     worker_thread.start()
     gui_logger.start_gui()

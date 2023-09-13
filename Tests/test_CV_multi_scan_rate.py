@@ -3,25 +3,28 @@ from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn
 
 """
-    This python script demonstrate the CV scans with multiple different scan rates.
+    This python script demonstrate the CV scans with multiple different scan rates, without using the Workflow Manager.
     Without the usage of the GUI, the experiment can be run in the background.
     The results are analyzed and plotted.
+    
+    The Data directory:
+    is defined by .test_utils.PathFinder.py,
+    which read settings read from .test_settings.data_settings.
 """
 
 # ========== Sample Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]_CV_scan_rate"
-TASK_NAME = "Multiple_Rate_0.2mM_Ag-Chip"
-V_init = -0.2                  # Unit: Initial Voltage in V
+sample_name = "K4[Fe(CN)6]_CV_scan_rate"
+task_name = "Multiple_Rate_0.2mM_cell"
+V_init = -0.2               # Unit: Initial Voltage in V
 V_max = 0.8                 # Unit: Highest Voltage in V
-V_min = -0.2                   # Unit: Lowest Voltage in V
+V_min = -0.2                # Unit: Lowest Voltage in V
 V_fin = 0                   # Unit: Final Voltage in V
 
-SCAN_RATES = [0.025, 0.050, 0.100, 0.200, 0.500]    # Unit: Scan Rate in V/s
-CYCLE_NUM: int = 5      # The Numer of Cycles at each Scan Rate
+scan_rates = [0.025, 0.050, 0.100, 0.200, 0.500]    # Unit: Scan Rate in V/s
+cycle_num: int = 5          # The Numer of Cycles at each Scan Rate
 
-DISABLE_GUI: bool = False
-SIMULATION: bool = False    # This option can turn ON/OFF the Simulation Mode
+enable_gui: bool = False    # This option can turn ON/OFF the GUI
 
 # ========== Sample Settings Above ========== #
 
@@ -42,7 +45,7 @@ def do_measurement(scan_rates: list, simulation_mode: bool, logger: GraphicalInt
                     "changed_over_iterations": True,
                     "value": list_scan_rates
                 },
-                "Number of Cycles": {"value": CYCLE_NUM}
+                "Number of Cycles": {"value": cycle_num}
             }
         }
     )
@@ -67,10 +70,11 @@ def do_measurement(scan_rates: list, simulation_mode: bool, logger: GraphicalInt
 
 if __name__ == "__main__":
 
-    gui_logger = MakeObjects.mk_logger(TASK_NAME, SAMPLE_NAME, DISABLE_GUI)
-    gui_logger.info(f"Starting {TASK_NAME} of {SAMPLE_NAME}.")
+    gui_logger = MakeObjects.mk_logger(task_name, sample_name, enable_gui)
+    gui_logger.info(f"Starting {task_name} of {sample_name}.")
 
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(SCAN_RATES, SIMULATION, gui_logger))
+    simulation = False
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(scan_rates, simulation, gui_logger))
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()

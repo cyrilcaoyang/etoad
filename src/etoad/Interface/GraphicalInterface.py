@@ -37,7 +37,7 @@ class GraphicalInterface(Logger):
             logging_config: Path,
             log_file: Optional[Path] = None,
             refresh_rate: float = 5,
-            disable_gui: bool = False
+            enable_gui: bool = True
     ):
         """
         Constructor of the GraphicalInterface (combined logger and tkinter GUI).
@@ -55,19 +55,19 @@ class GraphicalInterface(Logger):
             logging_config: Path to the json file that contains the logging configuration.
             log_file: Path to the log file (optional).
             refresh_rate: Refresh rate for the plots (in Hz)
-            disable_gui: Boolean to disable the GUI.
+            enable_gui: Boolean to enable the GUI.
         """
         Logger.__init__(self, "EChem", "DEBUG")
 
         self._measurement_details: dict = {"sample": "Initialization", "experiment": "Establishing Connections"}
         self._refresh_time = int(1000 / refresh_rate)
         self._terminate = False
-        self._disable_gui = disable_gui
+        self._enable_gui = enable_gui
 
         self._figure = Figure()
         self._figure_details: dict = dict()
 
-        if disable_gui is False:
+        if enable_gui is True:
             self._gui: tk.Tk = tk.Tk()
             self._gui_details: dict = dict()
             self._setup_gui()
@@ -84,8 +84,8 @@ class GraphicalInterface(Logger):
         """
         # Set Up the Entire GUI Window
         self._gui.title("EToad – Electrochemical Technique Operation for Autonomous Discovery")
-        height = int(0.90 * self._gui.winfo_screenheight())
-        width = int(0.45 * self._gui.winfo_screenwidth())
+        height = int(0.80 * self._gui.winfo_screenheight())
+        width = int(0.55 * self._gui.winfo_screenwidth())
         self._gui.geometry(f"{width}x{height}")
         self._gui.config(background=BACKGROUND)
 
@@ -135,7 +135,7 @@ class GraphicalInterface(Logger):
 
             # Specific treatment for GenericHandler (logging via GUI) and FileHandler (optional setting of logfile).
             if handler_type == "GenericHandler":
-                if self._disable_gui:
+                if not self._enable_gui:
                     continue
                 settings["logging_function"] = self._log_message
             if handler_type == "logging.FileHandler" and log_file:
@@ -191,7 +191,7 @@ class GraphicalInterface(Logger):
         """
         self._measurement_details["sample"] = sample_name
 
-        if not self._disable_gui:
+        if self._enable_gui:
             self._gui_details["title_label"]["text"] = self.title
 
     @property
@@ -214,7 +214,7 @@ class GraphicalInterface(Logger):
         """
         self._measurement_details["experiment"] = experiment_name
 
-        if not self._disable_gui:
+        if self._enable_gui:
             self._gui_details["title_label"]["text"] = self.title
 
     @property
@@ -232,7 +232,7 @@ class GraphicalInterface(Logger):
         Public method to open the GUI window.
         Blocks the main thread – after execution of this function, it can only be terminated from other threads.
         """
-        if self._disable_gui:
+        if not self._enable_gui:
             return
 
         _ = animation.FuncAnimation(self._figure, lambda x: None, interval=self._refresh_time)
@@ -286,7 +286,7 @@ class GraphicalInterface(Logger):
             x_values: 1D Numpy array of x values to plot
             y_values: 1D Numpy array of y values to plot
         """
-        if self._disable_gui:
+        if not self._enable_gui:
             return
 
         try:

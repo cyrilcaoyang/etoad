@@ -9,9 +9,9 @@ This Script is created to wash the EChem Cell.
 
 # ========== Sample Settings Below ========== #
 
-REPEAT: int = 3                 # How many times the cell will be washed.
-WASH_VOLUME = 5.0               # Wash volume each time
-DISABLE_GUI: bool = True        # We are disabling GUI for simple cell washing.
+repeat: int = 3                 # How many times the cell will be washed.
+wash_volume = 5.0               # Wash volume each time
+enable_gui: bool = True        # We are disabling GUI for simple cell washing.
 
 # ========== Sample Settings Above ========== #
 
@@ -32,11 +32,11 @@ if __name__ == "__main__":
     gui_logger = MakeObjects.mk_logger(
         task_name="wash_cell",
         sample_name="CELL_WASH",
-        disable_gui=DISABLE_GUI
+        enable_gui=enable_gui
     )
 
     worker_thread = ThreadWithReturn(
-        target=wash_cell, args=(REPEAT, WASH_VOLUME, gui_logger)
+        target=wash_cell, args=(repeat, wash_volume, gui_logger)
     )
     worker_thread.start()
     gui_logger.start_gui()

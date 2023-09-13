@@ -3,21 +3,25 @@ from etoad.Utils import ThreadWithReturn
 import test_utils.MakeObjects as MakeObjects
 
 """
-    This python script demonstrate a simple SWV scan, without using the Workflow Manager.
+    This python script demonstrate a simple DPV scan, without using the Workflow Manager.
     Without the usage of the GUI, the experiment can be run in the background.
+    The results are analyzed and plotted.
+    
+    The Data directory:
+    is defined by .test_utils.PathFinder.py,
+    which read settings read from .test_settings.data_settings.
 """
 
 # ========== Sample Settings Below ========== #
 
-SAMPLE_NAME = "K4[Fe(CN)6]_Pulse_Voltammetry"
-TASK_NAME = "SWV_single_scan"
+sample_name = "K4[Fe(CN)6]_Pulse_Voltammetry"
+task_name = "DPV_single_scan_0.2mM_Ag-chip"
 
-V_init = 0.2                # Unit: Initial Voltage in V
-V_fin = 0.6                   # Unit: Final Voltage in V
-T_rest = 10                 # The Resting Time Before the Scan in seconds
+V_init = 0.8            # Unit: Initial Voltage in V
+V_fin = 0               # Unit: Final Voltage in V
+T_rest = 10             # The Resting Time Before the Scan in seconds
 
-DISABLE_GUI: bool = False
-SIMULATION: bool = False
+enable_gui: bool = True        # This option can turn ON/OFF the GUI
 
 # ========== Sample Settings Above ========== #
 
@@ -26,7 +30,7 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
 
     potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation)
     results = potentiostat.do_measurement(
-        technique="SWV",
+        technique="DPV",
         set_parameters={
             "IterationSettings": {"no_iterations": 1},
             "TechniqueParameters": {
@@ -42,11 +46,11 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
     analyzer.analyze_data(
         sample_name=logger.sample_name,
         experiment_name=logger.experiment_name,
-        technique="SWV",
+        technique="DPV",
         analysis_settings={
-            "Plot": {"title": "A Single Scan of SWV"},
-            # "Peak Picking": {},
-            # "Integration": {}
+            "Plot": {"title": "A Single Scan of DPV"},
+            "Peak Picking": {},
+            "Integration": {}
         },
         raw_data=results
     )
@@ -55,10 +59,11 @@ def do_measurement(simulation: bool, logger: GraphicalInterface):
 
 if __name__ == "__main__":
 
-    gui_logger = MakeObjects.mk_logger(TASK_NAME, SAMPLE_NAME, DISABLE_GUI)
-    gui_logger.info(f"Starting {TASK_NAME} of {SAMPLE_NAME}.")
+    gui_logger = MakeObjects.mk_logger(task_name, sample_name, enable_gui)
+    gui_logger.info(f"Starting {task_name} of {sample_name}.")
 
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(SIMULATION, gui_logger))
+    simulation = False
+    worker_thread = ThreadWithReturn(target=do_measurement, args=(simulation, gui_logger))
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()
