@@ -1,4 +1,4 @@
-import time
+import time, pprint
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn
 import test_utils.MakeObjects as MakeObjects
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     for x in range(max_cycles):
         gui_logger = MakeObjects.mk_logger(task_name+f"_attempt_{x}", sample_name, enable_gui)
-        gui_logger.info(f"Starting {task_name} of {sample_name}, attempt f{x}.")
+        gui_logger.info(f"Starting {task_name} of {sample_name}, attempt {x}.")
 
         # The worker thread will run the measurement, and return the result to cycle_result.
         worker_thread = ThreadWithReturn(target=do_measurement, args=(simulation, gui_logger))
@@ -82,12 +82,16 @@ if __name__ == "__main__":
         cycle_result = worker_thread.join()
 
         # The measurement will only stop when all the measurements in cycle_result are stable.
-        if all(cycle_result[f"Iteration {i}"]["Is Voltage Stable"] for i in range(steps)):
-            V_mean = float(cycle_result[f"Iteration {steps-1}"]["Voltage Average"])
-            job_logger.info(f"The voltage has stabled after {x} cycles to {V_mean} volts. Experiment Completed.")
+        V_first = float(cycle_result[f"Iteration {0}"]["Voltage Average"])
+        V_fin = float(cycle_result[f"Iteration {steps - 1}"]["Voltage Average"])
+        V_std = float(cycle_result[f"Iteration {steps - 1}"]["Voltage Std Deviation"])
+        if (all(cycle_result[f"Iteration {i}"]["Is Voltage Stable"] for i in range(steps))
+                and (abs(V_first - V_fin) <= V_std/2)):
+            job_logger.info(f"The voltage has stabled after {x+1} cycles to {V_fin} volts. Experiment Completed.")
             break
         else:
-            job_logger.info(f"The voltage has not stabled after {x} cycles. Continuing experiment.")
+            job_logger.info(f"The voltage has not stabled after {x + 1} cycles. Continuing experiment."
+                            f"Analysis result for {x + 1} cycle: {pprint.pformat(cycle_result)}")
             continue
     else:
         # This else statement is executed when the for loop is not terminated by a break statement.
