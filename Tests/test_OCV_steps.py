@@ -1,14 +1,9 @@
-from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn
+from test_utils.MeasurePlot import measure_plot_ocv
 import test_utils.MakeObjects as MakeObjects
-import time
 
 """
     This python script monitors Open Circuit Voltage (OCV) over time, in steps of time_per_step.
-    
-    The Data directory is defined by .test_utils.PathFinder.py that read settings from .test_settings.data_settings.
-    The result will be saved in the Data / "Data" Directory.
-    The logs will be saved in the Data / "Log" Directory.
 """
 
 # ========== Sample Settings Below ========== #
@@ -16,57 +11,29 @@ import time
 sample_name = "K4[Fe(CN)6]-OCV"   # Sample Name will the name of the folder that contains the data
 task_name = "OCV_steps"
 
+T_step = 15                       # Time per Step of Measurements in s, default: 15
 voltage_interval = 0.1            # Unit: Voltage Interval in mV
-time_interval = 0.05              # Unit: Time Interval in s
-time_per_step = 15                # Unit: Time per Step in s
+time_interval = 0.05              # Unit: Time Interval Size in s
 steps = 1                         # Unit: Number of Steps per cycle
 
+channel_num: int = 1              # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True           # This option can turn ON/OFF the GUI
+simulation: bool = False          # This option can turn ON/OFF the simulation mode
 
 # ========== Sample Settings Above ========== #
 
 
-def do_measurement(simulation: bool, logger: GraphicalInterface) -> None:
-
-    potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation)
-    start_time = time.time()
-
-    while time.time() - start_time < time_per_step:
-        results = potentiostat.do_measurement(
-            technique="OCV",
-            set_parameters={
-                "IterationSettings": {
-                    "no_iterations": steps
-                },
-                "TechniqueParameters": {
-                    "Voltage Interval Size": {"value": voltage_interval},
-                    "Time Interval Size": {"value": time_interval},
-                    "Rest Time": {"value": time_per_step}
-                }
-            }
-        )
-
-    analyzer = MakeObjects.mk_analyzer(logger=logger)
-    analyzer.analyze_data(
-        sample_name=logger.sample_name,
-        experiment_name=logger.experiment_name,
-        technique="OCV",
-        analysis_settings={
-            "Plot": {"title": f"OCV for {time_per_step} seconds"},
-            "Voltage": {}
-        },
-        raw_data=results,
-    )
-    logger.stop_gui()
-
-
 if __name__ == "__main__":
 
+    parameters = (T_step, voltage_interval, time_interval, steps)
     gui_logger = MakeObjects.mk_logger(task_name, sample_name, enable_gui)
     gui_logger.info(f"Starting {task_name} of {sample_name}.")
 
     simulation = False
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(simulation, gui_logger))
+    worker_thread = ThreadWithReturn(
+        target=measure_plot_ocv,
+        args=(gui_logger, parameters, channel_num, simulation)
+    )
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()

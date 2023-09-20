@@ -9,7 +9,7 @@ class OCVAnalyzer(EChemDataAnalyzer):
         Implementation of the EChemDataAnalyzer for open circuit voltage.
 
     Available analysis techniques:
-        "Mean" -> Takes the mean of the voltage values
+        "Voltage" -> Takes the mean of the voltage values
         "Plot" -> plots the voltage vs time
     """
     analysis_method_name: str = "OCV"
@@ -68,6 +68,7 @@ class OCVAnalyzer(EChemDataAnalyzer):
         """
         Calculate the final voltage of the experiment
         Returns:
+            float: final voltage of the experiment
             bool: True if the voltage is stable in the last 10 seconds of the experiment
         """
         for i, iteration in enumerate(self._raw_data):

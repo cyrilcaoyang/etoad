@@ -14,40 +14,43 @@ from etoad.Utils import ThreadWithReturn
 
 # ========== Sample Settings Below ========== #
 
-sample_name = "K4[Fe(CN)6]_CV_scan_rate"
-task_name = "Multiple_Rate_0.2mM_cell"
-V_init = -0.2               # Unit: Initial Voltage in V
-V_max = 0.8                 # Unit: Highest Voltage in V
-V_min = -0.2                # Unit: Lowest Voltage in V
-V_fin = 0                   # Unit: Final Voltage in V
+sample_name = "K4[Fe(CN)6]_CV-Multi-ScanRate"
+task_name = "CV_Const_ScanRate_smooth-GC_Pt_SHE"
+V_init = 0.4                                                    # Initial Voltage in V
+V_max = 1.2                                                     # Highest Voltage in V
+V_min = 0.4                                                     # Lowest Voltage in V
+V_fin = 0.4                                                     # Final Voltage in V
 
-scan_rates = [0.025, 0.050, 0.100, 0.200, 0.500]    # Unit: Scan Rate in V/s
-cycle_num: int = 5          # The Numer of Cycles at each Scan Rate
+scan_rates = [0.025, 0.050, 0.100, 0.200, 0.500]                # Unit: Scan Rate in V/s
+cycle_num: int = 3                                              # The Numer of Cycles at each Scan Rate
 
-enable_gui: bool = False    # This option can turn ON/OFF the GUI
+channel_num: int = 2                                            # The channel number of the potentiostat, either 1 or 2.
+enable_gui: bool = True                                         # This option can turn ON/OFF the GUI
+simulation: bool = False                                        # This option can turn ON/OFF the simulation mode
 
 # ========== Sample Settings Above ========== #
 
 
-def do_measurement(scan_rates: list, simulation_mode: bool, logger: GraphicalInterface):
+def do_measurement(logger: GraphicalInterface, v_range: list, rates: list, channel: int, simulation_opt: bool):
 
-    num_iter = len(scan_rates)
-    list_scan_rates = [[scan_rates[i] for _ in range(5)] for i in range(num_iter)]
+    num_iter = len(rates)
+    list_scan_rates = [[rates[i] for _ in range(5)] for i in range(num_iter)]
 
-    potentiostat = MakeObjects.mk_potentiostat(logger=logger, simulation_mode=simulation_mode)
+    potentiostat = MakeObjects.mk_potentiostat(logger=logger, channel= channel, sim=simulation_opt)
     results = potentiostat.do_measurement(
         technique="CV",
         set_parameters={
             "IterationSettings": {"no_iterations": num_iter},
             "TechniqueParameters": {
-                "Voltage Profile": {"value": [V_init, V_max, V_min, V_init, V_fin]},
+                "Voltage Profile": {"value": v_range},
                 "Scan Rate": {
                     "changed_over_iterations": True,
                     "value": list_scan_rates
                 },
                 "Number of Cycles": {"value": cycle_num}
-            }
-        }
+            },
+        },
+        channel=channel
     )
     potentiostat.disconnect()
 
@@ -73,8 +76,11 @@ if __name__ == "__main__":
     gui_logger = MakeObjects.mk_logger(task_name, sample_name, enable_gui)
     gui_logger.info(f"Starting {task_name} of {sample_name}.")
 
-    simulation = False
-    worker_thread = ThreadWithReturn(target=do_measurement, args=(scan_rates, simulation, gui_logger))
+    V_range = [V_init, V_max, V_min, V_init, V_fin]
+    worker_thread = ThreadWithReturn(
+        target=do_measurement,
+        args=(gui_logger, V_range, scan_rates, channel_num, simulation)
+    )
     worker_thread.start()
     gui_logger.start_gui()
     worker_thread.join()

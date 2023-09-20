@@ -230,19 +230,23 @@ class SamplingSystem:
             - first time: 15 mL of wash solution to wash off also the sides of the measurement cell
             - other n-1 times: given volume of the wash solution.
         """
-        self.logger.debug(f"Measurement Cell will be washed {cycles} times.")
-        self._empty_cell()
+        if cycles == 0:
+            self.logger.info(f"Measurement Cell will not be washed.")
 
-        self.transfer_to_cell(self.wash_port, 15)
-        time.sleep(5)
-        self._empty_cell()
+        else:
+            self.logger.debug(f"Measurement Cell will be washed {cycles} times.")
+            self._empty_cell()
 
-        for _ in range(cycles-1):
-            self.transfer_to_cell(self.wash_port, wash_volume)
+            self.transfer_to_cell(self.wash_port, 15)
             time.sleep(5)
             self._empty_cell()
 
-        self.logger.info(f"Measurement Cell was washed {cycles} times and emptied.")
+            for _ in range(cycles-1):
+                self.transfer_to_cell(self.wash_port, wash_volume)
+                time.sleep(5)
+                self._empty_cell()
+
+            self.logger.info(f"Measurement Cell was washed {cycles} times and emptied.")
 
     def _empty_cell(self):
         """
@@ -276,9 +280,9 @@ class SamplingSystem:
         Closes the connection to the sampling system.
 
         ATTN: This method is just legacy for now -- the TecanXCPump automatically closes the connection after every
-              operation, and the AtmosphereHandler works the same... .
-              After all hardware components are reliably implemented via SerialDevice inheritance, this method can
-              probably be removed.
+            operation, and the AtmosphereHandler works the same... .
+            After all hardware components are reliably implemented via SerialDevice inheritance, this method can
+            probably be removed.
         """
         self.logger.info("Connection to the sampling system was successfully closed.")
 

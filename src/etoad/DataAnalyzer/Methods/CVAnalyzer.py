@@ -176,6 +176,7 @@ class CVAnalyzer(EChemDataAnalyzer):
                 reduction_integral = -np.trapz(reduction[:, 2], reduction[:, 1])
                 oxidation_integral = np.trapz(oxidation[:, 2], oxidation[:, 1])
                 integrals_per_iteration.append(oxidation_integral - reduction_integral)
+            integrals_per_iteration.pop()   # remove last cycle due to a constant strange dip in integration
             self._analysis_results[f"Iteration {idx}"]["Integration"] = integrals_per_iteration
 
             relative_integrals = np.asarray(integrals_per_iteration) / max(integrals_per_iteration)
@@ -184,7 +185,7 @@ class CVAnalyzer(EChemDataAnalyzer):
             # plot each iteration separately
             if plot:
                 figure = DataVisualizer.plot_single_curve(
-                    x_values=np.arange(len(iteration)) + 1,
+                    x_values=np.arange(len(iteration)-1) + 1,
                     y_values=relative_integrals,
                     x_label=f"CV Cycle",
                     y_label="Relative Integral",
@@ -192,7 +193,7 @@ class CVAnalyzer(EChemDataAnalyzer):
                     yaxis_percent=True
                 )
                 self._figures[f"CV_Integration_Iteration_{idx}"] = figure
-
+        # TODO: store this infor for further analysis as an stability metrics.
         # plot all iterations together
         if plot:
             figure = DataVisualizer.plot_multiple_curves(

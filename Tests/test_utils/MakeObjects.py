@@ -13,7 +13,7 @@ from typing import Any
 def mk_logger(
         task_name: str,
         sample_name: str,
-        enable_gui: bool
+        enable_gui: bool = True
 ) -> GraphicalInterface:
     """
     This function creates a GUI-logger for the experiment.
@@ -21,7 +21,7 @@ def mk_logger(
     parent_dir, data_dir = PathFinder.data_path()
 
     logger = GraphicalInterface(
-        logging_config=parent_dir / "test_settings" / "logger_settings.json",
+        logging_config=parent_dir / "test_settings" / "logger_settings.yaml",
         log_file=data_dir / "Logs" / f"{timestamp_datetime()}_{sample_name}_{task_name}.log",
         enable_gui=enable_gui
     )
@@ -56,7 +56,7 @@ def mk_sampler(logger: GraphicalInterface, **kwargs) -> SamplingSystem:
     parent_dir, data_dir = PathFinder.data_path()
     sampler = SamplingSystem(
         logger=logger,
-        config_file=parent_dir / "test_settings" / "sampler_settings.json",
+        config_file=parent_dir / "test_settings" / "sampler_settings.yaml",
         pump_wash=0,
         cell_filled=True
     )
@@ -65,7 +65,8 @@ def mk_sampler(logger: GraphicalInterface, **kwargs) -> SamplingSystem:
 
 def mk_potentiostat(
         logger: GraphicalInterface,
-        simulation_mode: bool = False,
+        channel: int = 1,
+        sim: bool = False,
         **kwargs
 ) -> EChemController:
     """
@@ -74,8 +75,8 @@ def mk_potentiostat(
     parent_dir, data_dir = PathFinder.data_path()
     potentiostat = EChemController(
         logger=logger,
-        simulation_mode=False,
-        config_file=parent_dir / "test_settings" / "potentiostat_settings.json",
+        simulation_mode=sim,
+        config_file=parent_dir / "test_settings" / f"potentiostat_settings_ch_{channel}.yaml",
     )
     return potentiostat
 
@@ -89,17 +90,17 @@ def mk_analyzer(logger: GraphicalInterface, **kwargs):
     return analyzer
 
 
-def mk_workflow_manager(enable_gui: bool, **kwargs):
+def mk_workflow_manager(channel: int, enable_gui: bool, **kwargs):
     """
     This function creates a workflow manager object with the default settings.
     """
     parent_dir, data_dir = PathFinder.data_path()
     workflow_manager = WorkflowManager(
-        enable_gui=True,
+        enable_gui=enable_gui,
         logfile=Path(data_dir / "Logs" / f"{timestamp_datetime()}_workflow_manager.log"),
-        logger_settings=parent_dir / "test_settings" / "logger_settings.json",
-        potentiostat_settings=parent_dir / "test_settings" / "potentiostat_settings.json",
-        sampler_settings=parent_dir / "test_settings" / "sampler_settings.json",
+        logger_settings=parent_dir / "test_settings" / "logger_settings.yaml",
+        potentiostat_settings=parent_dir / "test_settings" / f"potentiostat_settings_ch_{channel}.yaml",
+        sampler_settings=parent_dir / "test_settings" / "sampler_settings.yaml",
         data_path=data_dir / "DATA",
     )
     return workflow_manager

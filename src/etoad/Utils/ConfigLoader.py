@@ -1,4 +1,4 @@
-import pickle
+import pickle, yaml
 from pathlib import Path
 import json
 from typing import Any, Union
@@ -49,6 +49,7 @@ class ConfigLoader(object):
         loaders: dict = {
             ".json": cls._load_json,
             ".pkl": cls._load_pkl,
+            ".yaml": cls._load_yaml,
         }
 
         try:
@@ -86,5 +87,21 @@ class ConfigLoader(object):
         """
         with open(file_name, 'rb') as pklfile:
             loaded_object: Any = pickle.load(pklfile)
+
+        return loaded_object
+
+    @staticmethod
+    def _load_yaml(file_name: Path) -> Any:
+        """
+        Loads a yaml file and returns the content as a Python object.
+
+        Args:
+            file_name: Path to the yaml file.
+
+        Returns:
+            loaded_object: Content of the yaml file as a Python object.
+        """
+        with open(file_name, 'r') as yamlfile:
+            loaded_object: Any = yaml.load(yamlfile, Loader=yaml.FullLoader)
 
         return loaded_object

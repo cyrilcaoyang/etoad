@@ -139,7 +139,11 @@ class WorkflowManager(object):
         return results
 
     @log_exceptions
-    def initialize_system(self, initial_wash: int = 1, sample_in_cell: bool = True) -> None:
+    def initialize_system(
+            self, initial_wash:
+            int = 1,
+            sample_in_cell: bool = True
+    ) -> None:
         """
         Initializes the system by initializing the potentiostat, the sampling system and the data analyzer.
 
@@ -242,12 +246,12 @@ class WorkflowManager(object):
         and emptying and washing the cell (after the final measurement).
 
         Args:
-             autosampler_position: Vial number on the autosampler.
-             sample_volume: Volume to be transferred to the cell.
-             total_volume: Total volume of the sample in the cell (after dilution).
-             purge_time: Time for purging with nitrogen gas.
-             wash_volume: Volume to wash the cell.
-             washing_cycles: Iterations for washing the cell
+            autosampler_position: Vial number on the autosampler.
+            sample_volume: Volume to be transferred to the cell.
+            total_volume: Total volume of the sample in the cell (after dilution).
+            purge_time: Time for purging with nitrogen gas.
+            wash_volume: Volume to wash the cell.
+            washing_cycles: Iterations for washing the cell
         """
         self.logger.experiment_name = "Filling Cell"
         self._sampling_system.transfer_to_cell(autosampler_position, sample_volume)
@@ -388,7 +392,7 @@ class WorkflowManager(object):
             fill_cell: bool = True
     ) -> None:
         """
-        Transfers 5 mL solvent to the sample cell for keeping the electrode surfaces wet.
+        Transfers 5 mL solvent to the sample cell for keeping the reference electrode wet.
         Shuts the system down by disconnecting from the potentiostat and the sampling system.
         Sends the stop command to the GUI and liberates the main thread.
         """

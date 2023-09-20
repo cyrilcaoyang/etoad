@@ -89,9 +89,9 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         pre-processes the data if necessary and calls the _pick_peaks method.
 
         Args:
-             min_peak_width: Minimum width of a peak to be considered.
-             min_height_baseline: Minimum height of a peak (relative to the baseline)
-             rel_height: Relative height (to the peak maximum) to determine onset / offset and peak width.
+            min_peak_width: Minimum width of a peak to be considered.
+            min_height_baseline: Minimum height of a peak (relative to the baseline)
+            rel_height: Relative height (to the peak maximum) to determine onset / offset and peak width.
         """
         for idx, iteration_data in enumerate(self._raw_data):
 
@@ -238,12 +238,12 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
         Writes the CV parameters with the 'Voltage Profile' parameter adjusted into self._analysis_results.
 
         Args:
-             filters: List of filters (structure see filter_peaks documentation) for filtering the picked peaks.
-             selection: Selection criterion (structure see select_peaks documentation).
-             max_voltage: Maximum voltage allowed for CV measurements.
-             min_peak_onset: Minimum voltage allowed for CV measurements.
-             additional_voltage: Voltage range beyond the peak onset/offset to be scanned.
-             from_iteration: Index of the pulsed technique iteration from which to infer the CV parameters.
+            filters: List of filters (structure see filter_peaks documentation) for filtering the picked peaks.
+            selection: Selection criterion (structure see select_peaks documentation).
+            max_voltage: Maximum voltage allowed for CV measurements.
+            min_peak_onset: Minimum voltage allowed for CV measurements.
+            additional_voltage: Voltage range beyond the peak onset/offset to be scanned.
+            from_iteration: Index of the pulsed technique iteration from which to infer the CV parameters.
         """
         min_peak_onset, max_peak_offset = min_voltage, max_voltage
         peak_analysis_results = self._analysis_results[f"Iteration {from_iteration}"]["Peak Picking"]
@@ -265,7 +265,7 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
 
             if cv_onset > selected_peak["onset"] or cv_offset < selected_peak["offset"]:
                 self.logger.warning("Peak overlap on the pulsed technique measurement. CV parameters must be treated"
-                                     "with caution. ")
+                    "with caution. ")
 
             cv_parameters = [cv_offset, cv_offset, cv_onset, cv_offset, cv_offset]
 
@@ -314,13 +314,14 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
             data_iteration = self._raw_data[no_iteration]
             integral = np.trapz(data_iteration[:, 2], data_iteration[:, 1])
             integrals.append(integral)
+        integrals.pop()
         self._analysis_results["Integration"] = integrals
 
         relative_integrals = np.asarray(integrals) / max(integrals)
 
         if plot:
             figure = DataVisualizer.plot_single_curve(
-                x_values=np.arange(len(self._raw_data)) + 1,
+                x_values=np.arange(len(self._raw_data)-1) + 1,
                 y_values=relative_integrals,
                 x_label=f"Iteration",
                 y_label="Relative Integral",

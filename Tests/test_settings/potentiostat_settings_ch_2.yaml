@@ -1,0 +1,8 @@
+---
+port: USB0
+channel_ids:                                 # List of channel IDs
+- 0
+- 1
+default_channel_id: 1
+timeout: 5
+plot_in_real_time: true
