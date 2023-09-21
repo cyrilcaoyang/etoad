@@ -84,8 +84,8 @@ class GraphicalInterface(Logger):
         """
         # Set Up the Entire GUI Window
         self._gui.title("EToad – Electrochemical Technique Operation for Autonomous Discovery")
-        height = int(0.80 * self._gui.winfo_screenheight())
-        width = int(0.55 * self._gui.winfo_screenwidth())
+        height = int(0.75 * self._gui.winfo_screenheight())
+        width = int(0.45 * self._gui.winfo_screenwidth())
         self._gui.geometry(f"{width}x{height}")
         self._gui.config(background=BACKGROUND)
 

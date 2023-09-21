@@ -1,7 +1,7 @@
+import numpy as np
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Optional, Callable, Tuple, Union, List
-import numpy as np
 from ..BioLogic import TECH_ID, PROG_STATE, CurrentValues, DataInfo, DataBuffer
 from ....Utils import ConfigLoader
 from logging import Logger

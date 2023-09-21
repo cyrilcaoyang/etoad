@@ -62,6 +62,7 @@ class DataAnalyzer:
             analysis_results: Dictionary of all analysis results returned by the EChemAnalyzer
         """
         sample_dir, basename = self._get_target_folder(sample_name, experiment_name)
+        self._save_raw_data(raw_data, sample_dir, basename)     # Saves the raw data in case the analysis fails
 
         analyzer: EChemDataAnalyzer = self._technique_analyzers[technique](
             analysis_settings=analysis_settings,
@@ -71,8 +72,7 @@ class DataAnalyzer:
 
         analysis_results, figures = analyzer.run_analysis()
         self.logger.debug(f"Data Analysis Completed:\n {pprint.pformat(analysis_results)}")  # pprint is prettier :)
-
-        self._save_data(raw_data, analysis_results, figures, sample_dir, basename)
+        self._save_analyzed_data(analysis_results, figures, sample_dir, basename)     # Saves the analysis results
 
         return analysis_results
 
@@ -99,9 +99,25 @@ class DataAnalyzer:
         return sample_dir, file_basename
 
     @log_exceptions
-    def _save_data(
+    def _save_raw_data(
             self,
             raw_data: np.ndarray,
+            sample_dir: Path,
+            file_basename: str
+    ) -> None:
+        """
+        Saves the experimental results (raw data as .pkl and analysis results as .csv) into the target folder.
+
+        Args:
+            raw_data: Numpy ndarray of the obtained raw data.
+            sample_dir: Path to the sample-specific data directory.
+        """
+        save_as_csv(raw_data, sample_dir / f"{file_basename}.csv")
+        self.logger.info(f"Raw data was saved to {sample_dir / f'{file_basename}.csv'}")
+
+    @log_exceptions
+    def _save_analyzed_data(
+            self,
             analysis_results: Dict[str, Union[list, dict]],
             figures: Dict[str, matplotlib.figure.Figure],
             sample_dir: Path,
@@ -111,11 +127,10 @@ class DataAnalyzer:
         Saves the experimental results (raw data as .pkl and analysis results as .csv) into the target folder.
 
         Args:
-            raw_data: Numpy ndarray of the obtained raw data.
-            analysis_results: Dictionary of all analysis results returned by the EChemAnalyzer
+            analysis_results: Dictionary of all analysis results saved by the EChemAnalyzer
+            figures: Dictionary of all figures created by the EChemAnalyzer
+            sample_dir: Path to the sample-specific data directory.
         """
-        save_as_csv(raw_data, sample_dir / f"{file_basename}.csv")
-        self.logger.info(f"Raw data was saved to {sample_dir / f'{file_basename}.csv'}")
 
         save_as_json(analysis_results, sample_dir / f"{file_basename}_analysis.json")
         self.logger.info(f"Analysis results were saved to {sample_dir / f'{file_basename}_analysis.json'}")

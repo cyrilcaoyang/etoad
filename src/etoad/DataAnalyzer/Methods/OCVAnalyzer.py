@@ -74,9 +74,13 @@ class OCVAnalyzer(EChemDataAnalyzer):
         for i, iteration in enumerate(self._raw_data):
             column = np.vstack(iteration)[:, 2]
             stability = self.is_step_stable(column, 1.10)
+            v_average = "{:.5f}".format(np.mean(iteration[:, 2]))
+            v_std_dev = "{:.5f}".format(np.std(iteration[:, 2]))
             self._analysis_results[f"Iteration {i}"]["Is Voltage Stable"] = stability
-            self._analysis_results[f"Iteration {i}"]["Voltage Average"] = "{:.5f}".format(np.mean(iteration[:, 2]))
-            self._analysis_results[f"Iteration {i}"]["Voltage Std Deviation"] = "{:.5f}".format(np.std(iteration[:, 2]))
+            self._analysis_results[f"Iteration {i}"]["Voltage Average"] = v_average
+            self._analysis_results[f"Iteration {i}"]["Voltage Std Deviation"] = v_std_dev
+            self._analysis_results[f"Iteration {i}"]["CV Parameters"] = [v_average, None, None, v_average, None]
+            # The default parameters will not be over-written by the None values.
 
     @staticmethod
     @log_exceptions

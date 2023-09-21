@@ -1,5 +1,6 @@
 from etoad.Interface import GraphicalInterface
 from Tests.test_utils.MakeObjects import mk_sampler
+from logging import Logger
 
 
 def sample_to_cell(
@@ -27,7 +28,7 @@ def sample_to_cell(
 
 
 def wash_cell_refill(
-    logger: GraphicalInterface,
+    logger: Logger,
     repeat: int,
     refill_volume: float,
 ) -> None:

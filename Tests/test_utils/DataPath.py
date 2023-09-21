@@ -7,6 +7,5 @@ def data_path():
         The paths of the test folder and data folder
     """
     parent_dir = Path(__file__).parent.parent
-    with open(parent_dir / "test_settings" / "data_settings") as file:
-        data_dir = Path(file.read())
+    data_dir = Path("C://Users//Prep LC//Desktop//AutoEChem_Data")
     return parent_dir, data_dir

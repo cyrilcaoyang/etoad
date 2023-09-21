@@ -6,10 +6,6 @@ import test_utils.MakeObjects as MakeObjects
     This python script demonstrate a simple DPV scan, without using the Workflow Manager.
     Without the usage of the GUI, the experiment can be run in the background.
     The results are analyzed and plotted.
-    
-    The Data directory:
-    is defined by .test_utils.PathFinder.py,
-    which read settings read from .test_settings.data_settings.
 """
 
 # ========== Sample Settings Below ========== #

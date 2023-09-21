@@ -108,9 +108,11 @@ class EClibDLLInterface(object):
                 return check_value
 
             elif check_value == -200:
-                self.logger.debug(f"Error Code -200: Communication failed with the instrument upon executing "
-                                  f"{function_name}. In principle, this should raise an error, but we will try to "
-                                  f"continue anyway. Seems to be a bug in the DLL.")
+                self.logger.debug(
+                    f"Error Code -200: Communication failed with the instrument upon executing "
+                    f"{function_name}. In principle, this should raise an error, but we will try to "
+                    f"continue anyway. Seems to be a bug in the DLL."
+                )
 
             time.sleep(1)
 

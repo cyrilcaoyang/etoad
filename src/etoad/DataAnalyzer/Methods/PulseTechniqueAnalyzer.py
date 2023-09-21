@@ -267,8 +267,8 @@ class PulseTechniqueAnalyzer(EChemDataAnalyzer):
                 self.logger.warning("Peak overlap on the pulsed technique measurement. CV parameters must be treated"
                     "with caution. ")
 
-            cv_parameters = [cv_offset, cv_offset, cv_onset, cv_offset, cv_offset]
-
+            cv_parameters = [None, cv_offset, cv_onset, None, cv_offset]
+            # The default parameters will not be over-written by the None values.
         except (TypeError, ValueError):
             cv_parameters = "SKIP"
 

@@ -5,6 +5,7 @@ from etoad.DataAnalyzer.Methods import OCVAnalyzer
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime
 from pathlib import Path
+from test_utils import DataPath
 
 """
     This python script test the DataAnalyzer Module.
@@ -12,19 +13,17 @@ from pathlib import Path
     The first one analyze a csv file, while the second one reads a pickle file.
 """
 
-PARENT_DIR = Path(__file__).parent
-with open(PARENT_DIR / "test_settings" / "data_settings") as file:
-    DATA_DIR = Path(file.read())
+PARENT_DIR, DATA_DIR = DataPath.data_path()
 
 logger = GraphicalInterface(
-    logging_config=PARENT_DIR / "test_settings" / "logger_settings.json",
+    logging_config=PARENT_DIR / "test_settings" / "logger_settings.yaml",
     log_file=DATA_DIR / "Logs" / f"{timestamp_datetime()}_data_analysis.log"
     )
 
 # Example A
 # Analyzing a multi-iteration CV experiment, and plotting the peak position vs scan rates.
 
-Analyze_CV: bool = False
+Analyze_CV: bool = True
 
 if Analyze_CV:
     data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)
@@ -35,10 +34,13 @@ if Analyze_CV:
         analysis_settings={
             "Plot": {"title": "Test CV Measurement"},
             "Peak Picking": {},
-            "Integration": {}
-            # "Peaks Scanrate": {}
+            "Integration": {},
+            "Currents Scanrate": {}
         },
-        raw_data=np.genfromtxt(PARENT_DIR / "analyzer_test" / "CV_K4[Fe(CN)6]-smooth_23-08-31_16-02.csv", delimiter=',')
+        raw_data=np.genfromtxt(
+            "C:/Users/Prep LC/Desktop/AutoEChem_Data/DATA/K4[Fe(CN)6]-cv-peak-scanrate/K4[Fe(CN)6]_23-09-21_16-34_CV.csv",
+            delimiter=','
+        )
     )
 
 # Example B
@@ -64,7 +66,7 @@ if Analyze_Cyclic_SWV:
 # Example C
 # Analyzing OCV experiment, and plot the data.
 
-Analyze_OCV: bool = True
+Analyze_OCV: bool = False
 
 if Analyze_OCV:
     data_analyzer: DataAnalyzer = DataAnalyzer(PARENT_DIR / "analyzer_test", logger=logger)

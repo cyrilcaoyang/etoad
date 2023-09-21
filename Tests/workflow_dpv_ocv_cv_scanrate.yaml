@@ -1,0 +1,84 @@
+---
+Protocol Name: CV Peak Scan Rate
+Steps:
+  # Step 1 of the experiment, DPV
+  DPV:
+    task: measure
+    technique: DPV
+    parameters:
+      TechniqueParameters:
+        Initial Voltage:
+          value: 1.2
+        Final Voltage:
+          value: 0
+    update_parameters: []
+    analysis_settings:
+      Plot:
+        title: Differential Pulse Voltammetry
+      Peak Picking: {}
+      CV Parameters:
+        filters:
+        - key: peak
+          operation: x > 0.0
+        - key: rel_shape_factor
+          operation: x > 0.1
+        selection:
+          key: peak
+          operation: max(x)
+  # Step 2 of the experiment, OCV
+  OCV:
+    task: measure
+    technique: OCV
+    parameters:
+      TechniqueParameters:
+        Voltage Interval Size:
+          value: 0.1
+        Time Interval Size:
+          value: 0.05
+        Rest Time:
+          value: 30
+    update_parameters: []
+    analysis_settings:
+      Plot:
+        title: Open Circuit Voltammetry
+      Voltage: { }
+  # Step 3 of the experiment, CV scans
+  CV:
+    task: measure
+    technique: CV
+    parameters:
+      IterationSettings:
+        no_iterations: 5  # The number of iterations should match the number of scan rates
+      TechniqueParameters:
+        Voltage Profile:
+          value: [0.0, 0.5, 0.0, 0.0, 0.0]  #  [V_init, V_max, V_min, V_init, V_fin]
+        Number of Cycles:
+          value: 3
+        Scan Rate:
+          changed_over_iterations: true
+          value:
+          - [0.05, 0.05, 0.05, 0.05, 0.05]  # [V/s, V/s, V/s, V/s, V/s]
+          - [0.10, 0.10, 0.10, 0.10, 0.10]
+          - [0.20, 0.20, 0.20, 0.20, 0.20]
+          - [0.40, 0.40, 0.40, 0.40, 0.40]
+          - [0.80, 0.80, 0.80, 0.80, 0.80]
+    update_parameters:
+    - parameter: Voltage Profile # Update the voltage profile from the DPV scan results
+      from measurement: DPV
+      key: CV Parameters  # [None, V_max, V_min, None, V_fin]
+    - parameter: Voltage Profile # Update the voltage profile from the OCV scan results
+      from measurement: OCV
+      key: CV Parameters  # [V_init, None, None, V_init, None]
+    analysis_settings:
+      Plot:
+        title: Cyclic Voltammetry
+      Peak Picking: {}  # Peak picking is required for the next two analysis steps
+      Peaks Scanrate: {}  # Use the default peak scanrate settings
+      Currents Scanrate: {}   # Use the default current scanrate settings
+Sample Volume: 1
+Total Volume: 5
+Discard Sample: false
+Purge: 30
+Wash:
+  wash_volume: 5
+  washing_cycles: 2

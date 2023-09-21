@@ -1,3 +1,4 @@
+import pprint
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Union, Any, Optional, List
@@ -256,7 +257,10 @@ class WorkflowManager(object):
         self.logger.experiment_name = "Filling Cell"
         self._sampling_system.transfer_to_cell(autosampler_position, sample_volume)
         self._sampling_system.dilute_cell(volume=total_volume - sample_volume)
-        self.logger.info(f"Sample was successfully transferred to the measurement cell ({sample_volume} + {total_volume-sample_volume} mL).")
+        self.logger.info(
+            f"Sample was successfully transferred to the measurement cell "
+            f"({sample_volume} + {total_volume-sample_volume} mL)."
+        )
         self._sampling_system.purge_cell(purge_time)
         self.logger.experiment_name = "Purging Cell"
         try:
@@ -301,6 +305,9 @@ class WorkflowManager(object):
                 update_settings=update_parameters,
                 parameters=parameters,
                 previous_results=results)
+            self.logger.debug(f"Updated parameters for {technique} measurement:\n{pprint.pformat(parameters)}")
+        else:
+            self.logger.debug(f"Parameters for {technique} measurement:\n{pprint.pformat(parameters)}")
 
         raw_data: np.ndarray = self._potentiostat.do_measurement(
             technique=technique,
@@ -339,7 +346,7 @@ class WorkflowManager(object):
         """
         self._sampling_system.dilute_cell(**kwargs)
         results["dilution"] = True
-        self.logger.debug(f"Sample {sample_name} was diluted.")
+        self.logger.debug(f"Sample {sample_name} was diluted for {step_name} step.")
 
         return results
 
@@ -382,7 +389,16 @@ class WorkflowManager(object):
                     raise self._exception_keywords[new_value]
 
             para = param_to_update["parameter"]
-            parameters["TechniqueParameters"][para]["value"] = new_value
+
+            if type(new_value) == list:
+                for i in range(len(new_value)):
+                    if new_value[i] is None:    # Skip if the value is None
+                        continue
+                    else:
+                        new_value_i = float(new_value[i])
+                        parameters["TechniqueParameters"][para]["value"][i] = new_value_i
+            else:
+                parameters["TechniqueParameters"][para]["value"] = new_value
 
         return parameters
 
@@ -401,4 +417,3 @@ class WorkflowManager(object):
         self._potentiostat.disconnect()
         self._sampling_system.disconnect()
         self.logger.stop_gui()
-

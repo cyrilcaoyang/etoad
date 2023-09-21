@@ -29,7 +29,7 @@ class AtmosphereHandler(object):
         self._module_address: int = module_address
         self._channel: int = channel
 
-        self.logger.info(f"Inert Gas Handling initialized.")
+        self.logger.info(f"Atmosphere: Inert Gas Handling initialized.")
 
     @contextmanager
     def open_atmosphere(self) -> None:
@@ -38,10 +38,12 @@ class AtmosphereHandler(object):
         Enters the CM by setting the valve to "open", and exits by setting it back to "close".
         """
         self._set_atmosphere(True)
+        self.logger.info("Atmosphere: Nitrogen is ON.")
         try:
             yield
         finally:
             self._set_atmosphere(False)
+            self.logger.info("Atmosphere: Nitrogen is OFF.")
 
     @log_exceptions
     def _set_atmosphere(self, open_nitrogen: bool = False) -> None:
@@ -58,7 +60,6 @@ class AtmosphereHandler(object):
                 starting_address=self._channel,
                 output_value=int(open_nitrogen)
             )
-            self.logger.debug(f"Nitrogen Open? {open_nitrogen}.")
 
     @contextmanager
     def _open_relay_connection(self):

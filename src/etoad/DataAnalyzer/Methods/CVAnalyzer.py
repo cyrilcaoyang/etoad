@@ -275,6 +275,7 @@ class CVAnalyzer(EChemDataAnalyzer):
             peak_info: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
             peak_info["scan_rate_sqrt"] = self._get_scan_rate(iteration) ** 0.5
             all_peaks.append(np.array(peak_info))
+        self.logger.debug(f"all_peaks: {all_peaks}") # TODO: remove after debugging
 
         figure = DataVisualizer.plot_multiple_points(
             data_to_plot=[(peaks[:, 2], peaks[:, 1]) for peaks in all_peaks],

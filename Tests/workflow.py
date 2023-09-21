@@ -23,16 +23,17 @@ from test_utils.MakeObjects import mk_workflow_manager
 
 enable_gui = True                                # This option can turn ON/OFF the GUI
 channel_num = 1                                  # The channel number of the potentiostat, either 1 or 2.
-job_queue: tuple = (
-    # {"sample_name": "wash", "sample_location": 1, "workflow_path": Path("workflow_clean_vials.json")},
-    {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_clean_vials.yaml")},
+job_queue = (
+    # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_dpv_ocv_cv_pos.yaml")},
+    # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_dpv_ocv_cv_scanrate.yaml")},
+    {"sample_name": "K4[Fe(CN)6]-scanrates", "sample_location": 9, "workflow_path": Path("workflow_FeCN_scanrate.yaml")},
 )
 
 # ========== Submit Samples Above ========== #
 
 
 def run_workflow(queue: tuple, channel: int, gui: bool):
-    manager = mk_workflow_manager(channel=channel,enable_gui=gui)
+    manager = mk_workflow_manager(channel=channel, enable_gui=gui)
     manager.submit_samples(queue)
     manager.start_system()
 

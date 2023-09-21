@@ -1,5 +1,5 @@
 ---
-Protocol Name: Potentials and Stability of Posolytes
+Protocol Name: Potentials and Stability of Negolytes
 Steps:
   SWV:
     task: measure
@@ -7,9 +7,9 @@ Steps:
     parameters:
       TechniqueParameters:
         Initial Voltage:
-          value: 1.4
-        Final Voltage:
           value: 0
+        Final Voltage:
+          value: -1.2
     update_parameters: []
     analysis_settings:
       Plot:
@@ -18,7 +18,7 @@ Steps:
       CV Parameters:
         filters:
         - key: peak
-          operation: x > 0.0
+          operation: x < -0.2
         - key: rel_shape_factor
           operation: x > 0.1
         selection:
@@ -30,11 +30,11 @@ Steps:
     parameters:
       TechniqueParameters:
         Voltage Profile:
-          value: [0.5, 0.5, 0.9, 0.5, 0.5]
+          value: [-0.5, -0.5, 0, -0.5, -0.5]
         Number of Cycles:
           value: 50
         Scan Rate:
-          value: [0.10, 0.10, 0.10, 0.10, 0.10]
+          value: [0.05, 0.05, 0.05, 0.05, 0.05]
     update_parameters:
     - parameter: Voltage Profile
       from measurement: SWV
@@ -44,7 +44,7 @@ Steps:
         title: Cyclic Voltammetry
       Peak Picking: {}
       Integration: {}
-Sample Volume: 1
+Sample Volume: 0.5
 Total Volume: 5
 Discard Sample: false
 Purge: 30

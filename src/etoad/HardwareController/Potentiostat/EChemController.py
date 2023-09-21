@@ -204,6 +204,7 @@ class EChemController(object):
             parameter_array[i] = param_obj
 
         self.logger.debug(f"EChem Measurement Parameters Parsed.")
+
         return KBIO.EccParams(no_params, parameter_array)
 
     ########################################################
