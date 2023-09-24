@@ -1,5 +1,5 @@
 from etoad.Interface import GraphicalInterface
-from Tests.test_utils.MakeObjects import mk_sampler
+from .MakeObjects import mk_sampler
 from logging import Logger
 
 

@@ -7,4 +7,4 @@ Discard Sample: true
 Purge: 0
 Wash:
   wash_volume: 0
-  washing_cycles: 0                                 # no wash of cell if wash cycles == 0
+  washing_cycles: 0   # no wash of cell if wash cycles == 0
