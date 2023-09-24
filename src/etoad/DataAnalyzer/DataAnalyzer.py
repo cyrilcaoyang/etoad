@@ -5,10 +5,10 @@ from logging import Logger
 import matplotlib.figure
 import numpy as np
 
-from ..Utils import timestamp_datetime
-from ..Utils import save_as_csv, save_as_json
-from ..Utils import log_exceptions
-from .Methods import CVAnalyzer, PulseTechniqueAnalyzer, OCVAnalyzer, EChemDataAnalyzer
+from etoad.Utils import timestamp_datetime
+from etoad.Utils import save_as_csv, save_as_json
+from etoad.Utils import log_exceptions
+from etoad.DataAnalyzer.Methods import CVAnalyzer, PulseTechniqueAnalyzer, OCVAnalyzer, EChemDataAnalyzer
 
 
 class DataAnalyzer:

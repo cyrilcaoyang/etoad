@@ -1,11 +1,11 @@
-from typing import List, Tuple
 import numpy as np
 import pandas as pd
 import itertools
-from .EChemDataAnalyzer import EChemDataAnalyzer
-from ..AnalysisUtils import DataVisualizer
-from ..AnalysisUtils import significant_digits
-from ...Utils import log_exceptions
+from typing import List, Tuple
+
+from etoad.DataAnalyzer.Methods.EChemDataAnalyzer import EChemDataAnalyzer
+from etoad.DataAnalyzer.AnalysisUtils import DataVisualizer, significant_digits
+from etoad.Utils import log_exceptions
 
 
 class CVAnalyzer(EChemDataAnalyzer):
@@ -41,7 +41,10 @@ class CVAnalyzer(EChemDataAnalyzer):
         data_separated: List[List[np.ndarray]] = []
         for idx, iteration in enumerate(data):
             no_cycles: int = int(np.max(iteration[:, 3]) + 1)
-            data_separated.append([iteration[iteration[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)])
+            data: List[np.ndarray] = [iteration[iteration[:, 3] == cycle] for cycle in range(skip_cycles, no_cycles)]
+            # remove the first data point (row) of cycles due to potential discontinuity
+            data_no_first_row = [cycle[1:, :] for cycle in data]
+            data_separated.append(data_no_first_row)
 
         return data_separated
 
@@ -56,7 +59,7 @@ class CVAnalyzer(EChemDataAnalyzer):
             "Peak Picking": self._peak_picking,
             "Integration": self._integration,
             "Peaks Scanrate": self._plot_peaks_scan_rate,
-            "Currents Scanrate": self._plot_currents_scan_rate,
+            "Currents Scanrate": self._plot_currents_scan_rate_sqrt,
             "Plot": self._plot
         }
 
@@ -78,7 +81,8 @@ class CVAnalyzer(EChemDataAnalyzer):
         reduction: np.ndarray = cycle[np.diff(cycle[:, 1], append=0) < 0]
         oxidation: np.ndarray = cycle[np.diff(cycle[:, 1], append=0) > 0]
 
-        return reduction, oxidation
+        # remove the first and last data points (rows) of cycles due to potential discontinuity
+        return reduction[1:-1], oxidation[1:-1]
 
     @log_exceptions
     def _peak_picking(
@@ -92,11 +96,14 @@ class CVAnalyzer(EChemDataAnalyzer):
         """
         for idx, iteration in enumerate(self._raw_data):
             peaks_per_iteration: list = []
-            for cycle in iteration:
+            for cycle_num, cycle in enumerate(iteration):
                 reduction, oxidation = self._get_half_cycles(cycle)
-                peaks: list = self._pick_peaks(reduction, maxima=False) + self._pick_peaks(oxidation, maxima=True)
-                peaks_per_iteration.append(peaks)
+                list_neg = self._pick_peaks(reduction, cycle_num, maxima=False)
+                list_pos = self._pick_peaks(oxidation, cycle_num, maxima=True)
+                peaks_per_iteration.append(list_neg + list_pos)
             self._analysis_results[f"Iteration {idx}"]["Peak Picking"] = peaks_per_iteration
+            # Remove the last peak of the last cycle because it might be strange from time to time
+            peaks_per_iteration[-1].pop()
 
     @staticmethod
     def _get_scan_rate(raw_data: List[np.ndarray]) -> float:
@@ -118,6 +125,7 @@ class CVAnalyzer(EChemDataAnalyzer):
     @staticmethod
     def _pick_peaks(
             half_cycle: np.ndarray,
+            cycle: int,
             maxima=True
     ) -> List[dict]:
         """
@@ -131,26 +139,42 @@ class CVAnalyzer(EChemDataAnalyzer):
         Returns:
             peaks: List of all peaks (each one as a dictionary).
         """
-        first_derivative: np.ndarray = np.gradient(half_cycle[:, 2], half_cycle[:, 1])
-        second_derivative: np.ndarray = np.gradient(first_derivative, half_cycle[:, 1])
-        zero_crossings: np.ndarray = np.where(np.diff(np.sign(first_derivative)))[0]
 
-        if maxima:
-            peak_indices: np.ndarray = zero_crossings[second_derivative[zero_crossings] < 0]
-            peak_type: str = "Maximum"
+        # if scans did not start at V_min, there will be discontinuities in the first derivative.
+        # find out point of discontinuity in time, and separate the half cycle into segments for peak picking
+        time_intervals: np.ndarray = np.diff(half_cycle[:, 0])
+        rel_time_intervals: np.ndarray = time_intervals / np.average(time_intervals)
+        breakpoints: np.ndarray = np.where(abs(rel_time_intervals) > 2)[0]
+        if breakpoints.size == 0: segments: list = [half_cycle]
         else:
-            peak_indices: np.ndarray = zero_crossings[second_derivative[zero_crossings] > 0]
-            peak_type: str = "Minimum"
+            break_indices: np.ndarray = np.concatenate(([0], breakpoints, [len(half_cycle)]))
+            segments: list = [half_cycle[break_indices[i]+2:break_indices[i+1]-1] for i in range(len(break_indices)-1)]
 
-        peaks = [
-            {
-                "peak_type": peak_type,
-                "voltage": significant_digits(0.5 * (half_cycle[idx, 1] + half_cycle[idx + 1, 1]), 3),
-                "current": significant_digits(0.5 * (half_cycle[idx, 2] + half_cycle[idx + 1, 2]), 3),
-                "peak_idx": int(idx)
-            }
-            for idx in peak_indices
-        ]
+        peaks = []
+        for segment in segments:
+            first_derivative: np.ndarray = np.gradient(segment[:, 2], segment[:, 1])
+            second_derivative: np.ndarray = np.gradient(first_derivative, segment[:, 1])
+            zero_crossings: np.ndarray = np.where(np.diff(np.sign(first_derivative)))[0]
+
+            if maxima:
+                peak_indices: np.ndarray = zero_crossings[second_derivative[zero_crossings] < 0]
+                peak_type: str = "Maximum"
+            else:
+                peak_indices: np.ndarray = zero_crossings[second_derivative[zero_crossings] > 0]
+                peak_type: str = "Minimum"
+
+            peaks_to_add = [
+                {
+                    "peak_type": peak_type,
+                    "cycle number": f"cycle {cycle}",
+                    "voltage": significant_digits(0.5 * (half_cycle[idx, 1] + half_cycle[idx + 1, 1]), 3),
+                    "current": significant_digits(0.5 * (half_cycle[idx, 2] + half_cycle[idx + 1, 2]), 3),
+                    "peak_idx": int(idx),
+                    "time": significant_digits(0.5 * (half_cycle[idx, 0] + half_cycle[idx + 1, 0]), 3),
+                }
+                for idx in peak_indices
+            ]
+            peaks.extend(peaks_to_add)
 
         return peaks
 
@@ -238,20 +262,30 @@ class CVAnalyzer(EChemDataAnalyzer):
             title=title,
             legend=[f"iteration {i+1}" for i in range(len(self._raw_data))]
         )
-        self._figures["CV"] = figure
+        self._figures["CV_All_Iterations"] = figure
+
+    @log_exceptions
+    def _prep_peaks_for_plots(self) -> List:
+        """
+        Generates a plot of peak voltage vs. scan rate.
+        Saves the figure object to self._figures["CV_Peaks_Scanrate"].
+        """
+        all_peaks: list = []
+        for idx, iteration in enumerate(self._raw_data):
+            peaks_per_iteration = list(itertools.chain(*self._analysis_results[f"Iteration {idx}"]["Peak Picking"]))
+            peak_positions: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
+            peak_positions["scan_rate"] = self._get_scan_rate(iteration)
+            all_peaks.append(np.array(peak_positions))
+
+        return all_peaks
 
     @log_exceptions
     def _plot_peaks_scan_rate(self):
         """
         Generates a plot of peak voltage vs. scan rate.
-        Saves the figure object to self.figures["CV_Peaks_Scanrate"].
+        Saves the figure object to self._figures["CV_Peaks_Scanrate"].
         """
-        all_peaks: list = []
-        for idx, iteration in enumerate(self._raw_data):
-            peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[f"Iteration {idx}"]["Peak Picking"]))
-            peak_positions: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
-            peak_positions["scan_rate"] = self._get_scan_rate(iteration)
-            all_peaks.append(np.array(peak_positions))
+        all_peaks: list = self._prep_peaks_for_plots()
 
         figure = DataVisualizer.plot_multiple_points(
             data_to_plot=[(peaks[:, 2], peaks[:, 0]) for peaks in all_peaks],
@@ -260,22 +294,15 @@ class CVAnalyzer(EChemDataAnalyzer):
             title="Peak Positions as a Function of Scan Rate",
             legend=[f"Iteration {i + 1}" for i in range(len(all_peaks))]
         )
-
         self._figures["CV_Peaks_Scanrate"] = figure
 
     @log_exceptions
-    def _plot_currents_scan_rate(self):
+    def _plot_currents_scan_rate_sqrt(self):
         """
         Generates a plot of peak currents vs. square root of the scan rates.
-        Saves the figure object to self.figures["CV_Currents_Scanrate"].
+        Saves the figure object to self._figures["CV_Currents_Scanrate"].
         """
-        all_peaks: list = []
-        for idx, iteration in enumerate(self._raw_data):
-            peaks_per_iteration: list = list(itertools.chain(*self._analysis_results[f"Iteration {idx}"]["Peak Picking"]))
-            peak_info: pd.DataFrame = pd.DataFrame(peaks_per_iteration)[["voltage", "current"]]
-            peak_info["scan_rate_sqrt"] = self._get_scan_rate(iteration) ** 0.5
-            all_peaks.append(np.array(peak_info))
-        self.logger.debug(f"all_peaks: {all_peaks}") # TODO: remove after debugging
+        all_peaks: list = self._prep_peaks_for_plots()
 
         figure = DataVisualizer.plot_multiple_points(
             data_to_plot=[(peaks[:, 2], peaks[:, 1]) for peaks in all_peaks],
@@ -284,5 +311,4 @@ class CVAnalyzer(EChemDataAnalyzer):
             title="Peak Current as a Function of the Square Root of Scan Rate",
             legend=[f"Iteration {i + 1}" for i in range(len(all_peaks))]
         )
-
         self._figures["CV_Currents_Scanrate"] = figure
