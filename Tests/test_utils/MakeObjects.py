@@ -52,6 +52,7 @@ def mk_logger_gui_free(
 
 def mk_sampler(
         logger: Union[GraphicalInterface, logging.Logger],
+        cell_filled: bool = True,
         **kwargs
 ) -> SamplingSystem:
     """
@@ -62,7 +63,7 @@ def mk_sampler(
         logger=logger,
         config_file=parent_dir / "test_settings" / "sampler_settings.yaml",
         pump_wash=0,
-        cell_filled=True
+        cell_filled=cell_filled,
     )
     return sampler
 

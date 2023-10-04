@@ -271,8 +271,8 @@ class GraphicalInterface(Logger):
 
         Args:
             experiment_name: Name of the experiment
-            x_axis_label: Label for the x axis of the plot
-            y_axis_label: Label for the y axis of the plot
+            x_axis_label: Label for the x-axis of the plot
+            y_axis_label: Label for the y-axis of the plot
         """
         self.experiment_name = experiment_name
         self._figure_details["x_axis_title"] = x_axis_label

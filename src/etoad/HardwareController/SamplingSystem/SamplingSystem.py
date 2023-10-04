@@ -12,7 +12,7 @@ from ...Utils import log_exceptions
 
 class SamplingSystem:
     """
-    Simple System for Sampling Liquids into a Measurement Cell using a Tecan Syringe Pump (Driver by Tony Wu).
+    Simple System for Sampling Liquids into a Measurement Cell using a Tecan Syringe Pump.
     Current implementation only works for a system with a single multi-port syringe pump.
 
     Public Methods to be called from external:
@@ -42,6 +42,7 @@ class SamplingSystem:
         "wash_port",
         "waste_port"
     }
+
 
     def __init__(
             self,
@@ -132,15 +133,18 @@ class SamplingSystem:
             self._wash_pump(1)
             self.logger.debug(f"Line from port {source_port} washed once.")
 
+        dead_volume = self._config["dead_volume"]
+        self.logger.debug(f"Sampler: Dead volume of {dead_volume} mL is added.")
         self._pump.draw_and_dispense(
+            volume=volume + dead_volume,
             draw_valve_port=source_port,
             dispense_valve_port=self.cell_port,
-            volume=volume + self._config["dead_volume"],
             wait=2,
             speed=0.5
         )
         self._update_cell_volume(volume)
         self.logger.debug(f"Dispensed {volume} mL from port {source_port} to cell.")
+        self.logger.debug(f"The cell volume is now {self._cell_volume} mL.")
 
     @log_exceptions
     def dilute_cell(self, volume: float = 0, factor: float = 1) -> None:
@@ -185,7 +189,7 @@ class SamplingSystem:
                 draw_valve_port=self.wash_port,
                 dispense_valve_port=self.waste_port,
                 wait=1,
-                speed=0.5
+                speed=1
             )
         self.logger.info(f"Pump washed {cycles} times.")
 
@@ -229,9 +233,10 @@ class SamplingSystem:
         Washes the cell for n times:
             - first time: 15 mL of wash solution to wash off also the sides of the measurement cell
             - other n-1 times: given volume of the wash solution.
+        Cell is emptied in the end.
         """
         if cycles == 0:
-            self.logger.info(f"Measurement Cell will not be washed.")
+            self.logger.info(f"Measurement Cell will not be discarded.")    # maybe cycle=0 when just discard no wash?
 
         else:
             self.logger.debug(f"Measurement Cell will be washed {cycles} times.")
@@ -240,11 +245,13 @@ class SamplingSystem:
             self.transfer_to_cell(self.wash_port, 15)
             time.sleep(5)
             self._empty_cell()
+            self.logger.debug(f"Measurement Cell was washed once with 15 mL solvent.")
 
-            for _ in range(cycles-1):
-                self.transfer_to_cell(self.wash_port, wash_volume)
+            for i in range(cycles-1):
+                self.transfer_to_cell(source_port=self.wash_port, volume=wash_volume)
                 time.sleep(5)
                 self._empty_cell()
+                self.logger.debug(f"Measurement Cell was washed {i+1} time(s) with {wash_volume} mL solvent.")
 
             self.logger.info(f"Measurement Cell was washed {cycles} times and emptied.")
 

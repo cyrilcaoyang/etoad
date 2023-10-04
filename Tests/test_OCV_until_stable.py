@@ -22,7 +22,7 @@ steps = 4                         # Unit: Number of Steps per cycle, all steps m
 max_cycles = 30                   # Unit: Maximum number of cycles
 
 channel_num: int = 1              # The channel number of the potentiostat, either 1 or 2.
-enable_gui: bool = False          # This option can turn ON/OFF the GUI
+enable_gui: bool = True          # This option can turn ON/OFF the GUI
 simulation: bool = False          # This option can turn ON/OFF the simulation mode
 
 # ========== Sample Settings Above ========== #

@@ -1,5 +1,6 @@
 ---
 Protocol Name: DPV, OPV and CV Peak Scan Rate
+Start Fresh: true
 Steps:
   DPV:    # Step 1 of the experiment, DPV, find the peaks
     task: measure
@@ -75,6 +76,7 @@ Steps:
 Sample Volume: 1
 Total Volume: 5
 Discard Sample: false
+Discard Cell: true
 Purge: 30
 Wash:
   wash_volume: 5

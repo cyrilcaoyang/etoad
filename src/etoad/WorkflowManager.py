@@ -31,9 +31,11 @@ class WorkflowManager(object):
     _required_settings: set = {
         "Protocol Name",
         "Steps",
+        "Start Fresh",
         "Sample Volume",
         "Total Volume",
         "Discard Sample",
+        "Discard Cell",
         "Purge",
         "Wash"
     }
@@ -134,6 +136,7 @@ class WorkflowManager(object):
 
         results: dict = dict()
         for sample in self._samples:
+            print(f"{sample=}")
             results[sample["sample_name"]] = self._measure_sample(**sample)
 
         self.shutdown_system()
@@ -167,7 +170,7 @@ class WorkflowManager(object):
             self,
             sample_name: str,
             sample_location: int,
-            workflow_path: Path
+            workflow_path: Path,
     ) -> dict:
         """
         Executes a specified measurement workflow for a given sample.
@@ -189,10 +192,12 @@ class WorkflowManager(object):
 
         with self._sample_in_cell(
             autosampler_position=sample_location,
+            start_fresh=workflow["Start Fresh"],
             sample_volume=workflow["Sample Volume"],
             total_volume=workflow["Total Volume"],
             purge_time=workflow["Purge"],
             discard_sample=workflow["Discard Sample"],
+            discard_cell=workflow["Discard Cell"],
             **workflow["Wash"]
         ):
             for step, step_details in zip(workflow["Steps"], workflow["Steps"].values()):
@@ -239,6 +244,8 @@ class WorkflowManager(object):
             total_volume: float,
             purge_time: float,
             discard_sample: bool,
+            start_fresh: bool = True,
+            discard_cell: bool = True,
             wash_volume: float = 5,
             washing_cycles: int = 3
     ) -> None:
@@ -248,12 +255,21 @@ class WorkflowManager(object):
 
         Args:
             autosampler_position: Vial number on the autosampler.
+            start_fresh: If True, the cell will be emptied before the first measurement.
             sample_volume: Volume to be transferred to the cell.
             total_volume: Total volume of the sample in the cell (after dilution).
             purge_time: Time for purging with nitrogen gas.
+            discard_sample: If True, the sample (on the autosampler) will be discarded after the measurement.
+            discard_cell: If True, the cell will be emptied and washed after the measurement.
             wash_volume: Volume to wash the cell.
             washing_cycles: Iterations for washing the cell
         """
+
+        if not start_fresh:     # Last sample was not discarded from cell
+            self.logger.info(f"Sampler: Last sample was NOT discarded from the cell.")
+        else:                   # Last sample was discarded from cell
+            self.logger.info(f"Sampler: Last sample was discarded from the cell.")
+
         self.logger.experiment_name = "Filling Cell"
         self._sampling_system.transfer_to_cell(autosampler_position, sample_volume)
         self._sampling_system.dilute_cell(volume=total_volume - sample_volume)
@@ -261,17 +277,23 @@ class WorkflowManager(object):
             f"Sample was successfully transferred to the measurement cell "
             f"({sample_volume} + {total_volume-sample_volume} mL)."
         )
+
         self._sampling_system.purge_cell(purge_time)
         self.logger.experiment_name = "Purging Cell"
         try:
             yield
 
         finally:
-            self.logger.info(f"Measurements for sample completed.")
-            self.logger.experiment_name = "Emptying Cell"
-            if discard_sample:
-                self._sampling_system.wash_autosampler_position(autosampler_position)
-            self._sampling_system.wash_cell(wash_volume, washing_cycles)
+            self.logger.info(f"Measurements for sample {self.logger.sample_name} completed.")
+            if discard_cell:
+                self.logger.experiment_name = "Emptying Cell"
+                self._sampling_system.wash_cell(wash_volume, washing_cycles)
+            else:
+                self.logger.info(f"Solution is kept for further measurements.")
+                self.logger.debug(f"Sampler: Total volume is {self._sampling_system._cell_volume} mL.")
+
+        if discard_sample:
+            self._sampling_system.wash_autosampler_position(autosampler_position)
 
     @log_exceptions
     def run_measurement(

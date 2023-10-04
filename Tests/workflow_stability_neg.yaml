@@ -1,5 +1,6 @@
 ---
 Protocol Name: Potentials and Stability of Negolytes
+Start Fresh: true
 Steps:
   SWV:
     task: measure
@@ -47,6 +48,7 @@ Steps:
 Sample Volume: 0.5
 Total Volume: 5
 Discard Sample: false
+Discard Cell: true
 Purge: 30
 Wash:
   wash_volume: 5

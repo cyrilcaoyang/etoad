@@ -1,0 +1,12 @@
+---
+Protocol Name: Remove Sample from Cell and Clean Cell and Refill
+Start Fresh: true        # If false, the solution is not discarded from the cell
+Steps: {}
+Sample Volume: 0.0
+Total Volume: 5.0
+Discard Sample: false
+Discard Cell: true
+Purge: 10
+Wash:
+  wash_volume: 5
+  washing_cycles: 3

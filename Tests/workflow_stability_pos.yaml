@@ -1,5 +1,6 @@
 ---
 Protocol Name: Potentials and Stability of Posolytes
+Start Fresh: true   # Start with fresh samples in the Echem cell
 Steps:
   SWV:
     task: measure
@@ -47,6 +48,7 @@ Steps:
 Sample Volume: 1
 Total Volume: 5
 Discard Sample: false
+Discard Cell: true
 Purge: 30
 Wash:
   wash_volume: 5

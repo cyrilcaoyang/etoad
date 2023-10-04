@@ -1,0 +1,40 @@
+---
+Protocol Name: Simple CV scans
+Start Fresh: false # Use previous sample?
+Steps:
+  SWV:
+    task: measure
+    technique: SWV
+    parameters:
+      TechniqueParameters:
+        Initial Voltage:
+          value: -0.4
+        Final Voltage:
+          value: 1.2
+    update_parameters: []
+    analysis_settings:
+      Plot:
+        title: Square Wave Voltammetry
+  CV:
+    task: measure
+    technique: CV
+    parameters:
+      TechniqueParameters:
+        Voltage Profile:
+          value: [-0.3, 0.2, -0.3, -0.3, -0.3]  #  [V_init, V_max, V_min, V_init, V_fin]
+        Number of Cycles:
+          value: 5
+        Scan Rate:
+          value: [0.10, 0.10, 0.10, 0.10, 0.10]
+    update_parameters: {}
+    analysis_settings:
+      Plot:
+        title: Cyclic Voltammetry
+Sample Volume: 5
+Total Volume: 5
+Discard Sample: false
+Discard Cell: false
+Purge: 10
+Wash:
+  wash_volume: 5
+  washing_cycles: 3

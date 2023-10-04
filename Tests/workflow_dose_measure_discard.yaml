@@ -1,0 +1,30 @@
+---
+Protocol Name: Keep last solution, dose, Measure
+Start Fresh: false        # If false, the solution is not discarded from the cell
+Steps:
+  ##############################################
+  # Add your steps here
+  CV:
+    task: measure
+    technique: CV
+    parameters:
+      TechniqueParameters:
+        Voltage Profile:
+          value: [0.0, 0.6, 0.0, 0.0, 0.0]  #  [V_init, V_max, V_min, V_init, V_fin]
+        Number of Cycles:
+          value: 3
+        Scan Rate:
+          value: [0.10, 0.10, 0.10, 0.10, 0.10]
+    update_parameters: {}
+    analysis_settings:
+      Plot:
+        title: Cyclic Voltammetry
+  ##############################################
+Sample Volume: 0.2
+Total Volume: 0.2
+Discard Sample: false
+Discard Cell: true
+Purge: 10
+Wash:
+  wash_volume: 5
+  washing_cycles: 3

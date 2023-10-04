@@ -1,5 +1,6 @@
 ---
 Protocol Name: DPV, OPV and CV Stability of Posolytes
+Start Fresh: true
 Steps:
   DPV:    # Step 1 of the experiment, DPV, find the peaks
     task: measure
@@ -52,7 +53,7 @@ Steps:
         Scan Rate:
           value: [0.05, 0.05, 0.05, 0.05, 0.05]
         Voltage vs OCV:
-          value: [true, false, false, true, false]
+          value: [false, false, false, false, false]
     update_parameters:
     - parameter: Voltage Profile # Update the voltage profile from the DPV scan results
       from measurement: DPV
@@ -68,6 +69,7 @@ Steps:
 Sample Volume: 1
 Total Volume: 5
 Discard Sample: false
+Discard Cell: true
 Purge: 30
 Wash:
   wash_volume: 5
