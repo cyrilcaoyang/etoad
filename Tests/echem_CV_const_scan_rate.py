@@ -12,18 +12,18 @@ from test_utils.UnitOperations import do_experiment, do_analysis
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"sodium_anthraquinone_1_sulfonate_50mg_20mL_pH_12"
+sample_name = f"1,8-AQDS_{Timestamps.timestamp_date()}"
 task_name = "CV_Const_ScanRate_smooth-GC_Ag-AgCl"       # Specific test conditions.
 
 channel_num: int = 2        # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True     # GUI can be disabled for simple liquid transfer.
 
-V_init = -0.4      # Initial Voltage in V
-V_max = -0.4     # Highest Voltage in V
+V_init = 0      # Initial Voltage in V
+V_max = 0.4     # Highest Voltage in V
 V_min = -0.9        # Lowest Voltage in V
-V_fin = -0.4     # Final Voltage in V
+V_fin = 0     # Final Voltage in V
 scan_rate = 0.100       # Scan Rate in V/s
-cycle_num: int = 100     # The Numer of Cycles as an Integer, > 1
+cycle_num: int  = 5     # The Numer of Cycles as an Integer, > 1
 
 cv_test_settings: dict = {
     "IterationSettings": {"no_iterations": 1},
@@ -69,3 +69,4 @@ if __name__ == "__main__":
     worker_thread.start()
     gui_logger.start_gui()
     result = worker_thread.join()
+

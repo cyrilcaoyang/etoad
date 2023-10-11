@@ -106,7 +106,7 @@ class DataAnalyzer:
             file_basename: str
     ) -> None:
         """
-        Saves the experimental results (raw data as .pkl and analysis results as .csv) into the target folder.
+        Saves the experimental results (raw data and analysis results as .csv) into the target folder.
 
         Args:
             raw_data: Numpy ndarray of the obtained raw data.

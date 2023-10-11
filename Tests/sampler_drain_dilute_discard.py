@@ -1,5 +1,5 @@
 import time
-from etoad.Utils import ThreadWithReturn
+from etoad.Utils import ThreadWithReturn, Timestamps
 from etoad.Interface.GraphicalInterface import GraphicalInterface
 from test_utils.MakeObjects import mk_logger, mk_sampler
 
@@ -11,15 +11,15 @@ from test_utils.MakeObjects import mk_logger, mk_sampler
 
 # ========== Test Settings Below ========== #
 
-sample_name = "sodium_anthraquinone_1_sulfonate_50mg_20mL_neutral"
+sample_name = f"1,8-AQDS_{Timestamps.timestamp_date()}"     # The name of the sample.
 
-source_port = 8     # The Port from which the Sample will be added.
+source_port = 6     # The Port from which the Sample will be added.
 sample_vol = 2.0        # The volume of sample in mL to be diluted to the Cell.
 total_vol = 10.0     # The total volume of the diluted solution
 
 enable_gui: bool = False         # GUI can be disabled for simple liquid transfer.
 clean_up: bool = False          # True = wash cell afterward with electrolyte solution.
-cell_filled: bool = True        # If the cell is filled, the solution will be drained first.
+cell_filled: bool = False        # If the cell is filled, the solution will be drained first.
 
 # ========== Test Settings Above ========== #
 

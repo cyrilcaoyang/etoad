@@ -13,9 +13,9 @@ from test_utils.MakeObjects import mk_logger, mk_sampler
 
 sample_name = "HCl-addition"
 
-source_port = 5     # The Port from which the Sample will be added.
-sample_vol = 0.4        # The volume of sample in mL to be added to the Cell.
-wash_line: bool = False      # If True, the wash line will be used to transfer the sample.
+source_port = 4     # The Port from which the Sample will be added.
+sample_vol = 1.0        # The volume of sample in mL to be added to the Cell.
+wash_line: bool = True      # If True, the wash line will be used to transfer the sample.
 start_fresh_sample: bool = False
 
 enable_gui: bool = False         # GUI can be disabled for simple liquid transfer.
@@ -32,7 +32,7 @@ def liquid_addition(
 
     with sampler._atmosphere_handler.open_atmosphere():
         sampler.transfer_to_cell(source_port, volume=sample_vol, wash_line=wash_line)
-        time.sleep(10)
+        time.sleep(20)
 
     sampler.disconnect()
     gui_logger.stop_gui()

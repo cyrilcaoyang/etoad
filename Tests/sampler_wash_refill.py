@@ -27,7 +27,10 @@ def wash_refill(
     """
     This function will wash the cell and refill it with solvent.
     """
-
+    gui_logger.debug(f"The settings are: "
+                    f"Sample name is {sample_name}, Drain Cell = {cell_filled}, "
+                    f"Wash Volume is {wash_vol} mL, Refill Volume is {refill_vol} mL"
+                    f"Wash cycle numer is {cycle}")
     sampler = mk_sampler(gui_logger, cell_filled)
     sampler.wash_cell(wash_volume=wash_vol, cycles=cycle)
     sampler.transfer_to_cell(source_port=12, volume=refill_vol, wash_line=True)

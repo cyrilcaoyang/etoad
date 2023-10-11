@@ -20,13 +20,13 @@ enable_gui: bool = True
 
 Job_Queue = (
     {"sample_name": "wash", "sample_location": 1, "workflow_path": Path("workflow_clean_vial.yaml")},
-    # {"sample_name": "wash", "sample_location": 2, "workflow_path": Path("workflow_clean_vials.json")},
-    # {"sample_name": "wash", "sample_location": 3, "workflow_path": Path("workflow_clean_vials.json")},
-    # {"sample_name": "wash", "sample_location": 4, "workflow_path": Path("workflow_clean_vials.json")},
-    # {"sample_name": "wash", "sample_location": 5, "workflow_path": Path("workflow_clean_vials.json")},
-    # {"sample_name": "Fe-bpy", "sample_location": 6, "workflow_path": Path("workflow_stability_pos.json")},
-    # {"sample_name": "Fe-bpy-44Me", "sample_location": 7, "workflow_path": Path("workflow_stability_pos.json")},
-    # {"sample_name": "wash", "sample_location": 8, "workflow_path": Path("workflow_clean_vials.json")},
+    # {"sample_name": "2,5-BQS", "sample_location": 2, "workflow_path": Path("workflow_clean_vials.json")},
+    # {"sample_name": "None", "sample_location": 3, "workflow_path": Path("workflow_clean_vials.json")},
+    # {"sample_name": "HCl-1M", "sample_location": 4, "workflow_path": Path("workflow_clean_vials.json")},
+    # {"sample_name": "NaOH-1M", "sample_location": 5, "workflow_path": Path("workflow_clean_vials.json")},
+    # {"sample_name": "1,8-AQDS", "sample_location": 6, "workflow_path": Path("workflow_stability_pos.json")},
+    # {"sample_name": "2,6-AQDS", "sample_location": 7, "workflow_path": Path("workflow_stability_pos.json")},
+    # {"sample_name": "1-AQDS", "sample_location": 8, "workflow_path": Path("workflow_clean_vials.json")},
     # {"sample_name": "K4[Fe(CN)6]", "sample_location": 9, "workflow_path": Path("workflow_CV_peak_scan_rate.json")},
 )
 

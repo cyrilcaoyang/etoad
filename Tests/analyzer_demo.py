@@ -31,13 +31,13 @@ if __name__ == "__main__":
         analysis_settings={
             "Plot": {"title": "Test CV Measurement"},
             "Peak Picking": {},
-            "Peaks Scanrate": {},
-            "Currents Scanrate": {}
+            # "Peaks Scanrate": {},
+            # "Currents Scanrate": {}
         },
 
         # Analyze a csv file
         raw_data=np.genfromtxt(
-            "C:/Users/Prep LC/Desktop/AutoEChem_Data/DATA/K4[Fe(CN)6]-cv-peak-scanrate/K4[Fe(CN)6]_23-09-21_16-34_CV.csv",
+            "C:/Users/Prep LC/Desktop/AutoEChem_Data/DATA/2,6-AQDS_23-10-06-basic/2,6-AQDS_23-10-06-basic_23-10-06_13-20_Cyclic Voltammetry.csv",
             delimiter=',')
 
         # Analyze a pickle file

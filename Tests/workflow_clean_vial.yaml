@@ -5,7 +5,8 @@ Steps: {}
 Sample Volume: 0
 Total Volume: 0
 Discard Sample: true
-Purge: 0
+Discard Cell: false
+Purge: 10
 Wash:
   wash_volume: 0
   washing_cycles: 0   # no wash of cell if wash cycles == 0

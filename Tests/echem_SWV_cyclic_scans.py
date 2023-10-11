@@ -12,13 +12,13 @@ from test_utils.UnitOperations import do_experiment, do_analysis, cyclic_swv_vol
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"sodium_anthraquinone_1_sulfonate_50mg_20mL_pH_12_SWV"
+sample_name =  f"1,8-AQDS_{Timestamps.timestamp_date()}"
 task_name = "SWV_cyclic_scans_smooth-GC_Pt_SHE"
 
-V_init = 0.2                                                  # Initial Voltage in V
-V_fin = -0.9                                                   # Final Voltage in V
+V_init = 0.4                                                  # Initial Voltage in V
+V_fin = -0.6                                                   # Final Voltage in V
 T_rest = 10                                                    # The Resting Time Before the Scan in seconds
-cycle_num = 10
+cycle_num = 2
 
 channel_num: int = 2                                           # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True                                         # This option can turn ON/OFF the GUI

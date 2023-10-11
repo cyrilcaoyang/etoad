@@ -12,11 +12,11 @@ from test_utils.UnitOperations import do_experiment, do_analysis
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"sodium_anthraquinone_1_sulfonate_50mg_20mL_neutral_{Timestamps.timestamp_date()}"
+sample_name =  f"2,6-AQDS_{Timestamps.timestamp_date()}-basic"
 task_name = "DPV_single_scan_smooth-GC_Pt_SHE"
 
-V_init = -1.0                                                   # Unit: Initial Voltage in V
-V_fin = 1.2                                                     # Unit: Final Voltage in V
+V_init = 0.4                                                   # Unit: Initial Voltage in V
+V_fin = -0.6                                                     # Unit: Final Voltage in V
 T_rest = 10                                                     # The Resting Time Before the Scan in seconds
 
 Pulse_h = 0.010                                                 # Pulse Height in V, default: 0.010
@@ -26,7 +26,7 @@ Step_w = 0.500                                                  # Step Width in 
 start_percent = 0.800                                           # Start Averaging Interval (0,1), default: 0.800
 end_percent = 1.000                                             # End Averaging Interval (0,1), default: 1.000
 
-channel_num: int = 1                                            # The channel number of the potentiostat, either 1 or 2.
+channel_num: int = 2                                            # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True                                         # This option can turn ON/OFF the GUI
 simulation: bool = False                                        # This option can turn ON/OFF the simulation mode
 
