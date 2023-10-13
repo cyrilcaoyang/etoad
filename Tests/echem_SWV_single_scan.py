@@ -2,8 +2,8 @@ from typing import Any
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn, Timestamps
 
-import test_utils.MakeObjects as MakeObjects
-from test_utils.UnitOperations import do_experiment, do_analysis
+import Tests.utils_makeobjects as MakeObjects
+from Tests.utils_unitoperations import do_experiment, do_analysis
 
 """
     This python script demonstrate a simple SWV scan, with sample already in the Cell.
@@ -12,14 +12,14 @@ from test_utils.UnitOperations import do_experiment, do_analysis
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"sodium_anthraquinone_1_sulfonate_50mg_20mL_neutral_{Timestamps.timestamp_date()}"
+sample_name = f"2,6-AQDS_{Timestamps.timestamp_date()}-base"
 task_name = "SWV_single_scan_smooth-GC_Pt_SHE"
 
-V_init = -1.0                                                    # Initial Voltage in V
-V_fin = 1.2                                                    # Final Voltage in V
+V_init = 1.2                                                    # Initial Voltage in V
+V_fin = -1.0                                                    # Final Voltage in V
 T_rest = 10                                                     # The Resting Time Before the Scan in seconds
 
-channel_num: int = 1                                           # The channel number of the potentiostat, either 1 or 2.
+channel_num: int = 2                                           # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True                                         # This option can turn ON/OFF the GUI
 simulation: bool = False                                        # This option can turn ON/OFF the simulation mode
 

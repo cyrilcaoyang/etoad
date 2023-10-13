@@ -2,8 +2,8 @@ from typing import Any
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn, Timestamps
 
-import test_utils.MakeObjects as MakeObjects
-from test_utils.UnitOperations import do_experiment, do_analysis
+import Tests.utils_makeobjects as MakeObjects
+from Tests.utils_unitoperations import do_experiment, do_analysis
 
 """
     This python script demonstrate a simple DPV scan, with sample already in the Cell.
@@ -12,16 +12,16 @@ from test_utils.UnitOperations import do_experiment, do_analysis
 
 # ========== Sample Settings Below ========== #
 
-sample_name =  f"2,6-AQDS_{Timestamps.timestamp_date()}-basic"
+sample_name = f"1-AQS_{Timestamps.timestamp_date()}-base"
 task_name = "DPV_single_scan_smooth-GC_Pt_SHE"
 
 V_init = 0.4                                                   # Unit: Initial Voltage in V
-V_fin = -0.6                                                     # Unit: Final Voltage in V
+V_fin = -0.9                                                     # Unit: Final Voltage in V
 T_rest = 10                                                     # The Resting Time Before the Scan in seconds
 
-Pulse_h = 0.010                                                 # Pulse Height in V, default: 0.010
+Pulse_h = 0.020                                                 # Pulse Height in V, default: 0.010
 Pulse_w = 0.100                                                 # Pulse Width in seconds, default: 0.100
-Step_h = 0.005                                                  # Step Height in V, default: 0.005
+Step_h = 0.010                                                  # Step Height in V, default: 0.005
 Step_w = 0.500                                                  # Step Width in seconds, default: 0.500
 start_percent = 0.800                                           # Start Averaging Interval (0,1), default: 0.800
 end_percent = 1.000                                             # End Averaging Interval (0,1), default: 1.000

@@ -6,6 +6,6 @@ def data_path():
     Returns:
         The paths of the test folder and data folder
     """
-    parent_dir = Path(__file__).parent.parent
+    parent_dir = Path(__file__).parent
     data_dir = Path("C://Users//Prep LC//Desktop//AutoEChem_Data")
     return parent_dir, data_dir

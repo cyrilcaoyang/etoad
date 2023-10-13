@@ -1,7 +1,7 @@
 import pprint
 from etoad.Utils import ThreadWithReturn
-from test_utils.MakeObjects import mk_logger_gui_free, mk_logger
-from test_utils.MeasurePlot import measure_plot_ocv
+from Tests.utils_makeobjects import mk_logger_gui_free, mk_logger
+from Tests.utils_measureplot import measure_plot_ocv
 
 """
     This python script measures Open Circuit Voltage (OCV) over time, until the voltage is stable.

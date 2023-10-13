@@ -134,7 +134,6 @@ class SamplingSystem:
             self.logger.debug(f"Line from port {source_port} washed once.")
 
         dead_volume = self._config["dead_volume"]
-        self.logger.debug(f"Sampler: Dead volume of {dead_volume} mL is added.")
         self._pump.draw_and_dispense(
             volume=volume + dead_volume,
             draw_valve_port=source_port,

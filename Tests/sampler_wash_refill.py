@@ -1,6 +1,6 @@
 from etoad.Utils import ThreadWithReturn
 from etoad.Interface.GraphicalInterface import GraphicalInterface
-from test_utils.MakeObjects import mk_logger, mk_sampler
+from Tests.utils_makeobjects import mk_logger, mk_sampler
 
 """
 This Script is created to empty the EChem Cell and refill with solvent/solution.
@@ -9,7 +9,7 @@ This Script is created to empty the EChem Cell and refill with solvent/solution.
 
 # ========== Sample Settings Below ========== #
 sample_name = "None"                # Name of the Chemical Solution
-wash_volume = 10                     # Wash volume of the cell
+wash_volume = 5                     # Wash volume of the cell
 refill_volume = 5                   # Refill volume after washing
 cycles: int = 3                     # How many times the cell will be washed.
 

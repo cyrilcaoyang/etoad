@@ -1,4 +1,4 @@
-import test_utils.MakeObjects as MakeObjects
+import utils_makeobjects as MakeObjects
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn
 

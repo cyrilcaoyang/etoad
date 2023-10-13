@@ -2,8 +2,8 @@ from typing import Any
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn, Timestamps
 
-import test_utils.MakeObjects as MakeObjects
-from test_utils.UnitOperations import do_experiment, do_analysis, cyclic_swv_voltage_parser
+import Tests.utils_makeobjects as MakeObjects
+from Tests.utils_unitoperations import do_experiment, do_analysis, cyclic_swv_voltage_parser
 
 """
     This python script demonstrate cyclic SWV scans, with sample already in the Cell.
@@ -12,13 +12,14 @@ from test_utils.UnitOperations import do_experiment, do_analysis, cyclic_swv_vol
 
 # ========== Sample Settings Below ========== #
 
-sample_name =  f"1,8-AQDS_{Timestamps.timestamp_date()}"
+sample_name = f"1-AQS_{Timestamps.timestamp_date()}"
+# sample_name = f"K4[Fe(CN)6]_{Timestamps.timestamp_date()}"
 task_name = "SWV_cyclic_scans_smooth-GC_Pt_SHE"
 
-V_init = 0.4                                                  # Initial Voltage in V
+V_init = 0.6                                                  # Initial Voltage in V
 V_fin = -0.6                                                   # Final Voltage in V
 T_rest = 10                                                    # The Resting Time Before the Scan in seconds
-cycle_num = 2
+cycle_num = 1
 
 channel_num: int = 2                                           # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True                                         # This option can turn ON/OFF the GUI

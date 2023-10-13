@@ -1,5 +1,5 @@
 from etoad.Interface import GraphicalInterface
-from .MakeObjects import mk_potentiostat, mk_analyzer
+from .utils_makeobjects import mk_potentiostat, mk_analyzer
 
 
 def measure_plot_ocv(

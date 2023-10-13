@@ -2,8 +2,8 @@ from typing import Any
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn, Timestamps
 
-import test_utils.MakeObjects as MakeObjects
-from test_utils.UnitOperations import do_experiment, do_analysis
+import Tests.utils_makeobjects as MakeObjects
+from Tests.utils_unitoperations import do_experiment, do_analysis
 
 """
     This python script demonstrate the CV scans with multiple different scan rates, with sample already in the Cell.

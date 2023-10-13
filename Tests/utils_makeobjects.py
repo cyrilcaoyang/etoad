@@ -9,7 +9,7 @@ from etoad.HardwareController.SamplingSystem import SamplingSystem
 from etoad.DataAnalyzer import DataAnalyzer
 from etoad.WorkflowManager import WorkflowManager
 
-from .DataPath import data_path
+from utils_datapath import data_path
 
 
 def mk_logger(

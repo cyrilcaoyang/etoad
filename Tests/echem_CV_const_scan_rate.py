@@ -2,8 +2,8 @@ from typing import Any
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import ThreadWithReturn, Timestamps
 
-import test_utils.MakeObjects as MakeObjects
-from test_utils.UnitOperations import do_experiment, do_analysis
+import Tests.utils_makeobjects as MakeObjects
+from Tests.utils_unitoperations import do_experiment, do_analysis
 
 """
     This script demonstrate the CV scans with constant scan rates, with sample already in the Cell.
@@ -12,18 +12,19 @@ from test_utils.UnitOperations import do_experiment, do_analysis
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"1,8-AQDS_{Timestamps.timestamp_date()}"
+sample_name = f"1-AQS_{Timestamps.timestamp_date()}"
+# sample_name = f"K4[Fe(CN)6]_{Timestamps.timestamp_date()}"
 task_name = "CV_Const_ScanRate_smooth-GC_Ag-AgCl"       # Specific test conditions.
 
 channel_num: int = 2        # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True     # GUI can be disabled for simple liquid transfer.
 
-V_init = 0      # Initial Voltage in V
-V_max = 0.4     # Highest Voltage in V
-V_min = -0.9        # Lowest Voltage in V
+V_init = 0.2      # Initial Voltage in V
+V_max = 0.5     # Highest Voltage in V
+V_min = -1.2       # Lowest Voltage in V
 V_fin = 0     # Final Voltage in V
-scan_rate = 0.100       # Scan Rate in V/s
-cycle_num: int  = 5     # The Numer of Cycles as an Integer, > 1
+scan_rate = 0.200       # Scan Rate in V/s
+cycle_num: int = 3     # The Numer of Cycles as an Integer, > 1
 
 cv_test_settings: dict = {
     "IterationSettings": {"no_iterations": 1},
@@ -37,7 +38,7 @@ cv_test_settings: dict = {
 cv_analysis_settings: dict = {
     "Plot": {"title": f"Cyclic Voltammetry at {scan_rate} V/s"},  # Plot Title
     "Peak Picking": {},  # Peak Picking for CV
-    "Integration": {},  # Integration for CV over iterations (1 in this case)
+    # "Integration": {},  # Integration for CV over iterations (1 in this case)
 }
 
 # ========== Sample Settings Above ========== #

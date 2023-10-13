@@ -3,7 +3,6 @@ import numpy as np
 from etoad.DataAnalyzer import DataAnalyzer
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime
-from test_utils import DataPath
 
 """
     This python script test the DataAnalyzer Module.

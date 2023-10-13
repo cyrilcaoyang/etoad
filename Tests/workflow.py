@@ -1,5 +1,5 @@
 from pathlib import Path
-from Tests.test_utils.MakeObjects import mk_workflow_manager
+from Tests.utils_makeobjects import mk_workflow_manager
 
 """
     This python script demonstrate workflows of multiple measurements of different techniques on different samples.

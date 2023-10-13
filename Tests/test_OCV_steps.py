@@ -1,6 +1,6 @@
 from etoad.Utils import ThreadWithReturn
-from test_utils.MeasurePlot import measure_plot_ocv
-import test_utils.MakeObjects as MakeObjects
+from Tests.utils_measureplot import measure_plot_ocv
+import Tests.utils_makeobjects as MakeObjects
 
 """
     This python script monitors Open Circuit Voltage (OCV) over time, in steps of time_per_step.
@@ -16,7 +16,7 @@ voltage_interval = 0.1            # Unit: Voltage Interval in mV
 time_interval = 0.05              # Unit: Time Interval Size in s
 steps = 1                         # Unit: Number of Steps per cycle
 
-channel_num: int = 1              # The channel number of the potentiostat, either 1 or 2.
+channel_num: int = 2              # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True           # This option can turn ON/OFF the GUI
 simulation: bool = False          # This option can turn ON/OFF the simulation mode
 
