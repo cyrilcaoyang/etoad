@@ -11,11 +11,11 @@ from utils_makeobjects import mk_logger, mk_sampler
 
 # ========== Test Settings Below ========== #
 
-sample_name = "HCl-addition"
+sample_name = "H3PO4-addition"
 
-source_port = 4     # The Port from which the Sample will be added.
-sample_vol = 0.5        # The volume of sample in mL to be added to the Cell.
-wash_line: bool = True     # If True, the wash line will be used to transfer the sample.
+source_port = 12    # The Port from which the Sample will be added.
+sample_vol = 2.0       # The volume of sample in mL to be added to the Cell.
+wash_line: bool = True     # If True, the line will be washed before the transfer.
 start_fresh_sample: bool = False
 initial_addition: bool = True  # If True, dead volume will be added to the cell.
 
@@ -38,7 +38,7 @@ def liquid_addition(
             sampler.transfer_to_cell(source_port, volume=sample_vol, wash_line=wash_line)
         else:
             sampler.transfer_to_cell(source_port, volume=sample_vol-dead_vol, wash_line=wash_line)
-        time.sleep(20)
+        time.sleep(10)
 
     sampler.disconnect()
     gui_logger.stop_gui()

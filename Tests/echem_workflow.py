@@ -1,6 +1,6 @@
 import time
 from logging import Logger
-from Tests.test_utils import mk_logger_gui_free
+from utils_makeobjects import mk_logger_gui_free
 
 """
 This script runs designated scripts in the current directory.
@@ -9,10 +9,10 @@ This script runs designated scripts in the current directory.
 script_list = [
     # "sampler_drain_dilute_discard.py",
     # "sampler_wash_refill.py",
-    "sampler_liquid_addition.py",
-    "echem_SWV_cyclic_scans.py",
+    "sampler_drain_dilute_discard.py",
+    "echem_CV_const_scan_rate.py",
     # "echem_CV_const_scan_rate.py",
-    # "sampler_wash_refill.py"
+    "sampler_wash_refill.py"
 ]
 
 for _ in range(10):

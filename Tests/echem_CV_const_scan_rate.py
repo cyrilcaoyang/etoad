@@ -12,22 +12,22 @@ from Tests.utils_unitoperations import do_experiment, do_analysis
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"1-AQS_{Timestamps.timestamp_date()}"
+sample_name = f"FcCH2OH-Test_{Timestamps.timestamp_date()}"
 # sample_name = f"K4[Fe(CN)6]_{Timestamps.timestamp_date()}"
 task_name = "CV_Const_ScanRate_smooth-GC_Ag-AgCl"       # Specific test conditions.
 
 channel_num: int = 2        # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True     # GUI can be disabled for simple liquid transfer.
 
-V_init = 0.2      # Initial Voltage in V
-V_max = 0.5     # Highest Voltage in V
-V_min = -1.2       # Lowest Voltage in V
-V_fin = 0     # Final Voltage in V
-scan_rate = 0.200       # Scan Rate in V/s
-cycle_num: int = 3     # The Numer of Cycles as an Integer, > 1
+V_init = 0.0     # Initial Voltage in V
+V_max = 0.6     # Highest Voltage in V
+V_min = 0.0       # Lowest Voltage in V
+V_fin = 0.0     # Final Voltage in V
+scan_rate = 0.100       # Scan Rate in V/s
+cycle_num: int = 100              # The Numer of Cycles as an Integer, > 1
 
 cv_test_settings: dict = {
-    "IterationSettings": {"no_iterations": 1},
+    "IterationSett ings": {"no_iterations": 1},
     "TechniqueParameters": {
         "Voltage Profile": {"value": [V_init, V_max, V_min, V_init, V_fin]},
         "Scan Rate": {"value": [scan_rate] * 5},

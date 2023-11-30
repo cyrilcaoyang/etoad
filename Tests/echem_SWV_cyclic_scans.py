@@ -12,12 +12,12 @@ from Tests.utils_unitoperations import do_experiment, do_analysis, cyclic_swv_vo
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"1-AQS_{Timestamps.timestamp_date()}"
+sample_name = f"SampleName_{Timestamps.timestamp_date()}"
 # sample_name = f"K4[Fe(CN)6]_{Timestamps.timestamp_date()}"
 task_name = "SWV_cyclic_scans_smooth-GC_Pt_SHE"
 
-V_init = 0.6                                                  # Initial Voltage in V
-V_fin = -0.6                                                   # Final Voltage in V
+V_init = 1.0                                                  # Initial Voltage in V
+V_fin = -0.2                                                  # Final Voltage in V
 T_rest = 10                                                    # The Resting Time Before the Scan in seconds
 cycle_num = 1
 

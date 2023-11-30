@@ -11,11 +11,11 @@ from Tests.utils_makeobjects import mk_logger, mk_sampler
 
 # ========== Test Settings Below ========== #
 
-sample_name = f"1-AQ_{Timestamps.timestamp_date()}"     # The name of the sample.
+sample_name = f"FcCH2OH-Test"     # The name of the sample.
 
-source_port = 8     # The Port from which the Sample will be added.
-sample_vol = 2.0        # The volume of sample in mL to be diluted to the Cell.
-total_vol = 10.0     # The total volume of the diluted solution
+source_port = 7         # The Port from which the Sample will be added.
+sample_vol = 5.0        # The volume of sample in mL to be diluted to the Cell.
+total_vol = 5.0         # The total volume of the diluted solution
 
 enable_gui: bool = False         # GUI can be disabled for simple liquid transfer.
 clean_up: bool = False          # True = wash cell afterward with electrolyte solution.

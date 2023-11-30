@@ -12,17 +12,18 @@ from Tests.utils_unitoperations import do_experiment, do_analysis
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"sodium_anthraquinone_1_sulfonate_50mg_20mL_{Timestamps.timestamp_date()}"       # The name of the folder that contains the data.
+sample_name = f"Sample_10M_var_rate_{Timestamps.timestamp_date()}"       # The name of the folder that contains the data.
 task_name = "CV_Const_ScanRate_smooth-GC_Ag-AgCl"       # Specific test conditions.
 
 channel_num: int = 2        # The channel number of the potentiostat, either 1 or 2.
 enable_gui: bool = True     # GUI can be disabled for simple liquid transfer.
 
-V_init = 0      # Initial Voltage in V
-V_max = 0.2     # Highest Voltage in V
-V_min = -0.9        # Lowest Voltage in V
-V_fin = 0     # Final Voltage in V
-scan_rates = [0.050, 0.100, 0.200, 0.400, 0.800]        # Unit: Scan Rate in V/s
+V_init = -0.5      # Initial Voltage in V
+V_max = 0.8     # Highest Voltage in V
+V_min = -0.5       # Lowest Voltage in V
+V_fin = -0.5     # Final Voltage in V
+scan_rates = [0.200, 0.225, 0.300, 0.400, 0.500, 0.625]
+## scan_rates = [0.020, 0.025, 0.040, 0.050, 0.075, 0.100, 0.150, 0.200, 0.225, 0.300, 0.400, 0.500, 0.625]
 cycle_num: int = 5      # The Numer of Cycles at each Scan Rate
 
 cv_test_settings: dict = {

@@ -12,18 +12,18 @@ from Tests.utils_unitoperations import do_experiment, do_analysis
 
 # ========== Sample Settings Below ========== #
 
-sample_name = f"1-AQS_{Timestamps.timestamp_date()}-base"
+sample_name = f"Sample_{Timestamps.timestamp_date()}"
 task_name = "DPV_single_scan_smooth-GC_Pt_SHE"
 
-V_init = 0.4                                                   # Unit: Initial Voltage in V
-V_fin = -0.9                                                     # Unit: Final Voltage in V
+V_init = 0.6                                                   # Unit: Initial Voltage in V
+V_fin = -0.2                                                     # Unit: Final Voltage in V
 T_rest = 10                                                     # The Resting Time Before the Scan in seconds
 
-Pulse_h = 0.020                                                 # Pulse Height in V, default: 0.010
-Pulse_w = 0.100                                                 # Pulse Width in seconds, default: 0.100
+Pulse_h = 0.100                                                 # Pulse Height in V, default: 0.010
+Pulse_w = 0.050                                                 # Pulse Width in seconds, default: 0.100
 Step_h = 0.010                                                  # Step Height in V, default: 0.005
 Step_w = 0.500                                                  # Step Width in seconds, default: 0.500
-start_percent = 0.800                                           # Start Averaging Interval (0,1), default: 0.800
+start_percent = 0.900                                           # Start Averaging Interval (0,1), default: 0.800
 end_percent = 1.000                                             # End Averaging Interval (0,1), default: 1.000
 
 channel_num: int = 2                                            # The channel number of the potentiostat, either 1 or 2.
