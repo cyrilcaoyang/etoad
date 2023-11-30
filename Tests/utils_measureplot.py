@@ -67,5 +67,3 @@ def measure_swv(
     potentiostat.disconnect()
     return results
 
-
-
