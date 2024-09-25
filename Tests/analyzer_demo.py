@@ -3,6 +3,7 @@ import numpy as np
 from etoad.DataAnalyzer import DataAnalyzer
 from etoad.Interface import GraphicalInterface
 from etoad.Utils import timestamp_datetime
+from utils_datapath import data_path
 
 """
     This python script test the DataAnalyzer Module.
@@ -15,7 +16,7 @@ from etoad.Utils import timestamp_datetime
 
 if __name__ == "__main__":
 
-    PARENT_DIR, DATA_DIR = DataPath.data_path()
+    PARENT_DIR, DATA_DIR = data_path()
 
     logger = GraphicalInterface(
         logging_config=PARENT_DIR / "test_settings" / "logger_settings.yaml",
@@ -30,13 +31,14 @@ if __name__ == "__main__":
         analysis_settings={
             "Plot": {"title": "Test CV Measurement"},
             "Peak Picking": {},
+            "Integration": {},
             # "Peaks Scanrate": {},
             # "Currents Scanrate": {}
         },
 
         # Analyze a csv file
         raw_data=np.genfromtxt(
-            "C:/Users/Prep LC/Desktop/AutoEChem_Data/DATA/2,6-AQDS_23-10-06-basic/2,6-AQDS_23-10-06-basic_23-10-06_13-20_Cyclic Voltammetry.csv",
+            "",
             delimiter=',')
 
         # Analyze a pickle file
