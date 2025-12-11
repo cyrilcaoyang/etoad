@@ -1,4 +1,4 @@
-# Electrochemical Technique Operation for Autonomous Discovery: E-Toad
+# Electrochemical Technique Operator for Autonomous Discovery: E-Toad
 
 E-Toad is a modular Python package for automating the workflows around electroanalytical characterization of functional materials. 
 - Electroanalytical Measurements in Solution using the BioLogic Potentiostat family
